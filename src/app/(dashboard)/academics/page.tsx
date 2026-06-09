@@ -29,7 +29,7 @@ export default function AcademicsPage() {
 
         <Tabs defaultValue="notes" className="w-full">
           <TabsContent value="notes" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {[
                 { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400" },
                 { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400" },
@@ -37,24 +37,20 @@ export default function AcademicsPage() {
                 { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400" },
                 { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400" },
               ].map((file, idx) => (
-                <GlassCard key={idx} className="group hover:scale-[1.02] active:scale-[0.98]">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-2xl bg-white/5 border border-white/10 ${file.color}`}>
-                      <FileText className="w-6 h-6" />
+                <GlassCard key={idx} className="p-4 group hover:scale-[1.02] active:scale-[0.98] transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className={`p-2 rounded-xl bg-white/5 border border-white/10 ${file.color}`}>
+                      <FileText className="w-5 h-5" />
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 rounded-lg glass border-white/10 text-muted-foreground hover:text-white hover:border-white/20">
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 rounded-lg glass border-white/10 text-muted-foreground hover:text-white hover:border-white/20">
-                        <Share2 className="w-4 h-4" />
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button className="p-1.5 rounded-lg glass border-white/10 text-muted-foreground hover:text-white hover:border-white/20">
+                        <Download className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                  <h4 className="font-bold text-lg mb-1">{file.title}</h4>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {file.date}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/20" />
+                  <h4 className="font-bold text-sm mb-1 line-clamp-2 leading-tight h-10">{file.title}</h4>
+                  <div className="flex flex-col gap-1 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {file.date}</span>
                     <span>{file.size}</span>
                   </div>
                 </GlassCard>
