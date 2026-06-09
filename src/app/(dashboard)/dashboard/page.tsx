@@ -15,7 +15,10 @@ import {
   AlertCircle,
   Bell,
   Sparkles,
-  User
+  User,
+  CreditCard,
+  Hash,
+  School
 } from "lucide-react"
 
 export default function Dashboard() {
@@ -34,35 +37,46 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Student Info Card */}
-          <GlassCard className="flex flex-col gap-3 relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Student Profile</span>
-              <User className="w-4 h-4 text-primary opacity-50" />
+          <GlassCard className="p-5 flex flex-col justify-between relative overflow-hidden group border-white/10 min-h-[220px]">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+            
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
+                <User className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold leading-none mb-1">Alex Rivera</h3>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest">
+                  <School className="w-3 h-3" /> B.Tech CSE
+                </div>
+              </div>
             </div>
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Name</span>
-                <span className="text-xs font-semibold">Alex Rivera</span>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500/20 transition-colors flex flex-col gap-1">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-blue-400 uppercase tracking-tighter">
+                  <Hash className="w-2.5 h-2.5" /> Roll No
+                </div>
+                <span className="text-xs font-mono font-medium">22CSE1042</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Roll No</span>
-                <span className="text-xs font-mono">22CSE1042</span>
+              <div className="p-3 rounded-2xl bg-purple-500/5 border border-purple-500/10 hover:border-purple-500/20 transition-colors flex flex-col gap-1">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-purple-400 uppercase tracking-tighter">
+                  <CreditCard className="w-2.5 h-2.5" /> QID
+                </div>
+                <span className="text-xs font-mono font-medium">Q748291</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">QID</span>
-                <span className="text-xs font-mono">Q748291</span>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Live Attendance</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Course</span>
-                <span className="text-xs font-medium text-right max-w-[120px] truncate">B.Tech CSE</span>
-              </div>
-              <div className="pt-3 border-t border-white/5 flex justify-between items-center">
-                <span className="text-[10px] text-accent uppercase font-bold tracking-tight">Attendance</span>
-                <span className="text-xl font-headline font-bold text-accent">87.5%</span>
-              </div>
+              <span className="text-2xl font-headline font-bold text-green-400">87.5%</span>
             </div>
           </GlassCard>
 
+          {/* Ranking Card */}
           <GlassCard className="flex flex-col gap-4 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Trophy className="w-16 h-16" />
@@ -80,6 +94,7 @@ export default function Dashboard() {
             <p className="text-[10px] text-muted-foreground">Top 5% of your class. Stellar!</p>
           </GlassCard>
 
+          {/* Attendance Pulse Card */}
           <GlassCard className="flex flex-col gap-4 relative overflow-hidden group bg-primary/10 border-primary/30">
             <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
               <QrCode className="w-16 h-16" />
