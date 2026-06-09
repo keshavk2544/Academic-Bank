@@ -118,21 +118,21 @@ export default function AcademicsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-in fade-in duration-500">
-        <header className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <header className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-accent uppercase tracking-[0.2em] mb-1">Academic Vault</h2>
-              <h1 className="text-3xl font-headline font-bold">Study Repository</h1>
+              <h2 className="text-[10px] font-bold text-accent uppercase tracking-[0.3em] mb-1">Academic Vault</h2>
+              <h1 className="text-2xl font-headline font-bold">Study Repository</h1>
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex items-center justify-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all shadow-[0_0_15px_rgba(72,118,245,0.4)] md:min-w-[200px]">
-                  <PlusCircle className="w-5 h-5" /> Contribute Material
+                <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-accent text-accent-foreground rounded-xl text-sm font-bold hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">
+                  <PlusCircle className="w-4 h-4" /> Contribute Material
                 </button>
               </DialogTrigger>
-              <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] overflow-visible">
+              <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px]">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
                   <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
@@ -266,7 +266,7 @@ export default function AcademicsPage() {
                   <Button 
                     onClick={handleUpload}
                     disabled={!newFile.title || !newFile.subject || !newFile.docType}
-                    className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-[0_0_15px_rgba(72,118,245,0.4)]"
+                    className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-lg shadow-accent/20"
                   >
                     Initialize Contribution
                   </Button>
@@ -275,38 +275,38 @@ export default function AcademicsPage() {
             </Dialog>
           </div>
 
-          <GlassCard className="p-4 border-white/5 bg-white/5 flex flex-col md:flex-row items-center gap-4">
+          <GlassCard className="p-2 border-white/5 bg-white/5 flex flex-col md:flex-row items-center gap-2">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input 
-                className="glass border-white/10 pl-10 h-11 rounded-xl bg-white/5" 
-                placeholder="Search title or contributor..." 
+                className="glass border-none h-9 pl-9 rounded-lg bg-white/5 text-xs focus:ring-1 focus:ring-accent/50" 
+                placeholder="Quick search title or name..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-auto">
               <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                <SelectTrigger className="glass border-white/10 h-11 rounded-xl bg-white/5 min-w-[160px]">
+                <SelectTrigger className="glass border-none h-9 rounded-lg bg-white/5 min-w-[130px] text-xs">
                   <SelectValue placeholder="Subject" />
                 </SelectTrigger>
                 <SelectContent className="glass border-white/10">
                   <SelectItem value="all">All Subjects</SelectItem>
                   {SUBJECT_OPTIONS.map(opt => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt} className="text-xs">{opt}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="glass border-white/10 h-11 rounded-xl bg-white/5 min-w-[140px]">
-                  <SelectValue placeholder="Doc Type" />
+                <SelectTrigger className="glass border-none h-9 rounded-lg bg-white/5 min-w-[110px] text-xs">
+                  <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent className="glass border-white/10">
                   <SelectItem value="all">All Types</SelectItem>
                   {DOC_TYPE_OPTIONS.map(opt => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt} className="text-xs">{opt}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -314,44 +314,44 @@ export default function AcademicsPage() {
               {(searchTerm || selectedType !== "all" || selectedSubject !== "all") && (
                 <button 
                   onClick={clearFilters}
-                  className="p-2.5 rounded-xl glass border-white/10 text-muted-foreground hover:text-red-400 transition-colors"
+                  className="p-2 rounded-lg glass border-none bg-white/5 text-muted-foreground hover:text-red-400 transition-colors"
                   title="Clear Filters"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
           </GlassCard>
         </header>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filteredFiles.length > 0 ? (
             filteredFiles.map((file, idx) => (
               <GlassCard key={idx} className="p-0 group hover:bg-white/5 transition-all border-white/5 relative overflow-hidden">
                 <div className={`absolute left-0 top-0 bottom-0 w-1 bg-current ${file.color} opacity-30 group-hover:opacity-100 transition-opacity`} />
                 
-                <div className="flex items-center justify-between p-4 md:p-5">
-                  <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                    <div className="flex flex-col items-center gap-2 shrink-0">
-                      <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} transition-transform group-hover:scale-105`}>
-                        <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="flex items-center justify-between p-3 md:p-4">
+                  <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className={`p-2.5 md:p-3 rounded-xl bg-white/5 border border-white/10 ${file.color} transition-transform group-hover:scale-105`}>
+                        <FileText className="w-5 h-5 md:w-6 md:h-6" />
                       </div>
-                      <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", file.color)}>
+                      <span className={cn("text-[8px] font-black uppercase tracking-wider opacity-80", file.color)}>
                         {file.docType}
                       </span>
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
                         <span className="w-1 h-1 rounded-full bg-white/20" />
-                        <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
+                        <span className="text-[9px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5" /> {file.date}
                         </span>
                       </div>
-                      <h4 className="font-headline font-bold text-base md:text-xl truncate leading-tight">{file.title}</h4>
-                      <div className="flex items-center gap-3 mt-1">
-                        <div className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
+                      <h4 className="font-headline font-bold text-sm md:text-base truncate leading-tight">{file.title}</h4>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
                           <span className="font-bold text-white/40">{file.size}</span>
                           <span className="w-1 h-1 rounded-full bg-white/10" />
                           <span className="flex items-center gap-1">
@@ -363,37 +363,37 @@ export default function AcademicsPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 ml-4 shrink-0">
-                    <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl glass border-white/10 text-xs font-bold text-muted-foreground hover:text-white hover:border-white/20 transition-all">
-                      View Online
+                  <div className="flex items-center gap-2 ml-4 shrink-0">
+                    <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg glass border-white/10 text-[10px] font-bold text-muted-foreground hover:text-white hover:border-white/20 transition-all">
+                      View
                     </button>
-                    <button className="p-3 md:p-4 rounded-xl bg-accent text-accent-foreground shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
-                      <Download className="w-5 h-5" />
+                    <button className="p-2.5 rounded-lg bg-accent text-accent-foreground shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
+                      <Download className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </GlassCard>
             ))
           ) : (
-            <div className="py-20 text-center glass rounded-[32px] border-white/5">
-              <div className="inline-flex p-4 rounded-full bg-white/5 mb-4">
-                <Filter className="w-8 h-8 text-muted-foreground opacity-20" />
+            <div className="py-16 text-center glass rounded-[24px] border-white/5">
+              <div className="inline-flex p-3 rounded-full bg-white/5 mb-3">
+                <Filter className="w-6 h-6 text-muted-foreground opacity-20" />
               </div>
-              <h3 className="text-xl font-headline font-bold mb-2">No documents found</h3>
-              <p className="text-sm text-muted-foreground">Try adjusting your search or filters to find what you're looking for.</p>
+              <h3 className="text-lg font-headline font-bold mb-1">No matches found</h3>
+              <p className="text-xs text-muted-foreground">Refine your filters to see more academic materials.</p>
               <button 
                 onClick={clearFilters}
-                className="mt-6 text-accent font-bold text-sm hover:underline"
+                className="mt-4 text-accent font-bold text-xs hover:underline"
               >
-                Reset all filters
+                Reset Filters
               </button>
             </div>
           )}
         </div>
 
         {filteredFiles.length > 0 && (
-          <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
-            <p className="text-sm text-muted-foreground italic">You've reached the end of the filtered results. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
+          <div className="py-6 text-center border border-dashed border-white/10 rounded-[24px] bg-white/5">
+            <p className="text-xs text-muted-foreground italic">You've reached the end of the vault. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
           </div>
         )}
       </div>
