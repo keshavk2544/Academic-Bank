@@ -19,7 +19,8 @@ import {
   CheckCheck,
   Pin,
   Trash2,
-  Shield
+  Shield,
+  MessageSquare
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -342,8 +343,8 @@ export default function ChatPage() {
                 </div>
               </ScrollArea>
 
-              {/* Input Area - Reduced Spacing */}
-              <div className="p-3 md:p-4 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-24 md:pb-4">
+              {/* Input Area - Optimized Padding */}
+              <div className="p-3 md:p-4 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-6 md:pb-4">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
