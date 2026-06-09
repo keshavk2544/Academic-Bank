@@ -20,7 +20,9 @@ import {
   Pin,
   Trash2,
   Shield,
-  MessageSquare
+  MessageSquare,
+  Library,
+  Sparkles
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -36,13 +38,13 @@ const COLORS = {
 
 // Mock Data
 const INITIAL_CHATS = [
-  { id: 1, name: 'Design Team', type: 'group', avatar: '🎨', color: 'bg-purple-500', preview: 'Alex: Check the new mockups!', time: '2m', unread: 5, members: 12, online: 8, bio: 'UI/UX team workspace' },
-  { id: 2, name: 'Luna Park', type: 'personal', avatar: 'L', color: 'bg-fuchsia-500', preview: 'Sounds great, see you there!', time: '8m', online: true, bio: "Hey there, I'm using Aura" },
-  { id: 3, name: 'Dev Squad', type: 'group', avatar: '💻', color: 'bg-indigo-500', preview: 'CI passed ✅', time: '14m', unread: 2, members: 8, online: 5, bio: 'Building cool stuff together' },
-  { id: 4, name: 'Marco Alvarez', type: 'personal', avatar: 'M', color: 'bg-blue-500', preview: 'Did you see the game? 🔥', time: '1h', online: false, bio: 'Photographer & traveler' },
-  { id: 5, name: 'Launch 🚀', type: 'group', avatar: '🚀', color: 'bg-pink-500', preview: 'Product launch is on Friday!', time: '2h', unread: 9, members: 6, online: 3, bio: 'Product launch coordination' },
-  { id: 6, name: 'Priya Sharma', type: 'personal', avatar: 'P', color: 'bg-emerald-500', preview: 'Thanks for the help! 🙏', time: '3h', online: true, bio: 'Coffee lover ☕ | Developer' },
-  { id: 7, name: 'Family Group', type: 'group', avatar: '🏠', color: 'bg-orange-500', preview: 'Mom: Dinner at 7?', time: '5h', members: 5, online: 2, bio: 'Our little family' },
+  { id: 1, name: 'Design Team', type: 'group', category: 'academics', avatar: '🎨', color: 'bg-purple-500', preview: 'Alex: Check the new mockups!', time: '2m', unread: 5, members: 12, online: 8, bio: 'UI/UX team workspace' },
+  { id: 2, name: 'Luna Park', type: 'personal', category: 'clubs', avatar: 'L', color: 'bg-fuchsia-500', preview: 'Sounds great, see you there!', time: '8m', online: true, bio: "Hey there, I'm using Aura" },
+  { id: 3, name: 'Dev Squad', type: 'group', category: 'academics', avatar: '💻', color: 'bg-indigo-500', preview: 'CI passed ✅', time: '14m', unread: 2, members: 8, online: 5, bio: 'Building cool stuff together' },
+  { id: 4, name: 'Marco Alvarez', type: 'personal', category: 'clubs', avatar: 'M', color: 'bg-blue-500', preview: 'Did you see the game? 🔥', time: '1h', online: false, bio: 'Photographer & traveler' },
+  { id: 5, name: 'Launch 🚀', type: 'group', category: 'academics', avatar: '🚀', color: 'bg-pink-500', preview: 'Product launch is on Friday!', time: '2h', unread: 9, members: 6, online: 3, bio: 'Product launch coordination' },
+  { id: 6, name: 'Priya Sharma', type: 'personal', category: 'clubs', avatar: 'P', color: 'bg-emerald-500', preview: 'Thanks for the help! 🙏', time: '3h', online: true, bio: 'Coffee lover ☕ | Developer' },
+  { id: 7, name: 'Family Group', type: 'group', category: 'clubs', avatar: '🏠', color: 'bg-orange-500', preview: 'Mom: Dinner at 7?', time: '5h', members: 5, online: 2, bio: 'Our little family' },
 ];
 
 const INITIAL_MESSAGES: Record<number, any[]> = {
@@ -72,7 +74,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
   const router = useRouter()
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [currentTab, setCurrentTab] = useState<'all' | 'personal' | 'groups' | 'unread'>('all')
+  const [currentTab, setCurrentTab] = useState<'all' | 'academics' | 'clubs'>('all')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [inputText, setInputText] = useState("")
   
@@ -80,13 +82,13 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
 
   // Sync state with URL to allow the layout to hide/show the mobile nav
   useEffect(() => {
-    const id = searchParams.id
+    const id = searchParams.get('id')
     if (id) {
       setSelectedChatId(parseInt(id))
     } else {
       setSelectedChatId(null)
     }
-  }, [searchParams.id])
+  }, [searchParams])
 
   const selectedChat = useMemo(() => INITIAL_CHATS.find(c => c.id === selectedChatId), [selectedChatId])
   const messages = useMemo(() => (selectedChatId ? INITIAL_MESSAGES[selectedChatId] || [] : []), [selectedChatId])
@@ -94,9 +96,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
   const filteredChats = useMemo(() => {
     return INITIAL_CHATS.filter(c => {
       const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase())
-      if (currentTab === 'personal') return matchesSearch && c.type === 'personal'
-      if (currentTab === 'groups') return matchesSearch && c.type === 'group'
-      if (currentTab === 'unread') return matchesSearch && (c.unread || 0) > 0
+      if (currentTab === 'academics') return matchesSearch && c.category === 'academics'
+      if (currentTab === 'clubs') return matchesSearch && c.category === 'clubs'
       return matchesSearch
     })
   }, [searchQuery, currentTab])
@@ -147,22 +148,36 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           "flex flex-col w-full md:w-80 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Tabs - Merged with Sidebar background */}
-          <div className="flex gap-1 px-4 py-3 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
-            {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setCurrentTab(tab)}
-                className={cn(
-                  "flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
-                  currentTab === tab 
-                    ? "bg-gradient-to-r from-[#a855f7] to-[#7c3aed] text-white shadow-lg" 
-                    : "text-white/50 hover:bg-white/5"
-                )}
-              >
-                {tab === 'personal' ? 'DM' : tab === 'groups' ? 'Grp' : tab}
-              </button>
-            ))}
+          {/* Categories - Colorful Glassmorphism Design */}
+          <div className="flex gap-3 px-4 py-4 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
+            <button 
+              onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
+              className={cn(
+                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                currentTab === 'academics' 
+                  ? "bg-primary/30 border-primary/50 text-white shadow-lg shadow-primary/20 scale-[1.02]" 
+                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
+              )}
+            >
+              <div className={cn("p-1.5 rounded-lg", currentTab === 'academics' ? "bg-primary/20" : "bg-white/5")}>
+                <Library className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Academics</span>
+            </button>
+            <button 
+              onClick={() => setCurrentTab(currentTab === 'clubs' ? 'all' : 'clubs')}
+              className={cn(
+                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                currentTab === 'clubs' 
+                  ? "bg-accent/30 border-accent/50 text-white shadow-lg shadow-accent/20 scale-[1.02]" 
+                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
+              )}
+            >
+              <div className={cn("p-1.5 rounded-lg", currentTab === 'clubs' ? "bg-accent/20" : "bg-white/5")}>
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Clubs</span>
+            </button>
           </div>
 
           {/* Search - Merged with Sidebar background */}
@@ -238,7 +253,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           ) : (
             <>
               {/* Chat Area Header - Compact & Integrated */}
-              <div className="px-4 py-2 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-4 md:pt-2">
+              <div className="px-2 md:px-2.5 py-1 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2 md:pt-1">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
@@ -352,7 +367,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
               </ScrollArea>
 
               {/* Input Area - Seamless Integrated */}
-              <div className="p-3 md:p-4 z-10 flex flex-col items-center">
+              <div className="p-3 md:p-3 flex flex-col items-center">
                 <div className="max-w-4xl w-full flex items-center gap-3">
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
