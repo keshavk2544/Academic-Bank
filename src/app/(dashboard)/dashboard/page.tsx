@@ -79,11 +79,8 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[11px] font-medium">May 15, 2025</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400 uppercase tracking-tighter">
-                  <Clock className="w-2 h-2" /> Live Clock
-                </div>
-                <span className="text-[11px] font-mono font-medium">{currentTime}</span>
+              <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-colors flex flex-col items-center justify-center">
+                <span className="text-[11px] font-mono font-bold text-orange-400">{currentTime}</span>
               </div>
             </div>
 
