@@ -182,22 +182,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        {/* AI Insight Row */}
-        <GlassCard className="p-6 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 border-white/10 flex flex-col md:flex-row items-center gap-6">
-          <div className="p-4 rounded-full bg-white/10 border border-white/20 animate-float">
-            <Sparkles className="w-10 h-10 text-primary" />
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="text-xl font-headline font-bold mb-1">Academic Sage Insight</h3>
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              I've noticed your "Machine Learning" assignments are due in 2 days. Would you like me to summarize the lecture notes for Chapter 4?
-            </p>
-          </div>
-          <button className="px-6 py-2.5 bg-white text-black rounded-xl font-bold hover:bg-white/90 transition-all shadow-xl whitespace-nowrap">
-            Assist Me
-          </button>
-        </GlassCard>
       </div>
     </DashboardLayout>
   )
