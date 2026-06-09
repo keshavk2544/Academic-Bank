@@ -118,17 +118,17 @@ export default function ChatPage() {
         
         {/* Sidebar */}
         <div className={cn(
-          "flex flex-col w-full md:w-64 border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
+          "flex flex-col w-full md:w-56 border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
           {/* Tabs */}
-          <div className="flex gap-1 px-4 py-3">
+          <div className="flex gap-1 px-3 py-2">
             {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setCurrentTab(tab)}
                 className={cn(
-                  "flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
+                  "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all",
                   currentTab === tab 
                     ? "bg-gradient-to-r from-[#a855f7] to-[#7c3aed] text-white shadow-lg" 
                     : "text-white/50 hover:bg-white/5"
@@ -140,25 +140,25 @@ export default function ChatPage() {
           </div>
 
           {/* Search */}
-          <div className="px-4 pb-3 relative">
-            <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
+          <div className="px-3 pb-2 relative">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
             <input 
-              placeholder="Search chats..." 
-              className="w-full h-8 bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 text-[11px] outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
+              placeholder="Search..." 
+              className="w-full h-7 bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 text-[10px] outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Chat List */}
-          <ScrollArea className="flex-1 pb-24 md:pb-4">
+          <ScrollArea className="flex-1 pb-20 md:pb-4">
             <div className="p-0">
               {filteredChats.map(chat => (
                 <div
                   key={chat.id}
                   onClick={() => setSelectedChatId(chat.id)}
                   className={cn(
-                    "flex items-center gap-3 p-3 cursor-pointer transition-all relative border-l-4",
+                    "flex items-center gap-2 p-2.5 cursor-pointer transition-all relative border-l-2",
                     selectedChatId === chat.id 
                       ? "bg-[#a855f7]/20 border-[#a855f7]" 
                       : "hover:bg-white/5 border-transparent"
@@ -166,22 +166,22 @@ export default function ChatPage() {
                 >
                   <div className="relative shrink-0">
                     <div className={cn(
-                      "w-10 h-10 flex items-center justify-center text-white font-bold transition-transform",
+                      "w-8 h-8 flex items-center justify-center text-white font-bold transition-transform text-xs",
                       chat.color,
-                      chat.type === 'group' ? "rounded-xl" : "rounded-full"
+                      chat.type === 'group' ? "rounded-lg" : "rounded-full"
                     )}>
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <h4 className="font-bold text-xs truncate text-white">{chat.name}</h4>
-                      <span className="text-[10px] text-white/40">{chat.time}</span>
+                      <h4 className="font-bold text-[11px] truncate text-white">{chat.name}</h4>
+                      <span className="text-[9px] text-white/40">{chat.time}</span>
                     </div>
-                    <p className="text-[11px] text-white/50 truncate">{chat.preview}</p>
+                    <p className="text-[10px] text-white/50 truncate">{chat.preview}</p>
                   </div>
                 </div>
               ))}
@@ -196,26 +196,26 @@ export default function ChatPage() {
         )}>
           {!selectedChatId ? (
             <div className="max-w-xs animate-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 rounded-[28px] bg-gradient-to-tr from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-4xl mb-6 mx-auto border border-[#a855f7]/30 shadow-2xl">
+              <div className="w-16 h-16 rounded-[24px] bg-gradient-to-tr from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-3xl mb-4 mx-auto border border-[#a855f7]/30 shadow-2xl">
                 🔮
               </div>
-              <h2 className="text-2xl font-headline font-bold mb-2 text-white">Campus Aura</h2>
-              <p className="text-sm text-white/40 leading-relaxed">
+              <h2 className="text-xl font-headline font-bold mb-2 text-white">Campus Aura</h2>
+              <p className="text-xs text-white/40 leading-relaxed">
                 Select a campus group or start a conversation to stay connected.
               </p>
             </div>
           ) : (
             <>
-              {/* Chat Area Header - Shortened */}
-              <div className="p-2 md:p-2.5 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-8 md:pt-2.5">
-                <div className="flex items-center gap-3 min-w-0">
+              {/* Chat Area Header - Reduced Padding */}
+              <div className="p-2 md:p-2.5 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2.5 md:pt-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="md:hidden rounded-full h-8 w-8 text-white"
+                    className="md:hidden rounded-full h-7 w-7 text-white"
                     onClick={() => setSelectedChatId(null)}
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-4 h-4" />
                   </Button>
                   <div className={cn(
                     "w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-white font-bold shrink-0 text-sm",
