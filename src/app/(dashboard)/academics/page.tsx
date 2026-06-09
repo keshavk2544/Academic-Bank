@@ -147,137 +147,141 @@ export default function AcademicsPage() {
                   <PlusCircle className="w-4 h-4" /> Contribute Material
                 </button>
               </DialogTrigger>
-              <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px]">
-                <DialogHeader>
+              <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-2">
                   <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
                   <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
                 </DialogHeader>
-                <div className="grid gap-6 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
-                    <Input 
-                      id="name" 
-                      value={contributorName} 
-                      disabled 
-                      className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="title" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Title</Label>
-                    <Input 
-                      id="title" 
-                      placeholder="e.g., Data Structures Unit 3 Summary" 
-                      value={newFile.title}
-                      onChange={(e) => setNewFile({ ...newFile, title: e.target.value })}
-                      className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
-                    />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
-                    {!newFile.subject ? (
-                      <div className="relative">
-                        <div className="relative group">
-                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
-                          <Input 
-                            placeholder="Type to find subject..." 
-                            value={subjectSearch}
-                            onChange={(e) => setSubjectSearch(e.target.value)}
-                            className="glass border-white/10 bg-white/5 h-12 pl-11 rounded-xl focus:border-accent transition-all"
-                          />
-                        </div>
-                        {subjectSearch && (
-                          <div className="absolute top-full left-0 right-0 mt-2 z-50 glass border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
-                            <ScrollArea className="h-48">
-                              <div className="p-2">
-                                {filteredSubjectsForDialog.length === 0 ? (
-                                  <p className="p-4 text-xs text-center text-muted-foreground">No subjects match.</p>
-                                ) : (
-                                  filteredSubjectsForDialog.map((sub) => (
-                                    <button
-                                      key={sub}
-                                      type="button"
-                                      className="w-full text-left px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition-colors flex items-center justify-between group"
-                                      onClick={() => {
-                                        setNewFile({ ...newFile, subject: sub });
-                                        setSubjectSearch("");
-                                      }}
-                                    >
-                                      {sub}
-                                      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                    </button>
-                                  ))
-                                )}
-                              </div>
-                            </ScrollArea>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-4 rounded-xl glass border-accent/30 bg-accent/10 animate-in zoom-in-95">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-accent/20 text-accent">
-                            <CheckCircle2 className="w-4 h-4" />
-                          </div>
-                          <span className="text-sm font-bold text-white">{newFile.subject}</span>
-                        </div>
-                        <button 
-                          onClick={() => setNewFile({ ...newFile, subject: "" })}
-                          className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-400 transition-colors"
-                        >
-                          Change
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Type</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {DOC_TYPE_OPTIONS.map((type) => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => setNewFile({ ...newFile, docType: type })}
-                          className={cn(
-                            "py-2 rounded-xl text-[10px] font-bold transition-all border",
-                            newFile.docType === type 
-                              ? "bg-accent text-accent-foreground border-accent shadow-[0_0_10px_rgba(72,118,245,0.3)]" 
-                              : "glass border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
-                          )}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
-                    <div className="relative group cursor-pointer">
-                      <input 
-                        type="file" 
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                
+                <ScrollArea className="flex-1 px-6">
+                  <div className="grid gap-6 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
+                      <Input 
+                        id="name" 
+                        value={contributorName} 
+                        disabled 
+                        className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
                       />
-                      <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
-                        {newFile.fileName ? (
-                          <>
-                            <CheckCircle2 className="w-8 h-8 text-green-400" />
-                            <span className="text-xs font-medium text-green-400 truncate max-w-[200px]">{newFile.fileName}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
-                            <span className="text-xs font-bold text-muted-foreground">Drop PDF/DOC or click to browse</span>
-                          </>
-                        )}
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="title" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Title</Label>
+                      <Input 
+                        id="title" 
+                        placeholder="e.g., Data Structures Unit 3 Summary" 
+                        value={newFile.title}
+                        onChange={(e) => setNewFile({ ...newFile, title: e.target.value })}
+                        className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
+                      />
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
+                      {!newFile.subject ? (
+                        <div className="relative">
+                          <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                            <Input 
+                              placeholder="Type to find subject..." 
+                              value={subjectSearch}
+                              onChange={(e) => setSubjectSearch(e.target.value)}
+                              className="glass border-white/10 bg-white/5 h-12 pl-11 rounded-xl focus:border-accent transition-all"
+                            />
+                          </div>
+                          {subjectSearch && (
+                            <div className="absolute top-full left-0 right-0 mt-2 z-[60] glass border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
+                              <ScrollArea className="h-48">
+                                <div className="p-2">
+                                  {filteredSubjectsForDialog.length === 0 ? (
+                                    <p className="p-4 text-xs text-center text-muted-foreground">No subjects match.</p>
+                                  ) : (
+                                    filteredSubjectsForDialog.map((sub) => (
+                                      <button
+                                        key={sub}
+                                        type="button"
+                                        className="w-full text-left px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition-colors flex items-center justify-between group"
+                                        onClick={() => {
+                                          setNewFile({ ...newFile, subject: sub });
+                                          setSubjectSearch("");
+                                        }}
+                                      >
+                                        {sub}
+                                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                                      </button>
+                                    ))
+                                  )}
+                                </div>
+                              </ScrollArea>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between p-4 rounded-xl glass border-accent/30 bg-accent/10 animate-in zoom-in-95">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-accent/20 text-accent">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                            <span className="text-sm font-bold text-white">{newFile.subject}</span>
+                          </div>
+                          <button 
+                            onClick={() => setNewFile({ ...newFile, subject: "" })}
+                            className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-400 transition-colors"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Type</Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {DOC_TYPE_OPTIONS.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setNewFile({ ...newFile, docType: type })}
+                            className={cn(
+                              "py-2 rounded-xl text-[10px] font-bold transition-all border",
+                              newFile.docType === type 
+                                ? "bg-accent text-accent-foreground border-accent shadow-[0_0_10px_rgba(72,118,245,0.3)]" 
+                                : "glass border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
+                            )}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
+                      <div className="relative group cursor-pointer">
+                        <input 
+                          type="file" 
+                          accept=".pdf,.doc,.docx"
+                          onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                        />
+                        <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
+                          {newFile.fileName ? (
+                            <>
+                              <CheckCircle2 className="w-8 h-8 text-green-400" />
+                              <span className="text-xs font-medium text-green-400 truncate max-w-[200px]">{newFile.fileName}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
+                              <span className="text-xs font-bold text-muted-foreground">Drop PDF/DOC or click to browse</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
+                </ScrollArea>
+
+                <DialogFooter className="p-6 pt-2">
                   <Button 
                     onClick={handleUpload}
                     disabled={!newFile.title || !newFile.subject || !newFile.docType}
