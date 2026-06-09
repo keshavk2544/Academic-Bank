@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { 
@@ -13,7 +14,8 @@ import {
   CheckCircle2,
   Search,
   ChevronRight,
-  Tag
+  Filter,
+  X
 } from "lucide-react"
 import {
   Dialog,
@@ -23,6 +25,13 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -51,11 +60,6 @@ const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 export default function AcademicsPage() {
   const [contributorName, setContributorName] = useState("Alex Rivera");
 
-  useEffect(() => {
-    // In a real app, we'd fetch the name from a profile or auth session
-    setContributorName("Alex Rivera");
-  }, []);
-
   const [files, setFiles] = useState([
     { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "Machine Learning", docType: "NOTES", contributor: "Alex Rivera" },
     { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Computer Networks", docType: "MFT", contributor: "Sarah Jenkins" },
@@ -64,13 +68,28 @@ export default function AcademicsPage() {
     { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Database Management", docType: "PYQ", contributor: "Jordan Lee" },
   ]);
 
+  // Filter States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedSubject, setSelectedSubject] = useState("all");
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [subjectSearch, setSubjectSearch] = useState("");
   const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "", docType: "" });
 
-  const filteredSubjects = SUBJECT_OPTIONS.filter(s => 
+  const filteredSubjectsForDialog = SUBJECT_OPTIONS.filter(s => 
     s.toLowerCase().includes(subjectSearch.toLowerCase())
   );
+
+  const filteredFiles = useMemo(() => {
+    return files.filter(file => {
+      const matchesSearch = file.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            file.contributor.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = selectedType === "all" || file.docType === selectedType;
+      const matchesSubject = selectedSubject === "all" || file.type === selectedSubject;
+      return matchesSearch && matchesType && matchesSubject;
+    });
+  }, [files, searchTerm, selectedType, selectedSubject]);
 
   const handleUpload = () => {
     if (!newFile.title || !newFile.subject || !newFile.docType) return;
@@ -91,220 +110,292 @@ export default function AcademicsPage() {
     setIsDialogOpen(false);
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedType("all");
+    setSelectedSubject("all");
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in duration-500">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 className="text-sm font-semibold text-accent uppercase tracking-[0.2em] mb-1">Academic Vault</h2>
-            <h1 className="text-3xl font-headline font-bold">Study Repository</h1>
+        <header className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-accent uppercase tracking-[0.2em] mb-1">Academic Vault</h2>
+              <h1 className="text-3xl font-headline font-bold">Study Repository</h1>
+            </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <button className="flex items-center justify-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all shadow-[0_0_15px_rgba(72,118,245,0.4)] md:min-w-[200px]">
+                  <PlusCircle className="w-5 h-5" /> Contribute Material
+                </button>
+              </DialogTrigger>
+              <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] overflow-visible">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
+                  <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
+                    <Input 
+                      id="name" 
+                      value={contributorName} 
+                      disabled 
+                      className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="title" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Title</Label>
+                    <Input 
+                      id="title" 
+                      placeholder="e.g., Data Structures Unit 3 Summary" 
+                      value={newFile.title}
+                      onChange={(e) => setNewFile({ ...newFile, title: e.target.value })}
+                      className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
+                    {!newFile.subject ? (
+                      <div className="relative">
+                        <div className="relative group">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                          <Input 
+                            placeholder="Type to find subject..." 
+                            value={subjectSearch}
+                            onChange={(e) => setSubjectSearch(e.target.value)}
+                            className="glass border-white/10 bg-white/5 h-12 pl-11 rounded-xl focus:border-accent transition-all"
+                          />
+                        </div>
+                        {subjectSearch && (
+                          <div className="absolute top-full left-0 right-0 mt-2 z-50 glass border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
+                            <ScrollArea className="h-48">
+                              <div className="p-2">
+                                {filteredSubjectsForDialog.length === 0 ? (
+                                  <p className="p-4 text-xs text-center text-muted-foreground">No subjects match.</p>
+                                ) : (
+                                  filteredSubjectsForDialog.map((sub) => (
+                                    <button
+                                      key={sub}
+                                      type="button"
+                                      className="w-full text-left px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition-colors flex items-center justify-between group"
+                                      onClick={() => {
+                                        setNewFile({ ...newFile, subject: sub });
+                                        setSubjectSearch("");
+                                      }}
+                                    >
+                                      {sub}
+                                      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            </ScrollArea>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-4 rounded-xl glass border-accent/30 bg-accent/10 animate-in zoom-in-95">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-accent/20 text-accent">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-bold text-white">{newFile.subject}</span>
+                        </div>
+                        <button 
+                          onClick={() => setNewFile({ ...newFile, subject: "" })}
+                          className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-400 transition-colors"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Type</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {DOC_TYPE_OPTIONS.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => setNewFile({ ...newFile, docType: type })}
+                          className={cn(
+                            "py-2 rounded-xl text-[10px] font-bold transition-all border",
+                            newFile.docType === type 
+                              ? "bg-accent text-accent-foreground border-accent shadow-[0_0_10px_rgba(72,118,245,0.3)]" 
+                              : "glass border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
+                          )}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
+                    <div className="relative group cursor-pointer">
+                      <input 
+                        type="file" 
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                      />
+                      <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
+                        {newFile.fileName ? (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 text-green-400" />
+                            <span className="text-xs font-medium text-green-400 truncate max-w-[200px]">{newFile.fileName}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
+                            <span className="text-xs font-bold text-muted-foreground">Drop PDF/DOC or click to browse</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button 
+                    onClick={handleUpload}
+                    disabled={!newFile.title || !newFile.subject || !newFile.docType}
+                    className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-[0_0_15px_rgba(72,118,245,0.4)]"
+                  >
+                    Initialize Contribution
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <button className="flex items-center gap-2 px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all shadow-[0_0_15px_rgba(72,118,245,0.4)]">
-                <PlusCircle className="w-4 h-4" /> Contribute Material
-              </button>
-            </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] overflow-visible">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
-                <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
-              </DialogHeader>
-              <div className="grid gap-6 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
-                  <Input 
-                    id="name" 
-                    value={contributorName} 
-                    disabled 
-                    className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="title" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Title</Label>
-                  <Input 
-                    id="title" 
-                    placeholder="e.g., Data Structures Unit 3 Summary" 
-                    value={newFile.title}
-                    onChange={(e) => setNewFile({ ...newFile, title: e.target.value })}
-                    className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
-                  
-                  {!newFile.subject ? (
-                    <div className="relative">
-                      <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
-                        <Input 
-                          placeholder="Search to find subject..." 
-                          value={subjectSearch}
-                          onChange={(e) => setSubjectSearch(e.target.value)}
-                          className="glass border-white/10 bg-white/5 h-12 pl-11 rounded-xl focus:border-accent transition-all"
-                        />
-                      </div>
-                      
-                      {subjectSearch && (
-                        <div className="absolute top-full left-0 right-0 mt-2 z-50 glass border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
-                          <ScrollArea className="h-48">
-                            <div className="p-2">
-                              {filteredSubjects.length === 0 ? (
-                                <p className="p-4 text-xs text-center text-muted-foreground">No subjects match your search.</p>
-                              ) : (
-                                filteredSubjects.map((sub) => (
-                                  <button
-                                    key={sub}
-                                    type="button"
-                                    className="w-full text-left px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition-colors flex items-center justify-between group"
-                                    onClick={() => {
-                                      setNewFile({ ...newFile, subject: sub });
-                                      setSubjectSearch("");
-                                    }}
-                                  >
-                                    {sub}
-                                    <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                  </button>
-                                ))
-                              )}
-                            </div>
-                          </ScrollArea>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between p-4 rounded-xl glass border-accent/30 bg-accent/10 animate-in zoom-in-95">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-accent/20 text-accent">
-                          <CheckCircle2 className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-bold text-white">{newFile.subject}</span>
-                      </div>
-                      <button 
-                        onClick={() => setNewFile({ ...newFile, subject: "" })}
-                        className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-400 transition-colors"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  )}
-                </div>
+          <GlassCard className="p-4 border-white/5 bg-white/5 flex flex-col md:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input 
+                className="glass border-white/10 pl-10 h-11 rounded-xl bg-white/5" 
+                placeholder="Search title or contributor..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger className="glass border-white/10 h-11 rounded-xl bg-white/5 min-w-[160px]">
+                  <SelectValue placeholder="Subject" />
+                </SelectTrigger>
+                <SelectContent className="glass border-white/10">
+                  <SelectItem value="all">All Subjects</SelectItem>
+                  {SUBJECT_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <div className="grid gap-2">
-                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Type</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {DOC_TYPE_OPTIONS.map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setNewFile({ ...newFile, docType: type })}
-                        className={cn(
-                          "py-2 rounded-xl text-[10px] font-bold transition-all border",
-                          newFile.docType === type 
-                            ? "bg-accent text-accent-foreground border-accent shadow-[0_0_10px_rgba(72,118,245,0.3)]" 
-                            : "glass border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
-                        )}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="glass border-white/10 h-11 rounded-xl bg-white/5 min-w-[140px]">
+                  <SelectValue placeholder="Doc Type" />
+                </SelectTrigger>
+                <SelectContent className="glass border-white/10">
+                  <SelectItem value="all">All Types</SelectItem>
+                  {DOC_TYPE_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <div className="grid gap-2">
-                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
-                  <div className="relative group cursor-pointer">
-                    <input 
-                      type="file" 
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                    />
-                    <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
-                      {newFile.fileName ? (
-                        <>
-                          <CheckCircle2 className="w-8 h-8 text-green-400" />
-                          <span className="text-xs font-medium text-green-400 truncate max-w-[200px]">{newFile.fileName}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
-                          <span className="text-xs font-bold text-muted-foreground">Drop PDF/DOC or click to browse</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button 
-                  onClick={handleUpload}
-                  disabled={!newFile.title || !newFile.subject || !newFile.docType}
-                  className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-[0_0_15px_rgba(72,118,245,0.4)]"
+              {(searchTerm || selectedType !== "all" || selectedSubject !== "all") && (
+                <button 
+                  onClick={clearFilters}
+                  className="p-2.5 rounded-xl glass border-white/10 text-muted-foreground hover:text-red-400 transition-colors"
+                  title="Clear Filters"
                 >
-                  Initialize Contribution
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </GlassCard>
         </header>
 
         <div className="flex flex-col gap-3">
-          {files.map((file, idx) => (
-            <GlassCard key={idx} className="p-0 group hover:bg-white/5 transition-all border-white/5 relative overflow-hidden">
-              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-current ${file.color} opacity-30 group-hover:opacity-100 transition-opacity`} />
-              
-              <div className="flex items-center justify-between p-4 md:p-5">
-                <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                  <div className="flex flex-col items-center gap-2 shrink-0">
-                    <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} transition-transform group-hover:scale-105`}>
-                      <FileText className="w-6 h-6 md:w-8 md:h-8" />
+          {filteredFiles.length > 0 ? (
+            filteredFiles.map((file, idx) => (
+              <GlassCard key={idx} className="p-0 group hover:bg-white/5 transition-all border-white/5 relative overflow-hidden">
+                <div className={`absolute left-0 top-0 bottom-0 w-1 bg-current ${file.color} opacity-30 group-hover:opacity-100 transition-opacity`} />
+                
+                <div className="flex items-center justify-between p-4 md:p-5">
+                  <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
+                    <div className="flex flex-col items-center gap-2 shrink-0">
+                      <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} transition-transform group-hover:scale-105`}>
+                        <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                      </div>
+                      <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", file.color)}>
+                        {file.docType}
+                      </span>
                     </div>
-                    <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", file.color)}>
-                      {file.docType}
-                    </span>
-                  </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                       <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
-                       <span className="w-1 h-1 rounded-full bg-white/20" />
-                       <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" /> {file.date}
-                       </span>
-                    </div>
-                    <h4 className="font-headline font-bold text-base md:text-xl truncate leading-tight">{file.title}</h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      <div className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
-                        <span className="font-bold text-white/40">{file.size}</span>
-                        <span className="w-1 h-1 rounded-full bg-white/10" />
-                        <span className="flex items-center gap-1">
-                          <User className="w-3 h-3 text-accent/70" /> 
-                          <span className="text-white/60 font-medium">{file.contributor}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/20" />
+                        <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" /> {file.date}
                         </span>
+                      </div>
+                      <h4 className="font-headline font-bold text-base md:text-xl truncate leading-tight">{file.title}</h4>
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
+                          <span className="font-bold text-white/40">{file.size}</span>
+                          <span className="w-1 h-1 rounded-full bg-white/10" />
+                          <span className="flex items-center gap-1">
+                            <User className="w-3 h-3 text-accent/70" /> 
+                            <span className="text-white/60 font-medium">{file.contributor}</span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  
+                  <div className="flex items-center gap-3 ml-4 shrink-0">
+                    <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl glass border-white/10 text-xs font-bold text-muted-foreground hover:text-white hover:border-white/20 transition-all">
+                      View Online
+                    </button>
+                    <button className="p-3 md:p-4 rounded-xl bg-accent text-accent-foreground shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
+                      <Download className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-                
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl glass border-white/10 text-xs font-bold text-muted-foreground hover:text-white hover:border-white/20 transition-all">
-                    View Online
-                  </button>
-                  <button className="p-3 md:p-4 rounded-xl bg-accent text-accent-foreground shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
-                    <Download className="w-5 h-5" />
-                  </button>
-                </div>
+              </GlassCard>
+            ))
+          ) : (
+            <div className="py-20 text-center glass rounded-[32px] border-white/5">
+              <div className="inline-flex p-4 rounded-full bg-white/5 mb-4">
+                <Filter className="w-8 h-8 text-muted-foreground opacity-20" />
               </div>
-            </GlassCard>
-          ))}
+              <h3 className="text-xl font-headline font-bold mb-2">No documents found</h3>
+              <p className="text-sm text-muted-foreground">Try adjusting your search or filters to find what you're looking for.</p>
+              <button 
+                onClick={clearFilters}
+                className="mt-6 text-accent font-bold text-sm hover:underline"
+              >
+                Reset all filters
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
-          <p className="text-sm text-muted-foreground italic">You've reached the end of your recent academic repository. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
-        </div>
+        {filteredFiles.length > 0 && (
+          <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
+            <p className="text-sm text-muted-foreground italic">You've reached the end of the filtered results. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )
