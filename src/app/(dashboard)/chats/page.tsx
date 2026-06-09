@@ -155,11 +155,11 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
               className={cn(
                 "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'academics' 
-                  ? "bg-white/15 border-white/30 text-white shadow-xl shadow-primary/10" 
-                  : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                  ? "bg-primary/20 border-primary/40 text-white shadow-xl shadow-primary/20" 
+                  : "bg-primary/5 border-primary/10 text-primary/70 hover:bg-primary/10"
               )}
             >
-              <Library className={cn("w-4 h-4", currentTab === 'academics' ? "text-primary" : "text-white/40")} />
+              <Library className={cn("w-4 h-4", currentTab === 'academics' ? "text-primary" : "text-primary/70")} />
               <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Academics</span>
             </button>
             <button 
@@ -167,11 +167,11 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
               className={cn(
                 "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'clubs' 
-                  ? "bg-white/15 border-white/30 text-white shadow-xl shadow-accent/10" 
-                  : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                  ? "bg-accent/20 border-accent/40 text-white shadow-xl shadow-accent/20" 
+                  : "bg-accent/5 border-accent/10 text-accent/70 hover:bg-accent/10"
               )}
             >
-              <Sparkles className={cn("w-4 h-4", currentTab === 'clubs' ? "text-accent" : "text-white/40")} />
+              <Sparkles className={cn("w-4 h-4", currentTab === 'clubs' ? "text-accent" : "text-accent/70")} />
               <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Clubs</span>
             </button>
           </div>
