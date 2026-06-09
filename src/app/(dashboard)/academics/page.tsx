@@ -8,13 +8,10 @@ import {
   FileText, 
   Download, 
   Share2, 
-  Search,
-  Filter,
   PlusCircle,
   Clock,
   ExternalLink
 } from "lucide-react"
-import { Input } from "@/components/ui/input"
 
 export default function AcademicsPage() {
   return (
@@ -31,16 +28,6 @@ export default function AcademicsPage() {
         </header>
 
         <Tabs defaultValue="notes" className="w-full">
-          <div className="mb-6 flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input className="glass border-white/10 pl-10 h-12 rounded-xl" placeholder="Search across all academic files..." />
-            </div>
-            <button className="glass border-white/10 px-6 h-12 rounded-xl flex items-center gap-2 text-sm text-muted-foreground hover:text-white">
-              <Filter className="w-4 h-4" /> Filters
-            </button>
-          </div>
-
           <TabsContent value="notes" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
