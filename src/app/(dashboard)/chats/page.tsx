@@ -132,8 +132,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
         )}>
           {/* Header Section */}
           <div className="px-6 py-4 space-y-4">
-            <div>
-              <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-1">E2E Encrypted</h2>
+            <div className="flex items-center justify-center">
+              <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] opacity-60">E2E Encrypted</h2>
             </div>
 
             {/* Category Toggle */}
@@ -287,8 +287,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
               </div>
 
               {/* Message List */}
-              <ScrollArea className="flex-1 p-4 md:p-8" ref={scrollAreaRef}>
-                <div className="flex flex-col gap-3 max-w-4xl mx-auto pb-8">
+              <ScrollArea className="flex-1 p-4 md:p-6" ref={scrollAreaRef}>
+                <div className="flex flex-col gap-2 max-w-4xl mx-auto pb-8">
                   <div className="flex items-center justify-center gap-2 mb-8 opacity-40">
                     <div className="h-px w-12 bg-white/20" />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em]">End-to-End Encrypted</span>
@@ -306,29 +306,29 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                     const isOut = msg.type === 'out'
                     return (
                       <div key={idx} className={cn(
-                        "flex gap-3 max-w-[85%] md:max-w-[75%] group animate-in slide-in-from-bottom-2 duration-300",
+                        "flex gap-2 max-w-[85%] md:max-w-[70%] group animate-in slide-in-from-bottom-2 duration-300",
                         isOut ? "ml-auto flex-row-reverse" : "mr-auto"
                       )}>
                         {!isOut && (
-                          <div className={cn("w-8 h-8 self-end rounded-lg shrink-0 flex items-center justify-center text-[10px] font-black border border-white/5 bg-white/5", msg.color)}>
+                          <div className={cn("w-7 h-7 self-end rounded-lg shrink-0 flex items-center justify-center text-[9px] font-black border border-white/5 bg-white/5", msg.color)}>
                             {msg.avatar || '?'}
                           </div>
                         )}
-                        <div className="space-y-1.5">
+                        <div className="space-y-1">
                           <div className={cn(
-                            "p-3.5 px-4 rounded-2xl relative transition-all shadow-lg",
+                            "p-2.5 px-3.5 rounded-2xl relative transition-all shadow-lg",
                             isOut 
                               ? "bg-primary/20 border border-primary/30 rounded-br-none" 
                               : "glass border-white/10 rounded-bl-none"
                           )}>
                             {!isOut && selectedChat?.type === 'group' && (
-                              <p className={cn("text-[10px] font-black mb-1.5 uppercase tracking-widest", msg.color)}>{msg.from}</p>
+                              <p className={cn("text-[9px] font-black mb-1 uppercase tracking-widest", msg.color)}>{msg.from}</p>
                             )}
                             <p className="text-sm leading-relaxed text-white/90">{msg.text}</p>
-                            <div className="flex items-center gap-1.5 mt-2.5 justify-end opacity-50">
-                              <Clock className="w-2.5 h-2.5" />
-                              <span className="text-[9px] font-bold tracking-tight">{msg.time}</span>
-                              {isOut && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
+                            <div className="flex items-center gap-1 mt-1.5 justify-end opacity-50">
+                              <Clock className="w-2 h-2" />
+                              <span className="text-[8px] font-bold tracking-tight">{msg.time}</span>
+                              {isOut && <CheckCheck className="w-3 h-3 text-blue-400" />}
                             </div>
                           </div>
                         </div>
