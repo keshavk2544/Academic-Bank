@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "avatar-student",
+      "description": "Student Avatar",
+      "imageUrl": "https://picsum.photos/seed/student123/200/200",
+      "imageHint": "student profile"
+    },
+    {
+      "id": "avatar-faculty",
+      "description": "Faculty Avatar",
+      "imageUrl": "https://picsum.photos/seed/faculty456/200/200",
+      "imageHint": "professor profile"
+    },
+    {
+      "id": "campus-hero",
+      "description": "Modern Campus Architecture",
+      "imageUrl": "https://picsum.photos/seed/campus/1200/600",
+      "imageHint": "modern university"
+    }
+  ]
+}
