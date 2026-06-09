@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef, useMemo, use } from "react"
@@ -149,13 +148,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           "flex flex-col w-full md:w-80 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* E2E Status */}
-          <div className="flex items-center justify-center gap-1.5 py-2 pt-12 md:pt-4">
-             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">E2E encrypted</span>
-          </div>
-
           {/* Categories */}
-          <div className="flex gap-3 px-4 py-3">
+          <div className="flex gap-3 px-4 py-3 pt-12 md:pt-4">
             <button 
               onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
               className={cn(
