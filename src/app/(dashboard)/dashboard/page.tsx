@@ -49,35 +49,35 @@ export default function Dashboard() {
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
             
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
-                <User className="w-5 h-5 text-primary" />
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
+                <User className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-base font-bold leading-none mb-1">Alex Rivera</h3>
-                <div className="flex items-center gap-1.5 text-[9px] font-bold text-amber-400 uppercase tracking-widest">
-                  <School className="w-2.5 h-2.5" /> B.Tech CSE
+                <h3 className="text-lg font-headline font-bold leading-none mb-1">Alex Rivera</h3>
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-widest">
+                  <School className="w-3 h-3" /> B.Tech CSE
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[8px] font-bold text-blue-400 uppercase tracking-tighter">
-                  <Hash className="w-2 h-2" /> Roll No
+                <div className="flex items-center gap-1 text-[10px] font-bold text-blue-400 uppercase tracking-tighter">
+                  <Hash className="w-2.5 h-2.5" /> Roll No
                 </div>
-                <span className="text-[11px] font-mono font-medium">22CSE1042</span>
+                <span className="text-sm font-headline font-medium">22CSE1042</span>
               </div>
               <div className="p-2.5 rounded-xl bg-purple-500/5 border border-purple-500/10 hover:border-purple-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[8px] font-bold text-purple-400 uppercase tracking-tighter">
-                  <CreditCard className="w-2 h-2" /> QID
+                <div className="flex items-center gap-1 text-[10px] font-bold text-purple-400 uppercase tracking-tighter">
+                  <CreditCard className="w-2.5 h-2.5" /> QID
                 </div>
-                <span className="text-[11px] font-mono font-medium">Q748291</span>
+                <span className="text-sm font-headline font-medium">Q748291</span>
               </div>
               <div className="p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 uppercase tracking-tighter">
-                  <Calendar className="w-2 h-2" /> Date
+                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 uppercase tracking-tighter">
+                  <Calendar className="w-2.5 h-2.5" /> Date
                 </div>
-                <span className="text-[11px] font-medium">May 15, 2025</span>
+                <span className="text-sm font-headline font-medium">May 15, 2025</span>
               </div>
               <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-all flex flex-col items-center justify-center">
                 <span className="text-xl font-headline font-bold text-orange-400 tabular-nums tracking-widest">
@@ -89,7 +89,7 @@ export default function Dashboard() {
             <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Attendance</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attendance</span>
               </div>
               <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
             </div>
