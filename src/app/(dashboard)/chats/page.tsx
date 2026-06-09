@@ -116,24 +116,13 @@ export default function ChatPage() {
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Sidebar - Reduced width to 280px */}
+        {/* Sidebar */}
         <div className={cn(
-          "flex flex-col w-full md:w-[280px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
+          "flex flex-col w-full md:w-64 border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Search */}
-          <div className="px-4 py-3 relative pt-10 md:pt-4">
-            <Search className="absolute left-7 top-[60%] -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
-            <input 
-              placeholder="Search chats..." 
-              className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
           {/* Tabs */}
-          <div className="flex gap-1 px-4 pb-2">
+          <div className="flex gap-1 px-4 py-3">
             {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
               <button
                 key={tab}
@@ -150,6 +139,17 @@ export default function ChatPage() {
             ))}
           </div>
 
+          {/* Search */}
+          <div className="px-4 pb-3 relative">
+            <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <input 
+              placeholder="Search chats..." 
+              className="w-full h-8 bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 text-[11px] outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           {/* Chat List */}
           <ScrollArea className="flex-1 pb-24 md:pb-4">
             <div className="p-0">
@@ -158,7 +158,7 @@ export default function ChatPage() {
                   key={chat.id}
                   onClick={() => setSelectedChatId(chat.id)}
                   className={cn(
-                    "flex items-center gap-3 p-4 cursor-pointer transition-all relative border-l-4",
+                    "flex items-center gap-3 p-3 cursor-pointer transition-all relative border-l-4",
                     selectedChatId === chat.id 
                       ? "bg-[#a855f7]/20 border-[#a855f7]" 
                       : "hover:bg-white/5 border-transparent"
@@ -206,8 +206,8 @@ export default function ChatPage() {
             </div>
           ) : (
             <>
-              {/* Chat Area Header */}
-              <div className="p-3 md:p-4 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-10 md:pt-4">
+              {/* Chat Area Header - Shortened */}
+              <div className="p-2 md:p-2.5 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-8 md:pt-2.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
@@ -218,16 +218,16 @@ export default function ChatPage() {
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
                   <div className={cn(
-                    "w-10 h-10 flex items-center justify-center text-white font-bold shrink-0",
+                    "w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-white font-bold shrink-0 text-sm",
                     selectedChat?.color,
-                    selectedChat?.type === 'group' ? "rounded-xl" : "rounded-full"
+                    selectedChat?.type === 'group' ? "rounded-lg" : "rounded-full"
                   )}>
                     {selectedChat?.avatar}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-sm md:text-base truncate leading-tight text-white">{selectedChat?.name}</h3>
+                    <h3 className="font-bold text-xs md:text-sm truncate leading-tight text-white">{selectedChat?.name}</h3>
                     <p className={cn(
-                      "text-[10px] md:text-xs mt-0.5",
+                      "text-[9px] md:text-[10px] mt-0.5",
                       selectedChat?.online === true ? "text-green-400 font-medium" : "text-white/40"
                     )}>
                       {selectedChat?.type === 'group' 
@@ -238,25 +238,25 @@ export default function ChatPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white/10 text-white/50">
-                    <Phone className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-white/10 text-white/50">
+                    <Phone className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white/10 text-white/50">
-                    <Video className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-white/10 text-white/50">
+                    <Video className="w-4 h-4" />
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={cn("h-9 w-9 rounded-xl hover:bg-white/10", isProfileOpen ? "text-[#a855f7] bg-[#a855f7]/10" : "text-white/50")}
+                    className={cn("h-8 w-8 rounded-lg hover:bg-white/10", isProfileOpen ? "text-[#a855f7] bg-[#a855f7]/10" : "text-white/50")}
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                   >
-                    <Info className="w-5 h-5" />
+                    <Info className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Message List */}
-              <ScrollArea className="flex-1 p-4 md:p-8" ref={scrollAreaRef}>
+              <ScrollArea className="flex-1 p-4 md:p-6" ref={scrollAreaRef}>
                 <div className="flex flex-col gap-2 max-w-4xl mx-auto">
                   {messages.map((msg, idx) => {
                     if (msg.sys) {
