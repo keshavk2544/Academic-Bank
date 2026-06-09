@@ -11,7 +11,8 @@ import {
   Clock,
   User,
   Upload,
-  CheckCircle2
+  CheckCircle2,
+  Search
 } from "lucide-react"
 import {
   Dialog,
@@ -24,13 +25,30 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+const SUBJECT_OPTIONS = [
+  "Machine Learning",
+  "Computer Networks",
+  "Data Structures",
+  "Cloud Computing",
+  "Cyber Security",
+  "Operating Systems",
+  "Database Management",
+  "Artificial Intelligence",
+  "Software Engineering",
+  "Discrete Mathematics",
+  "Professional Ethics",
+  "Embedded Systems",
+  "Mobile App Development",
+  "Web Technologies"
+];
 
 export default function AcademicsPage() {
   const [files, setFiles] = useState([
@@ -42,7 +60,13 @@ export default function AcademicsPage() {
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubjectPopoverOpen, setIsSubjectPopoverOpen] = useState(false);
+  const [subjectSearch, setSubjectSearch] = useState("");
   const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "" });
+
+  const filteredSubjects = SUBJECT_OPTIONS.filter(s => 
+    s.toLowerCase().includes(subjectSearch.toLowerCase())
+  );
 
   const handleUpload = () => {
     if (!newFile.title || !newFile.subject) return;
@@ -103,18 +127,56 @@ export default function AcademicsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="subject" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
-                  <Select onValueChange={(val) => setNewFile({ ...newFile, subject: val })}>
-                    <SelectTrigger className="glass border-white/10 bg-white/5 h-12 rounded-xl">
-                      <SelectValue placeholder="Select Subject" />
-                    </SelectTrigger>
-                    <SelectContent className="glass border-white/10">
-                      <SelectItem value="Machine Learning">Machine Learning</SelectItem>
-                      <SelectItem value="Computer Networks">Computer Networks</SelectItem>
-                      <SelectItem value="Data Structures">Data Structures</SelectItem>
-                      <SelectItem value="Cloud Computing">Cloud Computing</SelectItem>
-                      <SelectItem value="Cyber Security">Cyber Security</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={isSubjectPopoverOpen} onOpenChange={setIsSubjectPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isSubjectPopoverOpen}
+                        className="glass border-white/10 bg-white/5 h-12 rounded-xl justify-between font-normal hover:bg-white/10"
+                      >
+                        <span className={newFile.subject ? "text-white" : "text-muted-foreground"}>
+                          {newFile.subject || "Select Subject Area..."}
+                        </span>
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0 glass border-white/10" align="start">
+                      <div className="flex items-center border-b border-white/10 px-3 h-10">
+                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                        <input
+                          className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Search subject..."
+                          value={subjectSearch}
+                          onChange={(e) => setSubjectSearch(e.target.value)}
+                        />
+                      </div>
+                      <ScrollArea className="h-60">
+                        <div className="p-1">
+                          {filteredSubjects.length === 0 ? (
+                            <p className="p-4 text-xs text-center text-muted-foreground">No subject found.</p>
+                          ) : (
+                            filteredSubjects.map((sub) => (
+                              <button
+                                key={sub}
+                                className={cn(
+                                  "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/10",
+                                  newFile.subject === sub ? "bg-accent text-accent-foreground" : "text-foreground"
+                                )}
+                                onClick={() => {
+                                  setNewFile({ ...newFile, subject: sub });
+                                  setIsSubjectPopoverOpen(false);
+                                  setSubjectSearch("");
+                                }}
+                              >
+                                {sub}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid gap-2">
                   <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
