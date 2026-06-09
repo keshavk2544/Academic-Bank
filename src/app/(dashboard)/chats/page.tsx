@@ -121,17 +121,9 @@ export default function ChatPage() {
           "flex flex-col w-full md:w-[280px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Subtle E2E Encrypted Header */}
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-center bg-white/5 pt-10 md:pt-3">
-            <div className="flex items-center gap-1.5 text-white/30">
-              <Shield className="w-3 h-3" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">E2E Encrypted</span>
-            </div>
-          </div>
-
           {/* Search */}
-          <div className="px-4 py-3 relative">
-            <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+          <div className="px-4 py-3 relative pt-10 md:pt-4">
+            <Search className="absolute left-7 top-[60%] -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
             <input 
               placeholder="Search chats..." 
               className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
