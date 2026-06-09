@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { 
@@ -51,6 +51,14 @@ const SUBJECT_OPTIONS = [
 ];
 
 export default function AcademicsPage() {
+  const [contributorName, setContributorName] = useState("Alex Rivera");
+
+  useEffect(() => {
+    // In a real app, we'd fetch the name from a profile or auth session
+    // For now, we use the mock name defined in the dashboard
+    setContributorName("Alex Rivera");
+  }, []);
+
   const [files, setFiles] = useState([
     { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document", contributor: "Alex Rivera" },
     { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide", contributor: "Sarah Jenkins" },
@@ -73,11 +81,11 @@ export default function AcademicsPage() {
 
     const addedFile = {
       title: newFile.title,
-      size: "2.4 MB", // Mock size
+      size: "2.4 MB", 
       date: "Just now",
       color: "text-accent",
       type: newFile.subject,
-      contributor: "Alex Rivera" // Auto-filled from mock session
+      contributor: contributorName
     };
 
     setFiles([addedFile, ...files]);
@@ -100,7 +108,7 @@ export default function AcademicsPage() {
                 <PlusCircle className="w-4 h-4" /> Contribute Material
               </button>
             </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[425px] rounded-[32px]">
+            <DialogContent className="glass border-white/10 sm:max-w-[425px] rounded-[32px] overflow-visible">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
                 <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
@@ -110,7 +118,7 @@ export default function AcademicsPage() {
                   <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
                   <Input 
                     id="name" 
-                    value="Alex Rivera" 
+                    value={contributorName} 
                     disabled 
                     className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
                   />
@@ -133,7 +141,7 @@ export default function AcademicsPage() {
                         variant="outline"
                         role="combobox"
                         aria-expanded={isSubjectPopoverOpen}
-                        className="glass border-white/10 bg-white/5 h-12 rounded-xl justify-between font-normal hover:bg-white/10"
+                        className="glass border-white/10 bg-white/5 h-12 rounded-xl justify-between font-normal hover:bg-white/10 w-full"
                       >
                         <span className={newFile.subject ? "text-white" : "text-muted-foreground"}>
                           {newFile.subject || "Select Subject Area..."}
@@ -141,7 +149,7 @@ export default function AcademicsPage() {
                         <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0 glass border-white/10" align="start">
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 glass border-white/10" align="start">
                       <div className="flex items-center border-b border-white/10 px-3 h-10">
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <input
@@ -149,6 +157,8 @@ export default function AcademicsPage() {
                           placeholder="Search subject..."
                           value={subjectSearch}
                           onChange={(e) => setSubjectSearch(e.target.value)}
+                          autoFocus
+                          autoComplete="off"
                         />
                       </div>
                       <ScrollArea className="h-60">
@@ -159,6 +169,7 @@ export default function AcademicsPage() {
                             filteredSubjects.map((sub) => (
                               <button
                                 key={sub}
+                                type="button"
                                 className={cn(
                                   "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/10",
                                   newFile.subject === sub ? "bg-accent text-accent-foreground" : "text-foreground"
