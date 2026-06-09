@@ -54,7 +54,8 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
   ]
 };
 
-export default function ChatPage() {
+export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
+  const unwrappedSearchParams = use(props.searchParams);
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -131,6 +132,10 @@ export default function ChatPage() {
         )}>
           {/* Header Section */}
           <div className="px-6 py-4 space-y-4">
+            <div>
+              <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-1">E2E Encrypted</h2>
+            </div>
+
             {/* Category Toggle */}
             <div className="flex gap-3">
               <button 
@@ -139,10 +144,10 @@ export default function ChatPage() {
                   "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                   currentTab === 'academics' 
                     ? "bg-primary/20 border-primary/30 text-white shadow-lg shadow-primary/20" 
-                    : "glass border-white/5 text-white/40 hover:bg-white/10"
+                    : "glass border-white/5 text-muted-foreground hover:bg-white/5"
                 )}
               >
-                <Library className={cn("w-4 h-4", currentTab === 'academics' ? "text-primary" : "text-white/40")} />
+                <Library className={cn("w-4 h-4", currentTab === 'academics' ? "text-primary" : "text-muted-foreground")} />
                 <span className="text-[9px] font-bold uppercase tracking-widest">Academics</span>
               </button>
               <button 
@@ -151,10 +156,10 @@ export default function ChatPage() {
                   "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                   currentTab === 'clubs' 
                     ? "bg-accent/20 border-accent/30 text-white shadow-lg shadow-accent/20" 
-                    : "glass border-white/5 text-white/40 hover:bg-white/10"
+                    : "glass border-white/5 text-muted-foreground hover:bg-white/5"
                 )}
               >
-                <Sparkles className={cn("w-4 h-4", currentTab === 'clubs' ? "text-accent" : "text-white/40")} />
+                <Sparkles className={cn("w-4 h-4", currentTab === 'clubs' ? "text-accent" : "text-muted-foreground")} />
                 <span className="text-[9px] font-bold uppercase tracking-widest">Clubs</span>
               </button>
             </div>
@@ -179,7 +184,7 @@ export default function ChatPage() {
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={cn(
-                    "flex items-center gap-4 p-5 cursor-pointer transition-all relative rounded-2xl border border-transparent",
+                    "flex items-center gap-4 p-4 cursor-pointer transition-all relative rounded-2xl border border-transparent",
                     selectedChatId === chat.id 
                       ? "bg-primary/10 border-primary/20 shadow-md" 
                       : "hover:bg-white/5"
