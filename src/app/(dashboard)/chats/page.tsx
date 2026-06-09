@@ -149,11 +149,11 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           selectedChatId && "hidden md:flex"
         )}>
           {/* Categories */}
-          <div className="flex gap-3 px-4 py-3 pt-4 md:pt-4">
+          <div className="flex gap-3 px-4 py-2 pt-2 md:pt-2">
             <button 
               onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
               className={cn(
-                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'academics' 
                   ? "bg-white/15 border-white/30 text-white shadow-xl shadow-primary/10" 
                   : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
@@ -165,7 +165,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
             <button 
               onClick={() => setCurrentTab(currentTab === 'clubs' ? 'all' : 'clubs')}
               className={cn(
-                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'clubs' 
                   ? "bg-white/15 border-white/30 text-white shadow-xl shadow-accent/10" 
                   : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
