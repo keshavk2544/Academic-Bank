@@ -139,13 +139,13 @@ export default function ChatPage() {
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Sidebar */}
+        {/* Sidebar - Integrated & Minimal */}
         <div className={cn(
-          "flex flex-col w-full md:w-56 border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
+          "flex flex-col w-full md:w-56 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Tabs */}
-          <div className="flex gap-1 px-3 py-2">
+          {/* Tabs - Merged with Sidebar background */}
+          <div className="flex gap-1 px-3 py-2 bg-white/5 backdrop-blur-md">
             {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
               <button
                 key={tab}
@@ -162,8 +162,8 @@ export default function ChatPage() {
             ))}
           </div>
 
-          {/* Search */}
-          <div className="px-3 pb-2 relative">
+          {/* Search - Merged with Sidebar background */}
+          <div className="px-3 pb-2 pt-2 relative bg-white/5 backdrop-blur-md border-b border-white/10">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
             <input 
               placeholder="Search..." 
@@ -174,7 +174,7 @@ export default function ChatPage() {
           </div>
 
           {/* Chat List */}
-          <ScrollArea className="flex-1 pb-20 md:pb-4">
+          <ScrollArea className="flex-1 pb-4">
             <div className="p-0">
               {filteredChats.map(chat => (
                 <div
@@ -214,7 +214,7 @@ export default function ChatPage() {
 
         {/* Conversation Area */}
         <div className={cn(
-          "flex-1 flex flex-col bg-white/[0.01] relative",
+          "flex-1 flex flex-col relative",
           !selectedChatId && "hidden md:flex items-center justify-center text-center p-8"
         )}>
           {!selectedChatId ? (
@@ -229,7 +229,7 @@ export default function ChatPage() {
             </div>
           ) : (
             <>
-              {/* Chat Area Header - Reduced Padding */}
+              {/* Chat Area Header - Compact & Integrated */}
               <div className="p-2 md:p-2.5 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2.5 md:pt-2.5">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Button 
@@ -343,8 +343,8 @@ export default function ChatPage() {
                 </div>
               </ScrollArea>
 
-              {/* Input Area - Optimized Padding */}
-              <div className="p-3 md:p-4 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-6 md:pb-4">
+              {/* Input Area - Merged with BG */}
+              <div className="p-3 md:p-4 pb-4 md:pb-4 z-10">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
@@ -355,7 +355,7 @@ export default function ChatPage() {
                     </Button>
                   </div>
                   
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 min-h-[44px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner">
+                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 min-h-[44px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner backdrop-blur-md">
                     <input 
                       placeholder="Type a message…" 
                       className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 text-white placeholder:text-white/20"
