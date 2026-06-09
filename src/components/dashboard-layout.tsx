@@ -9,7 +9,8 @@ import {
   Library, 
   Wrench, 
   User, 
-  Zap
+  Zap,
+  MessageSquare
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,6 +23,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Library, label: "Repo", href: "/academics" },
+  { icon: MessageSquare, label: "Chats", href: "/chats" },
   { icon: Wrench, label: "Tools", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
