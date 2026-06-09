@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -13,7 +12,8 @@ import {
   Upload,
   CheckCircle2,
   Search,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from "lucide-react"
 import {
   Dialog,
@@ -46,6 +46,8 @@ const SUBJECT_OPTIONS = [
   "Web Technologies"
 ];
 
+const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
+
 export default function AcademicsPage() {
   const [contributorName, setContributorName] = useState("Alex Rivera");
 
@@ -55,23 +57,23 @@ export default function AcademicsPage() {
   }, []);
 
   const [files, setFiles] = useState([
-    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document", contributor: "Alex Rivera" },
-    { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide", contributor: "Sarah Jenkins" },
-    { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Lecture Notes", contributor: "Michael Chen" },
-    { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Core Subject", contributor: "Priya Sharma" },
-    { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Cheat Sheet", contributor: "Jordan Lee" },
+    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "Machine Learning", docType: "NOTES", contributor: "Alex Rivera" },
+    { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Computer Networks", docType: "MFT", contributor: "Sarah Jenkins" },
+    { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Operating Systems", docType: "NOTES", contributor: "Michael Chen" },
+    { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Web Technologies", docType: "IMP TOPIC", contributor: "Priya Sharma" },
+    { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Database Management", docType: "PYQ", contributor: "Jordan Lee" },
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [subjectSearch, setSubjectSearch] = useState("");
-  const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "" });
+  const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "", docType: "" });
 
   const filteredSubjects = SUBJECT_OPTIONS.filter(s => 
     s.toLowerCase().includes(subjectSearch.toLowerCase())
   );
 
   const handleUpload = () => {
-    if (!newFile.title || !newFile.subject) return;
+    if (!newFile.title || !newFile.subject || !newFile.docType) return;
 
     const addedFile = {
       title: newFile.title,
@@ -79,11 +81,12 @@ export default function AcademicsPage() {
       date: "Just now",
       color: "text-accent",
       type: newFile.subject,
+      docType: newFile.docType,
       contributor: contributorName
     };
 
     setFiles([addedFile, ...files]);
-    setNewFile({ title: "", subject: "", fileName: "" });
+    setNewFile({ title: "", subject: "", fileName: "", docType: "" });
     setSubjectSearch("");
     setIsDialogOpen(false);
   };
@@ -103,7 +106,7 @@ export default function AcademicsPage() {
                 <PlusCircle className="w-4 h-4" /> Contribute Material
               </button>
             </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[425px] rounded-[32px] overflow-visible">
+            <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] overflow-visible">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
                 <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
@@ -190,6 +193,27 @@ export default function AcademicsPage() {
                 </div>
 
                 <div className="grid gap-2">
+                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Type</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {DOC_TYPE_OPTIONS.map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setNewFile({ ...newFile, docType: type })}
+                        className={cn(
+                          "py-2 rounded-xl text-[10px] font-bold transition-all border",
+                          newFile.docType === type 
+                            ? "bg-accent text-accent-foreground border-accent shadow-[0_0_10px_rgba(72,118,245,0.3)]" 
+                            : "glass border-white/10 text-muted-foreground hover:border-white/20 hover:text-white"
+                        )}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
                   <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
                   <div className="relative group cursor-pointer">
                     <input 
@@ -198,7 +222,7 @@ export default function AcademicsPage() {
                       onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
                     />
-                    <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
+                    <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
                       {newFile.fileName ? (
                         <>
                           <CheckCircle2 className="w-8 h-8 text-green-400" />
@@ -217,7 +241,7 @@ export default function AcademicsPage() {
               <DialogFooter>
                 <Button 
                   onClick={handleUpload}
-                  disabled={!newFile.title || !newFile.subject}
+                  disabled={!newFile.title || !newFile.subject || !newFile.docType}
                   className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-[0_0_15px_rgba(72,118,245,0.4)]"
                 >
                   Initialize Contribution
@@ -241,6 +265,10 @@ export default function AcademicsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                        <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
+                       <span className="w-1 h-1 rounded-full bg-white/20" />
+                       <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-accent-foreground uppercase tracking-widest">
+                          {file.docType}
+                       </span>
                        <span className="w-1 h-1 rounded-full bg-white/20" />
                        <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5" /> {file.date}
