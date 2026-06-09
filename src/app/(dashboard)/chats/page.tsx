@@ -20,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
 const CHATS = [
@@ -91,16 +90,15 @@ export default function ChatPage() {
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
-    // Logic for sending message would go here
     setMessageInput("");
   };
 
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-8rem)] gap-4 animate-in fade-in duration-500">
+      <GlassCard className="flex h-[calc(100vh-8rem)] p-0 border-white/5 overflow-hidden animate-in fade-in duration-500">
         {/* Chat List Sidebar */}
-        <GlassCard className={cn(
-          "flex-col w-full md:w-80 lg:w-96 p-0 border-white/5 overflow-hidden flex",
+        <div className={cn(
+          "flex flex-col w-full md:w-80 lg:w-96 border-r border-white/5 bg-white/[0.02]",
           selectedChatId && "hidden md:flex"
         )}>
           <div className="p-4 space-y-4">
@@ -155,17 +153,17 @@ export default function ChatPage() {
               ))}
             </div>
           </ScrollArea>
-        </GlassCard>
+        </div>
 
         {/* Conversation View */}
-        <GlassCard className={cn(
-          "flex-1 p-0 border-white/5 overflow-hidden flex flex-col relative",
+        <div className={cn(
+          "flex-1 flex flex-col relative bg-transparent",
           !selectedChatId && "hidden md:flex items-center justify-center text-center p-12"
         )}>
           {activeChat ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5 backdrop-blur-md sticky top-0 z-10">
+              <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.03] backdrop-blur-md sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
@@ -219,7 +217,7 @@ export default function ChatPage() {
                           "px-4 py-2.5 rounded-2xl text-sm shadow-sm",
                           msg.isMe 
                             ? "bg-primary text-primary-foreground rounded-tr-none" 
-                            : "glass border-white/10 rounded-tl-none"
+                            : "glass border-white/10 rounded-tl-none bg-white/[0.05]"
                         )}>
                           {msg.text}
                           <div className={cn(
@@ -241,7 +239,7 @@ export default function ChatPage() {
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="p-4 bg-white/5 border-t border-white/5">
+              <div className="p-4 bg-white/[0.03] border-t border-white/5">
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground shrink-0">
                     <Paperclip className="w-5 h-5" />
@@ -272,7 +270,7 @@ export default function ChatPage() {
               </div>
             </>
           ) : (
-            <div className="space-y-4 flex flex-col items-center">
+            <div className="space-y-4 flex flex-col items-center justify-center h-full">
               <div className="w-20 h-20 rounded-[40px] bg-primary/10 flex items-center justify-center border border-primary/20 animate-float">
                 <Hash className="w-10 h-10 text-primary" />
               </div>
@@ -284,8 +282,8 @@ export default function ChatPage() {
               </div>
             </div>
           )}
-        </GlassCard>
-      </div>
+        </div>
+      </GlassCard>
     </DashboardLayout>
   )
 }
