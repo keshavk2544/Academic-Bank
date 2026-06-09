@@ -104,20 +104,6 @@ export default function Dashboard() {
               <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
             </div>
           </GlassCard>
-
-          {/* Attendance Pulse Card */}
-          <GlassCard className="flex flex-col gap-4 relative overflow-hidden group bg-primary/10 border-primary/30">
-            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
-              <QrCode className="w-16 h-16" />
-            </div>
-            <span className="text-sm font-medium text-primary">Attendance Pulse</span>
-            <div className="flex-1 flex flex-col justify-center">
-              <button className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold shadow-[0_0_15px_rgba(139,92,246,0.5)] active:scale-95 transition-all">
-                Mark Attendance
-              </button>
-            </div>
-            <p className="text-[10px] text-primary/70">Scan QR Code or enter OTP now.</p>
-          </GlassCard>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
