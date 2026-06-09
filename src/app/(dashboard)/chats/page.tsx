@@ -68,7 +68,7 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
   // Unwrap async params for Next.js 15 compatibility
-  use(props.params);
+  const params = use(props.params);
   const searchParams = useSearchParams();
   const router = useRouter()
 
@@ -149,7 +149,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           selectedChatId && "hidden md:flex"
         )}>
           {/* Categories */}
-          <div className="flex gap-3 px-4 py-3 pt-12 md:pt-4">
+          <div className="flex gap-3 px-4 py-3 pt-4 md:pt-4">
             <button 
               onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
               className={cn(
@@ -197,7 +197,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={cn(
-                    "flex items-center gap-4 p-4 cursor-pointer transition-all relative rounded-[24px] mb-1",
+                    "flex items-center gap-4 p-5 cursor-pointer transition-all relative rounded-[24px] mb-1",
                     selectedChatId === chat.id 
                       ? "bg-white/10" 
                       : "hover:bg-white/5"
@@ -328,7 +328,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                               ? "bg-[#a855f7]/40 border border-[#a855f7]/20 rounded-br-none" 
                               : "bg-white/10 border border-white/10 rounded-bl-none"
                           )}>
-                            {!isOut && selectedChat?.type === 'group' && (
+                            {!isOut && INITIAL_CHATS.find(c => c.id === selectedChatId)?.type === 'group' && (
                               <p className="text-[11px] font-black text-[#a855f7] mb-1.5 uppercase tracking-wider">{msg.from}</p>
                             )}
                             
