@@ -149,7 +149,11 @@ export default function AcademicsPage() {
                         <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 glass border-white/10" align="start">
+                    <PopoverContent 
+                      className="w-[var(--radix-popover-trigger-width)] p-0 glass border-white/10" 
+                      align="start"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
                       <div className="flex items-center border-b border-white/10 px-3 h-10">
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                         <input
@@ -157,6 +161,7 @@ export default function AcademicsPage() {
                           placeholder="Search subject..."
                           value={subjectSearch}
                           onChange={(e) => setSubjectSearch(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
                           autoFocus
                           autoComplete="off"
                         />
