@@ -3,9 +3,8 @@
 
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { 
-  Folder, 
   FileText, 
   Download, 
   Share2, 
@@ -32,13 +31,6 @@ export default function AcademicsPage() {
         </header>
 
         <Tabs defaultValue="notes" className="w-full">
-          <TabsList className="glass border-white/10 bg-white/5 p-1 h-14 w-full md:w-auto mb-8">
-            <TabsTrigger value="notes" className="rounded-xl px-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Notes & PDFs</TabsTrigger>
-            <TabsTrigger value="assignments" className="rounded-xl px-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Assignments</TabsTrigger>
-            <TabsTrigger value="papers" className="rounded-xl px-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">PYQs</TabsTrigger>
-            <TabsTrigger value="timetable" className="rounded-xl px-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Timetable</TabsTrigger>
-          </TabsList>
-
           <div className="mb-6 flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
