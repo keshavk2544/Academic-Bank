@@ -16,15 +16,11 @@ import {
   Smile, 
   Paperclip, 
   Send, 
-  Play, 
   CheckCheck,
   Pin,
   Trash2,
-  Shield,
-  MessageSquare,
   Library,
   Sparkles,
-  Lock,
   Clock
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -55,7 +51,10 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 };
 
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
-  const unwrappedSearchParams = use(props.searchParams);
+  // Consume Next.js 15 async props
+  const params = use(props.params);
+  const searchParamsProp = use(props.searchParams);
+  
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -133,7 +132,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           {/* Header Section */}
           <div className="px-6 py-4 space-y-4">
             <div className="flex items-center justify-center">
-              <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] opacity-60">E2E Encrypted</h2>
+              <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] opacity-60">E2E Encrypted</h2>
             </div>
 
             {/* Category Toggle */}
@@ -291,7 +290,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 <div className="flex flex-col gap-2 max-w-4xl mx-auto pb-8">
                   <div className="flex items-center justify-center gap-2 mb-8 opacity-40">
                     <div className="h-px w-12 bg-white/20" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">End-to-End Encrypted</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Encrypted Pulse</span>
                     <div className="h-px w-12 bg-white/20" />
                   </div>
 
@@ -316,20 +315,21 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                         )}
                         <div className="space-y-1">
                           <div className={cn(
-                            "p-2.5 px-3.5 rounded-2xl relative transition-all shadow-lg",
+                            "p-2 px-3 rounded-2xl relative transition-all shadow-lg",
                             isOut 
                               ? "bg-primary/20 border border-primary/30 rounded-br-none" 
                               : "glass border-white/10 rounded-bl-none"
                           )}>
                             {!isOut && selectedChat?.type === 'group' && (
-                              <p className={cn("text-[9px] font-black mb-1 uppercase tracking-widest", msg.color)}>{msg.from}</p>
+                              <p className={cn("text-[8px] font-black mb-0.5 uppercase tracking-widest", msg.color)}>{msg.from}</p>
                             )}
-                            <p className="text-sm leading-relaxed text-white/90">{msg.text}</p>
-                            <div className="flex items-center gap-1 mt-1.5 justify-end opacity-50">
-                              <Clock className="w-2 h-2" />
-                              <span className="text-[8px] font-bold tracking-tight">{msg.time}</span>
-                              {isOut && <CheckCheck className="w-3 h-3 text-blue-400" />}
-                            </div>
+                            <p className="text-sm leading-tight text-white/90">
+                              {msg.text}
+                              <span className="ml-2 inline-flex items-center gap-0.5 text-[9px] opacity-40 font-bold whitespace-nowrap align-baseline">
+                                {msg.time}
+                                {isOut && <CheckCheck className="w-3 h-3 text-blue-400" />}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
