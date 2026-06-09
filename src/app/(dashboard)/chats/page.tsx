@@ -67,10 +67,9 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
   // Unwrap async props for Next.js 15 compatibility
   use(props.params);
-  use(props.searchParams);
-
+  const searchParams = use(props.searchParams);
+  
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentTab, setCurrentTab] = useState<'all' | 'personal' | 'groups' | 'unread'>('all')
@@ -81,13 +80,13 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
 
   // Sync state with URL to allow the layout to hide/show the mobile nav
   useEffect(() => {
-    const id = searchParams.get('id')
+    const id = searchParams.id
     if (id) {
       setSelectedChatId(parseInt(id))
     } else {
       setSelectedChatId(null)
     }
-  }, [searchParams])
+  }, [searchParams.id])
 
   const selectedChat = useMemo(() => INITIAL_CHATS.find(c => c.id === selectedChatId), [selectedChatId])
   const messages = useMemo(() => (selectedChatId ? INITIAL_MESSAGES[selectedChatId] || [] : []), [selectedChatId])
@@ -148,15 +147,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           "flex flex-col w-full md:w-56 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Header Status */}
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-center bg-white/5 pt-10 md:pt-3">
-             <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
-                <Shield className="w-3 h-3 text-accent" /> E2E Encrypted
-             </div>
-          </div>
-
           {/* Tabs - Merged with Sidebar background */}
-          <div className="flex gap-1 px-3 py-2 bg-white/5 backdrop-blur-md">
+          <div className="flex gap-1 px-3 py-2 bg-white/5 backdrop-blur-md pt-10 md:pt-2">
             {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
               <button
                 key={tab}
@@ -192,7 +184,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={cn(
-                    "flex items-center gap-2 p-2.5 cursor-pointer transition-all relative border-l-2",
+                    "flex items-center gap-3 p-3.5 cursor-pointer transition-all relative border-l-2",
                     selectedChatId === chat.id 
                       ? "bg-[#a855f7]/20 border-[#a855f7]" 
                       : "hover:bg-white/5 border-transparent"
@@ -200,23 +192,28 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 >
                   <div className="relative shrink-0">
                     <div className={cn(
-                      "w-8 h-8 flex items-center justify-center text-white font-bold transition-transform text-xs",
+                      "w-10 h-10 flex items-center justify-center text-white font-bold transition-transform text-sm",
                       chat.color,
                       chat.type === 'group' ? "rounded-lg" : "rounded-full"
                     )}>
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <h4 className="font-bold text-[11px] truncate text-white">{chat.name}</h4>
-                      <span className="text-[9px] text-white/40">{chat.time}</span>
+                      <h4 className="font-bold text-[12px] truncate text-white">{chat.name}</h4>
+                      <span className="text-[10px] text-white/40">{chat.time}</span>
                     </div>
-                    <p className="text-[10px] text-white/50 truncate">{chat.preview}</p>
+                    <p className="text-[11px] text-white/50 truncate">{chat.preview}</p>
                   </div>
+                  {chat.unread > 0 && (
+                    <div className="ml-2 bg-[#a855f7] text-white text-[9px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center">
+                      {chat.unread}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
