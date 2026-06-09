@@ -149,34 +149,34 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           selectedChatId && "hidden md:flex"
         )}>
           {/* Categories - Colorful Glassmorphism Design */}
-          <div className="flex gap-3 px-4 py-4 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
+          <div className="flex gap-3 px-4 py-3 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
             <button 
               onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
               className={cn(
-                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                "flex-1 p-2 rounded-xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'academics' 
                   ? "bg-primary/30 border-primary/50 text-white shadow-lg shadow-primary/20 scale-[1.02]" 
                   : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
               )}
             >
-              <div className={cn("p-1.5 rounded-lg", currentTab === 'academics' ? "bg-primary/20" : "bg-white/5")}>
-                <Library className="w-4 h-4" />
+              <div className={cn("p-1 rounded-lg", currentTab === 'academics' ? "bg-primary/20" : "bg-white/5")}>
+                <Library className="w-3.5 h-3.5" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest">Academics</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">Academics</span>
             </button>
             <button 
               onClick={() => setCurrentTab(currentTab === 'clubs' ? 'all' : 'clubs')}
               className={cn(
-                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
+                "flex-1 p-2 rounded-xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'clubs' 
                   ? "bg-accent/30 border-accent/50 text-white shadow-lg shadow-accent/20 scale-[1.02]" 
                   : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
               )}
             >
-              <div className={cn("p-1.5 rounded-lg", currentTab === 'clubs' ? "bg-accent/20" : "bg-white/5")}>
-                <Sparkles className="w-4 h-4" />
+              <div className={cn("p-1 rounded-lg", currentTab === 'clubs' ? "bg-accent/20" : "bg-white/5")}>
+                <Sparkles className="w-3.5 h-3.5" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest">Clubs</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">Clubs</span>
             </button>
           </div>
 
