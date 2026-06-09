@@ -144,17 +144,17 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
         
         {/* Sidebar - Integrated & Minimal */}
         <div className={cn(
-          "flex flex-col w-full md:w-56 border-r border-white/10 transition-all duration-300",
+          "flex flex-col w-full md:w-80 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
           {/* Tabs - Merged with Sidebar background */}
-          <div className="flex gap-1 px-3 py-2 bg-white/5 backdrop-blur-md pt-10 md:pt-2">
+          <div className="flex gap-1 px-4 py-3 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
             {(['all', 'personal', 'groups', 'unread'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setCurrentTab(tab)}
                 className={cn(
-                  "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all",
+                  "flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
                   currentTab === tab 
                     ? "bg-gradient-to-r from-[#a855f7] to-[#7c3aed] text-white shadow-lg" 
                     : "text-white/50 hover:bg-white/5"
@@ -166,11 +166,11 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           </div>
 
           {/* Search - Merged with Sidebar background */}
-          <div className="px-3 pb-2 pt-2 relative bg-white/5 backdrop-blur-md border-b border-white/10">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
+          <div className="px-4 pb-3 pt-1 relative bg-white/5 backdrop-blur-md border-b border-white/10">
+            <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
             <input 
-              placeholder="Search..." 
-              className="w-full h-7 bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 text-[10px] outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
+              placeholder="Search conversations..." 
+              className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -184,7 +184,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={cn(
-                    "flex items-center gap-3 p-3.5 cursor-pointer transition-all relative border-l-2",
+                    "flex items-center gap-4 p-5 cursor-pointer transition-all relative border-l-2",
                     selectedChatId === chat.id 
                       ? "bg-[#a855f7]/20 border-[#a855f7]" 
                       : "hover:bg-white/5 border-transparent"
@@ -192,25 +192,25 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 >
                   <div className="relative shrink-0">
                     <div className={cn(
-                      "w-10 h-10 flex items-center justify-center text-white font-bold transition-transform text-sm",
+                      "w-12 h-12 flex items-center justify-center text-white font-bold transition-transform text-lg",
                       chat.color,
-                      chat.type === 'group' ? "rounded-lg" : "rounded-full"
+                      chat.type === 'group' ? "rounded-xl" : "rounded-full"
                     )}>
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <h4 className="font-bold text-[12px] truncate text-white">{chat.name}</h4>
-                      <span className="text-[10px] text-white/40">{chat.time}</span>
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="font-bold text-[13px] truncate text-white">{chat.name}</h4>
+                      <span className="text-[10px] text-white/40 font-medium">{chat.time}</span>
                     </div>
-                    <p className="text-[11px] text-white/50 truncate">{chat.preview}</p>
+                    <p className="text-[12px] text-white/50 truncate leading-snug">{chat.preview}</p>
                   </div>
                   {chat.unread > 0 && (
-                    <div className="ml-2 bg-[#a855f7] text-white text-[9px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center">
+                    <div className="ml-2 bg-[#a855f7] text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center shadow-lg shadow-[#a855f7]/20">
                       {chat.unread}
                     </div>
                   )}
@@ -238,27 +238,27 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           ) : (
             <>
               {/* Chat Area Header - Compact & Integrated */}
-              <div className="p-2 md:p-2.5 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2.5 md:pt-2.5">
-                <div className="flex items-center gap-2.5 min-w-0">
+              <div className="px-4 py-2 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-4 md:pt-2">
+                <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="md:hidden rounded-full h-7 w-7 text-white"
+                    className="md:hidden rounded-full h-8 w-8 text-white"
                     onClick={handleGoBack}
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-5 h-5" />
                   </Button>
                   <div className={cn(
-                    "w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-white font-bold shrink-0 text-sm",
+                    "w-9 h-9 flex items-center justify-center text-white font-bold shrink-0 text-sm",
                     selectedChat?.color,
                     selectedChat?.type === 'group' ? "rounded-lg" : "rounded-full"
                   )}>
                     {selectedChat?.avatar}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-xs md:text-sm truncate leading-tight text-white">{selectedChat?.name}</h3>
+                    <h3 className="font-bold text-sm truncate leading-tight text-white">{selectedChat?.name}</h3>
                     <p className={cn(
-                      "text-[9px] md:text-[10px] mt-0.5",
+                      "text-[10px] mt-0.5",
                       selectedChat?.online === true ? "text-green-400 font-medium" : "text-white/40"
                     )}>
                       {selectedChat?.type === 'group' 
@@ -351,9 +351,9 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 </div>
               </ScrollArea>
 
-              {/* Input Area - Integrated with BG */}
-              <div className="p-3 md:p-4 z-10">
-                <div className="max-w-4xl mx-auto flex items-center gap-3">
+              {/* Input Area - Seamless Integrated */}
+              <div className="p-3 md:p-4 z-10 flex flex-col items-center">
+                <div className="max-w-4xl w-full flex items-center gap-3">
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
                       <Smile className="w-5 h-5" />
