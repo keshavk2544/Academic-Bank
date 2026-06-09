@@ -7,10 +7,20 @@ import {
   FileText, 
   Download, 
   PlusCircle,
-  Clock
+  Clock,
+  ChevronRight,
+  ShieldCheck
 } from "lucide-react"
 
 export default function AcademicsPage() {
+  const files = [
+    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document" },
+    { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide" },
+    { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Lecture Notes" },
+    { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Core Subject" },
+    { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Cheat Sheet" },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in duration-500">
@@ -24,32 +34,54 @@ export default function AcademicsPage() {
           </button>
         </header>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {[
-            { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400" },
-            { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400" },
-            { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400" },
-            { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400" },
-            { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400" },
-          ].map((file, idx) => (
-            <GlassCard key={idx} className="p-3 group hover:scale-[1.02] active:scale-[0.98] transition-all">
-              <div className="flex justify-between items-start mb-2">
-                <div className={`p-1.5 rounded-lg bg-white/5 border border-white/10 ${file.color}`}>
-                  <FileText className="w-4 h-4" />
+        <div className="flex flex-col gap-3">
+          {files.map((file, idx) => (
+            <GlassCard key={idx} className="p-0 group hover:bg-white/5 transition-all border-white/5 relative overflow-hidden">
+              {/* Subtle side accent */}
+              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-current ${file.color} opacity-30 group-hover:opacity-100 transition-opacity`} />
+              
+              <div className="flex items-center justify-between p-4 md:p-5">
+                <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
+                  {/* Icon with background */}
+                  <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} shrink-0 transition-transform group-hover:scale-105`}>
+                    <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                       <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
+                       <span className="w-1 h-1 rounded-full bg-white/20" />
+                       <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" /> {file.date}
+                       </span>
+                    </div>
+                    <h4 className="font-headline font-bold text-base md:text-xl truncate leading-tight">{file.title}</h4>
+                    <div className="flex items-center gap-3 mt-1">
+                      <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
+                        <span className="font-bold text-white/40">{file.size}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/10" />
+                        <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-green-400/70" /> Verified by Faculty</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1 rounded-md glass border-white/10 text-muted-foreground hover:text-white hover:border-white/20">
-                    <Download className="w-3 h-3" />
+                
+                <div className="flex items-center gap-3 ml-4 shrink-0">
+                  <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl glass border-white/10 text-xs font-bold text-muted-foreground hover:text-white hover:border-white/20 transition-all">
+                    View Online
+                  </button>
+                  <button className="p-3 md:p-4 rounded-xl bg-accent text-accent-foreground shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
+                    <Download className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-              <h4 className="font-bold text-xs mb-1 line-clamp-2 leading-tight h-8">{file.title}</h4>
-              <div className="flex flex-col gap-0.5 text-[9px] text-muted-foreground">
-                <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {file.date}</span>
-                <span>{file.size}</span>
-              </div>
             </GlassCard>
           ))}
+        </div>
+
+        {/* Empty state hint */}
+        <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
+          <p className="text-sm text-muted-foreground italic">You've reached the end of your recent academic repository. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
         </div>
       </div>
     </DashboardLayout>
