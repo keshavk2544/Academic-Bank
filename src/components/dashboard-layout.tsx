@@ -5,7 +5,7 @@ import { ReactNode, useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  Home, 
+  LayoutDashboard, 
   Library, 
   Wrench, 
   User, 
@@ -20,7 +20,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: Home, label: "Home", href: "/dashboard" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Library, label: "Repo", href: "/academics" },
   { icon: Wrench, label: "Tools", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
