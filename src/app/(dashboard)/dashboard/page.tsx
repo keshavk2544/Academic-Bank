@@ -14,7 +14,8 @@ import {
   FileText,
   AlertCircle,
   Bell,
-  Sparkles
+  Sparkles,
+  User
 } from "lucide-react"
 
 export default function Dashboard() {
@@ -32,20 +33,34 @@ export default function Dashboard() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Quick Stats */}
-          <GlassCard className="flex flex-col gap-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <CheckCircle2 className="w-16 h-16" />
+          {/* Student Info Card */}
+          <GlassCard className="flex flex-col gap-3 relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Student Profile</span>
+              <User className="w-4 h-4 text-primary opacity-50" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Overall Attendance</span>
-            <div className="flex items-end gap-2">
-              <span className="text-4xl font-headline font-bold">87.5%</span>
-              <span className="text-xs text-green-400 mb-1 flex items-center gap-0.5">
-                <ArrowUpRight className="w-3 h-3" /> 2.1%
-              </span>
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Name</span>
+                <span className="text-xs font-semibold">Alex Rivera</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Roll No</span>
+                <span className="text-xs font-mono">22CSE1042</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">QID</span>
+                <span className="text-xs font-mono">Q748291</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Course</span>
+                <span className="text-xs font-medium text-right max-w-[120px] truncate">B.Tech CSE</span>
+              </div>
+              <div className="pt-3 border-t border-white/5 flex justify-between items-center">
+                <span className="text-[10px] text-accent uppercase font-bold tracking-tight">Attendance</span>
+                <span className="text-xl font-headline font-bold text-accent">87.5%</span>
+              </div>
             </div>
-            <Progress value={87.5} className="h-1.5 bg-white/10" />
-            <p className="text-[10px] text-muted-foreground">Keep it above 75% to stay eligible.</p>
           </GlassCard>
 
           <GlassCard className="flex flex-col gap-4 relative overflow-hidden group">
