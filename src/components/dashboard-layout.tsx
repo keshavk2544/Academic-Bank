@@ -1,9 +1,9 @@
 
 "use client"
 
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useState, Suspense } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { 
   LayoutDashboard, 
   Library, 
@@ -28,13 +28,17 @@ const navItems: NavItem[] = [
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+function NavigationContent({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [userRole, setUserRole] = useState<string>("student")
 
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole") || "student")
   }, [])
+
+  // Check if we are in a sub-view (like an active chat) to hide the mobile nav
+  const isDetailView = pathname === '/chats' && !!searchParams.get('id')
 
   return (
     <div className="flex flex-col min-h-screen pb-20 md:pb-0 md:pl-64">
@@ -83,8 +87,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 rounded-t-[32px]">
+      {/* Mobile Bottom Navigation - Hidden when in detail view */}
+      <nav className={cn(
+        "md:hidden fixed bottom-0 left-0 w-full glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 rounded-t-[32px] transition-transform duration-300",
+        isDetailView ? "translate-y-full" : "translate-y-0"
+      )}>
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -100,5 +107,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         ))}
       </nav>
     </div>
+  )
+}
+
+export function DashboardLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <NavigationContent>{children}</NavigationContent>
+    </Suspense>
   )
 }

@@ -1,6 +1,8 @@
+
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
@@ -62,6 +64,8 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 };
 
 export default function ChatPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentTab, setCurrentTab] = useState<'all' | 'personal' | 'groups' | 'unread'>('all')
@@ -69,6 +73,16 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("")
   
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  // Sync state with URL to allow the layout to hide/show the mobile nav
+  useEffect(() => {
+    const id = searchParams.get('id')
+    if (id) {
+      setSelectedChatId(parseInt(id))
+    } else {
+      setSelectedChatId(null)
+    }
+  }, [searchParams])
 
   const selectedChat = useMemo(() => INITIAL_CHATS.find(c => c.id === selectedChatId), [selectedChatId])
   const messages = useMemo(() => (selectedChatId ? INITIAL_MESSAGES[selectedChatId] || [] : []), [selectedChatId])
@@ -91,6 +105,14 @@ export default function ChatPage() {
       }
     }
   }, [messages, selectedChatId])
+
+  const handleSelectChat = (id: number) => {
+    router.push(`?id=${id}`)
+  }
+
+  const handleGoBack = () => {
+    router.push('/chats')
+  }
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !selectedChatId) return
@@ -156,7 +178,7 @@ export default function ChatPage() {
               {filteredChats.map(chat => (
                 <div
                   key={chat.id}
-                  onClick={() => setSelectedChatId(chat.id)}
+                  onClick={() => handleSelectChat(chat.id)}
                   className={cn(
                     "flex items-center gap-2 p-2.5 cursor-pointer transition-all relative border-l-2",
                     selectedChatId === chat.id 
@@ -213,7 +235,7 @@ export default function ChatPage() {
                     variant="ghost" 
                     size="icon" 
                     className="md:hidden rounded-full h-7 w-7 text-white"
-                    onClick={() => setSelectedChatId(null)}
+                    onClick={handleGoBack}
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </Button>
