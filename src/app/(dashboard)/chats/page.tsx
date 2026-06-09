@@ -15,7 +15,8 @@ import {
   Mic, 
   Smile,
   MoreVertical,
-  Users
+  Users,
+  Bell
 } from "lucide-react"
 
 const channels = [

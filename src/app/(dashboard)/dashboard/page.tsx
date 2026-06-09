@@ -12,7 +12,9 @@ import {
   ArrowUpRight, 
   CheckCircle2,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Bell,
+  Sparkles
 } from "lucide-react"
 
 export default function Dashboard() {
