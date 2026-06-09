@@ -67,11 +67,11 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 };
 
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
-  // Unwrap async props for Next.js 15 compatibility
+  // Unwrap async params for Next.js 15 compatibility
   use(props.params);
-  const searchParams = use(props.searchParams);
-  
+  const searchParams = useSearchParams();
   const router = useRouter()
+
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentTab, setCurrentTab] = useState<'all' | 'academics' | 'clubs'>('all')
@@ -143,7 +143,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Sidebar - Integrated & Minimal */}
+        {/* Sidebar */}
         <div className={cn(
           "flex flex-col w-full md:w-80 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
@@ -180,7 +180,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
             </button>
           </div>
 
-          {/* Search - Merged with Sidebar background */}
+          {/* Search */}
           <div className="px-4 pb-3 pt-1 relative bg-white/5 backdrop-blur-md border-b border-white/10">
             <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
             <input 
@@ -191,7 +191,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
             />
           </div>
 
-          {/* Chat List */}
+          {/* Chat List - Magnified Items */}
           <ScrollArea className="flex-1 pb-4">
             <div className="p-0">
               {filteredChats.map(chat => (
@@ -214,12 +214,12 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">
-                      <h4 className="font-bold text-[13px] truncate text-white">{chat.name}</h4>
+                      <h4 className="font-bold text-sm truncate text-white">{chat.name}</h4>
                       <span className="text-[10px] text-white/40 font-medium">{chat.time}</span>
                     </div>
                     <p className="text-[12px] text-white/50 truncate leading-snug">{chat.preview}</p>
@@ -252,7 +252,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
             </div>
           ) : (
             <>
-              {/* Chat Area Header - Compact & Integrated */}
+              {/* Chat Area Header - Shortened & Integrated */}
               <div className="px-2 md:px-2.5 py-1 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2 md:pt-1">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
@@ -366,7 +366,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 </div>
               </ScrollArea>
 
-              {/* Input Area - Seamless Integrated */}
+              {/* Input Area - Seamless "Merged" Integrated */}
               <div className="p-3 md:p-3 flex flex-col items-center">
                 <div className="max-w-4xl w-full flex items-center gap-3">
                   <div className="flex gap-1">
@@ -378,7 +378,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                     </Button>
                   </div>
                   
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 min-h-[44px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner backdrop-blur-md">
+                  <div className="flex-1 bg-transparent border-none rounded-2xl px-4 py-2 min-h-[44px] flex items-center transition-all shadow-none">
                     <input 
                       placeholder="Type a message…" 
                       className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 text-white placeholder:text-white/20"
