@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { 
   Sparkles, 
-  FileTransform, 
+  FileText, 
   Calculator, 
   Scan, 
   FileStack,
