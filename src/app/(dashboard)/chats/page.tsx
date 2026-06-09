@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
@@ -19,11 +18,12 @@ import {
   Play, 
   CheckCheck,
   Pin,
-  Trash2
+  Trash2,
+  MoreHorizontal
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Theme Constants
+// Theme Constants based on user requirements
 const COLORS = {
   bg1: '#0f0c29',
   bg2: '#302b63',
@@ -114,41 +114,41 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout>
-      {/* Full-screen Integrated Container */}
+      {/* Integrated Chat Screen Container */}
       <div 
         className="fixed inset-0 md:left-64 flex z-0 overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Integrated Sidebar */}
+        {/* Sidebar */}
         <div className={cn(
           "flex flex-col w-full md:w-[320px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5 pt-12 md:pt-4">
+          {/* Compact Sidebar Header */}
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between bg-white/5 pt-10 md:pt-2.5">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg shadow-[#a855f7]/20">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg shadow-[#a855f7]/20">
                 💬
               </div>
-              <h1 className="text-lg font-headline font-bold tracking-tight text-white">Aura</h1>
+              <h1 className="text-base font-headline font-bold tracking-tight text-white">Aura</h1>
             </div>
             <div className="flex gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-white/50 hover:text-white rounded-lg">
                 <CircleDashed className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-white/50 hover:text-white rounded-lg">
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </div>
           </div>
 
           {/* Search */}
-          <div className="p-4 relative">
+          <div className="px-4 py-3 relative">
             <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
             <input 
               placeholder="Search chats, groups…" 
-              className="w-full h-10 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
+              className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -216,7 +216,7 @@ export default function ChatPage() {
           </ScrollArea>
         </div>
 
-        {/* Integrated Chat Area */}
+        {/* Conversation Area */}
         <div className={cn(
           "flex-1 flex flex-col bg-white/[0.01] relative",
           !selectedChatId && "hidden md:flex items-center justify-center text-center p-8"
@@ -228,13 +228,13 @@ export default function ChatPage() {
               </div>
               <h2 className="text-2xl font-headline font-bold mb-2 text-white">Campus Aura</h2>
               <p className="text-sm text-white/40 leading-relaxed">
-                Choose a conversation to sync with your peers and campus events.
+                Select a campus group or start a conversation to coordinate study sessions and events.
               </p>
             </div>
           ) : (
             <>
-              {/* Header */}
-              <div className="p-3 md:p-4 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-12 md:pt-4">
+              {/* Chat Area Header */}
+              <div className="p-3 md:p-4 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-10 md:pt-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
@@ -282,7 +282,7 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* Messages Area */}
+              {/* Message List */}
               <ScrollArea className="flex-1 p-4 md:p-8" ref={scrollAreaRef}>
                 <div className="flex flex-col gap-2 max-w-4xl mx-auto">
                   <div className="flex items-center gap-4 my-6">
@@ -403,7 +403,7 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Profile Integrated Panel */}
+        {/* Profile Panel */}
         <div className={cn(
           "bg-black/60 backdrop-blur-3xl border-l border-white/10 transition-all duration-300 overflow-hidden",
           isProfileOpen ? "w-full md:w-[300px]" : "w-0"
