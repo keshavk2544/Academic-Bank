@@ -19,6 +19,7 @@ import {
   CheckCheck,
   Pin,
   Trash2,
+  Shield,
   MoreHorizontal
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -125,21 +126,11 @@ export default function ChatPage() {
           "flex flex-col w-full md:w-[320px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Compact Sidebar Header */}
-          <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between bg-white/5 pt-10 md:pt-2.5">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg shadow-[#a855f7]/20">
-                💬
-              </div>
-              <h1 className="text-base font-headline font-bold tracking-tight text-white">Aura</h1>
-            </div>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-white/50 hover:text-white rounded-lg">
-                <CircleDashed className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-white/50 hover:text-white rounded-lg">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
+          {/* Subtle E2E Encrypted Header */}
+          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-center bg-white/5 pt-10 md:pt-3">
+            <div className="flex items-center gap-1.5 text-white/30">
+              <Shield className="w-3 h-3" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">E2E Encrypted</span>
             </div>
           </div>
 
