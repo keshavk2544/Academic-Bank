@@ -32,6 +32,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -73,12 +78,21 @@ export default function AcademicsPage() {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedSubject, setSelectedSubject] = useState("all");
 
+  // Contribution Dialog States
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [subjectSearch, setSubjectSearch] = useState("");
   const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "", docType: "" });
 
+  // Main Filter Search States
+  const [subjectFilterSearch, setSubjectFilterSearch] = useState("");
+  const [isSubjectFilterOpen, setIsSubjectFilterOpen] = useState(false);
+
   const filteredSubjectsForDialog = SUBJECT_OPTIONS.filter(s => 
     s.toLowerCase().includes(subjectSearch.toLowerCase())
+  );
+
+  const filteredSubjectsForFilter = SUBJECT_OPTIONS.filter(s => 
+    s.toLowerCase().includes(subjectFilterSearch.toLowerCase())
   );
 
   const filteredFiles = useMemo(() => {
@@ -114,6 +128,7 @@ export default function AcademicsPage() {
     setSearchTerm("");
     setSelectedType("all");
     setSelectedSubject("all");
+    setSubjectFilterSearch("");
   };
 
   return (
@@ -287,17 +302,59 @@ export default function AcademicsPage() {
             </div>
             
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                <SelectTrigger className="glass border-none h-9 rounded-lg bg-white/5 min-w-[130px] text-xs">
-                  <SelectValue placeholder="Subject" />
-                </SelectTrigger>
-                <SelectContent className="glass border-white/10">
-                  <SelectItem value="all">All Subjects</SelectItem>
-                  {SUBJECT_OPTIONS.map(opt => (
-                    <SelectItem key={opt} value={opt} className="text-xs">{opt}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={isSubjectFilterOpen} onOpenChange={setIsSubjectFilterOpen}>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "glass border-none h-9 px-3 rounded-lg bg-white/5 min-w-[110px] text-[10px] font-bold uppercase tracking-tight flex items-center justify-between gap-2 hover:bg-white/10 transition-all",
+                    selectedSubject !== "all" && "text-accent border border-accent/30 bg-accent/5"
+                  )}>
+                    <span className="truncate max-w-[80px]">
+                      {selectedSubject === "all" ? "Find Subject" : selectedSubject}
+                    </span>
+                    <Search className="w-3 h-3 opacity-50" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0 glass border-white/10" align="start">
+                  <div className="p-2 border-b border-white/5">
+                    <Input 
+                      placeholder="Type to find..." 
+                      className="h-8 text-xs bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-accent"
+                      value={subjectFilterSearch}
+                      onChange={(e) => setSubjectFilterSearch(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <ScrollArea className="h-48">
+                    <div className="p-1">
+                      <button
+                        onClick={() => {
+                          setSelectedSubject("all");
+                          setIsSubjectFilterOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md text-[10px] font-bold uppercase hover:bg-white/10 transition-colors"
+                      >
+                        All Subjects
+                      </button>
+                      {filteredSubjectsForFilter.length === 0 ? (
+                        <p className="p-4 text-[10px] text-center text-muted-foreground">No matches.</p>
+                      ) : (
+                        filteredSubjectsForFilter.map((sub) => (
+                          <button
+                            key={sub}
+                            onClick={() => {
+                              setSelectedSubject(sub);
+                              setIsSubjectFilterOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-md text-[10px] font-bold uppercase hover:bg-white/10 transition-colors"
+                          >
+                            {sub}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
 
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger className="glass border-none h-9 rounded-lg bg-white/5 min-w-[110px] text-xs">
