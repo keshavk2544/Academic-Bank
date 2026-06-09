@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { Progress } from "@/components/ui/progress"
+import { useRouter } from "next/navigation"
 import { 
   Calendar, 
   Clock, 
@@ -23,6 +24,7 @@ import {
 } from "lucide-react"
 
 export default function Dashboard() {
+  const router = useRouter();
   const [currentTime, setCurrentTime] = useState<string>("--:--:--");
 
   useEffect(() => {
@@ -53,7 +55,10 @@ export default function Dashboard() {
               <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
                 <Bell className="w-4 h-4" />
               </button>
-              <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-muted-foreground hover:text-accent transition-all">
+              <button 
+                onClick={() => router.push('/attendance')}
+                className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-muted-foreground hover:text-accent transition-all"
+              >
                 <QrCode className="w-4 h-4" />
               </button>
             </div>
@@ -96,12 +101,17 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attendance</span>
+            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between gap-3">
+              <button 
+                onClick={() => router.push('/attendance')}
+                className="flex-1 py-2 px-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Mark your attendance</span>
+              </button>
+              <div className="text-right">
+                <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
               </div>
-              <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
             </div>
           </GlassCard>
         </div>
