@@ -320,19 +320,19 @@ export default function ChatPage() {
                 </div>
               </ScrollArea>
 
-              {/* Input Area */}
-              <div className="p-4 md:p-6 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-24 md:pb-6">
+              {/* Input Area - Reduced Spacing */}
+              <div className="p-3 md:p-4 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-24 md:pb-4">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-10 w-10 text-white/40 hover:text-white rounded-xl">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
                       <Smile className="w-5 h-5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 text-white/40 hover:text-white rounded-xl">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-white/40 hover:text-white rounded-xl">
                       <Paperclip className="w-5 h-5" />
                     </Button>
                   </div>
                   
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 min-h-[48px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner">
+                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 min-h-[44px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner">
                     <input 
                       placeholder="Type a message…" 
                       className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 text-white placeholder:text-white/20"
@@ -348,10 +348,10 @@ export default function ChatPage() {
                   </div>
 
                   <Button 
-                    className="h-12 w-12 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] shadow-xl shadow-[#a855f7]/30 hover:scale-105 active:scale-95 transition-all p-0 shrink-0"
+                    className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] shadow-xl shadow-[#a855f7]/30 hover:scale-105 active:scale-95 transition-all p-0 shrink-0"
                     onClick={handleSendMessage}
                   >
-                    <Send className="w-5 h-5 text-white" />
+                    <Send className="w-4 h-4 text-white" />
                   </Button>
                 </div>
               </div>
