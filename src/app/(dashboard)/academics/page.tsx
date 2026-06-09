@@ -56,14 +56,14 @@ export default function AcademicsPage() {
                     </div>
                     <h4 className="font-headline font-bold text-base md:text-xl truncate leading-tight">{file.title}</h4>
                     <div className="flex items-center gap-3 mt-1">
-                      <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
+                      <div className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
                         <span className="font-bold text-white/40">{file.size}</span>
                         <span className="w-1 h-1 rounded-full bg-white/10" />
                         <span className="flex items-center gap-1">
                           <User className="w-3 h-3 text-accent/70" /> 
-                          Contributed by <span className="text-white/60 font-medium">{file.contributor}</span>
+                          <span className="text-white/60 font-medium">{file.contributor}</span>
                         </span>
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </div>
