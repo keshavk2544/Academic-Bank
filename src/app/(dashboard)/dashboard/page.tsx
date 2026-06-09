@@ -80,7 +80,7 @@ export default function Dashboard() {
                 <span className="text-[11px] font-medium">May 15, 2025</span>
               </div>
               <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-all flex flex-col items-center justify-center">
-                <span className="text-[11px] font-mono font-bold text-orange-400 tabular-nums tracking-widest">
+                <span className="text-xl font-headline font-bold text-orange-400 tabular-nums tracking-widest">
                   {currentTime}
                 </span>
               </div>
