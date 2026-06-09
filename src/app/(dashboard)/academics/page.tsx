@@ -12,7 +12,8 @@ import {
   User,
   Upload,
   CheckCircle2,
-  Search
+  Search,
+  ChevronRight
 } from "lucide-react"
 import {
   Dialog,
@@ -24,11 +25,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -55,7 +51,6 @@ export default function AcademicsPage() {
 
   useEffect(() => {
     // In a real app, we'd fetch the name from a profile or auth session
-    // For now, we use the mock name defined in the dashboard
     setContributorName("Alex Rivera");
   }, []);
 
@@ -68,7 +63,6 @@ export default function AcademicsPage() {
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSubjectPopoverOpen, setIsSubjectPopoverOpen] = useState(false);
   const [subjectSearch, setSubjectSearch] = useState("");
   const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "" });
 
@@ -90,6 +84,7 @@ export default function AcademicsPage() {
 
     setFiles([addedFile, ...files]);
     setNewFile({ title: "", subject: "", fileName: "" });
+    setSubjectSearch("");
     setIsDialogOpen(false);
   };
 
@@ -133,67 +128,67 @@ export default function AcademicsPage() {
                     className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
                   />
                 </div>
+                
                 <div className="grid gap-2">
-                  <Label htmlFor="subject" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
-                  <Popover open={isSubjectPopoverOpen} onOpenChange={setIsSubjectPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isSubjectPopoverOpen}
-                        className="glass border-white/10 bg-white/5 h-12 rounded-xl justify-between font-normal hover:bg-white/10 w-full"
-                      >
-                        <span className={newFile.subject ? "text-white" : "text-muted-foreground"}>
-                          {newFile.subject || "Select Subject Area..."}
-                        </span>
-                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent 
-                      className="w-[var(--radix-popover-trigger-width)] p-0 glass border-white/10" 
-                      align="start"
-                      onOpenAutoFocus={(e) => e.preventDefault()}
-                    >
-                      <div className="flex items-center border-b border-white/10 px-3 h-10">
-                        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                        <input
-                          className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                          placeholder="Search subject..."
+                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
+                  
+                  {!newFile.subject ? (
+                    <div className="relative">
+                      <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                        <Input 
+                          placeholder="Search to find subject..." 
                           value={subjectSearch}
                           onChange={(e) => setSubjectSearch(e.target.value)}
-                          onKeyDown={(e) => e.stopPropagation()}
-                          autoFocus
-                          autoComplete="off"
+                          className="glass border-white/10 bg-white/5 h-12 pl-11 rounded-xl focus:border-accent transition-all"
                         />
                       </div>
-                      <ScrollArea className="h-60">
-                        <div className="p-1">
-                          {filteredSubjects.length === 0 ? (
-                            <p className="p-4 text-xs text-center text-muted-foreground">No subject found.</p>
-                          ) : (
-                            filteredSubjects.map((sub) => (
-                              <button
-                                key={sub}
-                                type="button"
-                                className={cn(
-                                  "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/10",
-                                  newFile.subject === sub ? "bg-accent text-accent-foreground" : "text-foreground"
-                                )}
-                                onClick={() => {
-                                  setNewFile({ ...newFile, subject: sub });
-                                  setIsSubjectPopoverOpen(false);
-                                  setSubjectSearch("");
-                                }}
-                              >
-                                {sub}
-                              </button>
-                            ))
-                          )}
+                      
+                      {subjectSearch && (
+                        <div className="absolute top-full left-0 right-0 mt-2 z-50 glass border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
+                          <ScrollArea className="h-48">
+                            <div className="p-2">
+                              {filteredSubjects.length === 0 ? (
+                                <p className="p-4 text-xs text-center text-muted-foreground">No subjects match your search.</p>
+                              ) : (
+                                filteredSubjects.map((sub) => (
+                                  <button
+                                    key={sub}
+                                    type="button"
+                                    className="w-full text-left px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition-colors flex items-center justify-between group"
+                                    onClick={() => {
+                                      setNewFile({ ...newFile, subject: sub });
+                                      setSubjectSearch("");
+                                    }}
+                                  >
+                                    {sub}
+                                    <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </ScrollArea>
                         </div>
-                      </ScrollArea>
-                    </PopoverContent>
-                  </Popover>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-4 rounded-xl glass border-accent/30 bg-accent/10 animate-in zoom-in-95">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-accent/20 text-accent">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-white">{newFile.subject}</span>
+                      </div>
+                      <button 
+                        onClick={() => setNewFile({ ...newFile, subject: "" })}
+                        className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-400 transition-colors"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
                 </div>
+
                 <div className="grid gap-2">
                   <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
                   <div className="relative group cursor-pointer">
