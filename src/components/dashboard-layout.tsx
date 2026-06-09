@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 import { 
   Home, 
   MessageSquare, 
-  BookOpen, 
+  Library, 
   Wrench, 
   User, 
   Bell, 
@@ -25,7 +25,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/dashboard" },
   { icon: MessageSquare, label: "Chats", href: "/chats" },
-  { icon: BookOpen, label: "Academics", href: "/academics" },
+  { icon: Library, label: "Repo", href: "/academics" },
   { icon: Wrench, label: "Tools", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
