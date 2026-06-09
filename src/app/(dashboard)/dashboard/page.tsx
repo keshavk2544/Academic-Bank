@@ -79,8 +79,11 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[11px] font-medium">May 15, 2025</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-colors flex flex-col items-center justify-center">
-                <span className="text-[11px] font-mono font-bold text-orange-400">{currentTime}</span>
+              <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-all flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-scan z-0" />
+                <span className="text-[11px] font-mono font-bold text-orange-400 relative z-10 drop-shadow-[0_0_5px_rgba(251,146,60,0.5)] tabular-nums tracking-widest">
+                  {currentTime}
+                </span>
               </div>
             </div>
 
