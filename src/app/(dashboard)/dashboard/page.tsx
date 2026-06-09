@@ -48,6 +48,16 @@ export default function Dashboard() {
           <GlassCard className="p-4 flex flex-col justify-between relative overflow-hidden group border-white/10">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
             
+            {/* Top Right Options */}
+            <div className="absolute top-4 right-4 flex gap-2 z-10">
+              <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
+                <Bell className="w-4 h-4" />
+              </button>
+              <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-muted-foreground hover:text-accent transition-all">
+                <QrCode className="w-4 h-4" />
+              </button>
+            </div>
+
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
                 <User className="w-6 h-6 text-primary" />
