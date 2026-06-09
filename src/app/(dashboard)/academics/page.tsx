@@ -8,17 +8,16 @@ import {
   Download, 
   PlusCircle,
   Clock,
-  ChevronRight,
-  ShieldCheck
+  User
 } from "lucide-react"
 
 export default function AcademicsPage() {
   const files = [
-    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document" },
-    { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide" },
-    { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Lecture Notes" },
-    { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Core Subject" },
-    { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Cheat Sheet" },
+    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document", contributor: "Alex Rivera" },
+    { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide", contributor: "Sarah Jenkins" },
+    { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Lecture Notes", contributor: "Michael Chen" },
+    { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Core Subject", contributor: "Priya Sharma" },
+    { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Cheat Sheet", contributor: "Jordan Lee" },
   ];
 
   return (
@@ -60,7 +59,10 @@ export default function AcademicsPage() {
                       <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1.5">
                         <span className="font-bold text-white/40">{file.size}</span>
                         <span className="w-1 h-1 rounded-full bg-white/10" />
-                        <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-green-400/70" /> Verified by Faculty</span>
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3 text-accent/70" /> 
+                          Contributed by <span className="text-white/60 font-medium">{file.contributor}</span>
+                        </span>
                       </p>
                     </div>
                   </div>
