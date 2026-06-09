@@ -67,14 +67,12 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 };
 
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
-  // Unwrap async params for Next.js 15 compatibility
-  const params = use(props.params);
   const searchParams = useSearchParams();
   const router = useRouter()
 
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [currentTab, setCurrentTab] = useState<'all' | 'academics' | 'clubs'>('all')
+  const [currentTab, setCurrentTab] = useState<'academics' | 'clubs'>('academics')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [inputText, setInputText] = useState("")
   
@@ -96,9 +94,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
   const filteredChats = useMemo(() => {
     return INITIAL_CHATS.filter(c => {
       const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase())
-      if (currentTab === 'academics') return matchesSearch && c.category === 'academics'
-      if (currentTab === 'clubs') return matchesSearch && c.category === 'clubs'
-      return matchesSearch
+      const matchesCategory = c.category === currentTab
+      return matchesSearch && matchesCategory
     })
   }, [searchQuery, currentTab])
 
@@ -151,7 +148,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           {/* Categories */}
           <div className="flex gap-3 px-4 py-2 pt-2 md:pt-2">
             <button 
-              onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
+              onClick={() => setCurrentTab('academics')}
               className={cn(
                 "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'academics' 
@@ -163,7 +160,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
               <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Academics</span>
             </button>
             <button 
-              onClick={() => setCurrentTab(currentTab === 'clubs' ? 'all' : 'clubs')}
+              onClick={() => setCurrentTab('clubs')}
               className={cn(
                 "flex-1 p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border",
                 currentTab === 'clubs' 
