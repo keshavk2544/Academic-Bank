@@ -22,7 +22,8 @@ import {
   Shield,
   MessageSquare,
   Library,
-  Sparkles
+  Sparkles,
+  Lock
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -148,84 +149,87 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
           "flex flex-col w-full md:w-80 border-r border-white/10 transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
-          {/* Categories - Colorful Glassmorphism Design */}
-          <div className="flex gap-3 px-4 py-3 bg-white/5 backdrop-blur-md pt-10 md:pt-4">
+          {/* E2E Status */}
+          <div className="flex items-center justify-center gap-1.5 py-2 pt-12 md:pt-4">
+             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">E2E encrypted</span>
+          </div>
+
+          {/* Categories */}
+          <div className="flex gap-3 px-4 py-3">
             <button 
               onClick={() => setCurrentTab(currentTab === 'academics' ? 'all' : 'academics')}
               className={cn(
-                "flex-1 p-2 rounded-xl flex flex-col items-center justify-center gap-1 transition-all border",
+                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
                 currentTab === 'academics' 
-                  ? "bg-primary/30 border-primary/50 text-white shadow-lg shadow-primary/20 scale-[1.02]" 
-                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
+                  ? "bg-white/15 border-white/30 text-white shadow-xl shadow-primary/10" 
+                  : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
               )}
             >
-              <div className={cn("p-1 rounded-lg", currentTab === 'academics' ? "bg-primary/20" : "bg-white/5")}>
-                <Library className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-widest">Academics</span>
+              <Library className={cn("w-4 h-4", currentTab === 'academics' ? "text-primary" : "text-white/40")} />
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Academics</span>
             </button>
             <button 
               onClick={() => setCurrentTab(currentTab === 'clubs' ? 'all' : 'clubs')}
               className={cn(
-                "flex-1 p-2 rounded-xl flex flex-col items-center justify-center gap-1 transition-all border",
+                "flex-1 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all border",
                 currentTab === 'clubs' 
-                  ? "bg-accent/30 border-accent/50 text-white shadow-lg shadow-accent/20 scale-[1.02]" 
-                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
+                  ? "bg-white/15 border-white/30 text-white shadow-xl shadow-accent/10" 
+                  : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
               )}
             >
-              <div className={cn("p-1 rounded-lg", currentTab === 'clubs' ? "bg-accent/20" : "bg-white/5")}>
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-widest">Clubs</span>
+              <Sparkles className={cn("w-4 h-4", currentTab === 'clubs' ? "text-accent" : "text-white/40")} />
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Clubs</span>
             </button>
           </div>
 
           {/* Search */}
-          <div className="px-4 pb-3 pt-1 relative bg-white/5 backdrop-blur-md border-b border-white/10">
-            <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
-            <input 
-              placeholder="Search conversations..." 
-              className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="px-4 pb-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+              <input 
+                placeholder="Search conversations..." 
+                className="w-full h-11 bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/30"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
 
-          {/* Chat List - Magnified Items */}
-          <ScrollArea className="flex-1 pb-4">
-            <div className="p-0">
+          {/* Chat List */}
+          <ScrollArea className="flex-1">
+            <div className="px-2">
               {filteredChats.map(chat => (
                 <div
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={cn(
-                    "flex items-center gap-4 p-5 cursor-pointer transition-all relative border-l-2",
+                    "flex items-center gap-4 p-4 cursor-pointer transition-all relative rounded-[24px] mb-1",
                     selectedChatId === chat.id 
-                      ? "bg-[#a855f7]/20 border-[#a855f7]" 
-                      : "hover:bg-white/5 border-transparent"
+                      ? "bg-white/10" 
+                      : "hover:bg-white/5"
                   )}
                 >
                   <div className="relative shrink-0">
                     <div className={cn(
-                      "w-12 h-12 flex items-center justify-center text-white font-bold transition-transform text-lg",
+                      "w-12 h-12 flex items-center justify-center text-white font-bold transition-transform text-xl",
                       chat.color,
-                      chat.type === 'group' ? "rounded-xl" : "rounded-full"
+                      chat.type === 'group' ? "rounded-2xl" : "rounded-full"
                     )}>
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#161616] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
+                    <div className="flex justify-between items-center mb-0.5">
                       <h4 className="font-bold text-sm truncate text-white">{chat.name}</h4>
-                      <span className="text-[10px] text-white/40 font-medium">{chat.time}</span>
+                      <span className="text-[10px] text-white/30 font-medium">{chat.time}</span>
                     </div>
-                    <p className="text-[12px] text-white/50 truncate leading-snug">{chat.preview}</p>
+                    <p className="text-[12px] text-white/40 truncate leading-snug">{chat.preview}</p>
                   </div>
                   {chat.unread > 0 && (
-                    <div className="ml-2 bg-[#a855f7] text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center shadow-lg shadow-[#a855f7]/20">
+                    <div className="ml-2 bg-[#a855f7] text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center shadow-lg shadow-[#a855f7]/30">
                       {chat.unread}
                     </div>
                   )}
@@ -252,8 +256,8 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
             </div>
           ) : (
             <>
-              {/* Chat Area Header - Shortened & Integrated */}
-              <div className="px-2 md:px-2.5 py-1 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2 md:pt-1">
+              {/* Chat Area Header */}
+              <div className="px-3 py-2 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-2 md:pt-2">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
@@ -366,7 +370,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                 </div>
               </ScrollArea>
 
-              {/* Input Area - Seamless "Merged" Integrated */}
+              {/* Input Area */}
               <div className="p-3 md:p-3 flex flex-col items-center">
                 <div className="max-w-4xl w-full flex items-center gap-3">
                   <div className="flex gap-1">
