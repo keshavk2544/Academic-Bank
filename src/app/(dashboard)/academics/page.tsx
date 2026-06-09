@@ -1,6 +1,7 @@
 
 "use client"
 
+import { useState } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { 
@@ -8,17 +9,57 @@ import {
   Download, 
   PlusCircle,
   Clock,
-  User
+  User,
+  Upload,
+  CheckCircle2
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
 export default function AcademicsPage() {
-  const files = [
+  const [files, setFiles] = useState([
     { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "PDF Document", contributor: "Alex Rivera" },
     { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Lab Guide", contributor: "Sarah Jenkins" },
     { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Lecture Notes", contributor: "Michael Chen" },
     { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Core Subject", contributor: "Priya Sharma" },
     { title: "Database Normalization PDF", size: "890 KB", date: "5 days ago", color: "text-green-400", type: "Cheat Sheet", contributor: "Jordan Lee" },
-  ];
+  ]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newFile, setNewFile] = useState({ title: "", subject: "", fileName: "" });
+
+  const handleUpload = () => {
+    if (!newFile.title || !newFile.subject) return;
+
+    const addedFile = {
+      title: newFile.title,
+      size: "2.4 MB", // Mock size
+      date: "Just now",
+      color: "text-accent",
+      type: newFile.subject,
+      contributor: "Alex Rivera" // Auto-filled from mock session
+    };
+
+    setFiles([addedFile, ...files]);
+    setNewFile({ title: "", subject: "", fileName: "" });
+    setIsDialogOpen(false);
+  };
 
   return (
     <DashboardLayout>
@@ -28,20 +69,98 @@ export default function AcademicsPage() {
             <h2 className="text-sm font-semibold text-accent uppercase tracking-[0.2em] mb-1">Academic Vault</h2>
             <h1 className="text-3xl font-headline font-bold">Study Repository</h1>
           </div>
-          <button className="flex items-center gap-2 px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all shadow-[0_0_15px_rgba(72,118,245,0.4)]">
-            <PlusCircle className="w-4 h-4" /> Contribute Material
-          </button>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-2 px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all shadow-[0_0_15px_rgba(72,118,245,0.4)]">
+                <PlusCircle className="w-4 h-4" /> Contribute Material
+              </button>
+            </DialogTrigger>
+            <DialogContent className="glass border-white/10 sm:max-w-[425px] rounded-[32px]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
+                <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
+                  <Input 
+                    id="name" 
+                    value="Alex Rivera" 
+                    disabled 
+                    className="glass border-white/10 bg-white/5 h-12 rounded-xl text-white/50 cursor-not-allowed" 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="title" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Document Title</Label>
+                  <Input 
+                    id="title" 
+                    placeholder="e.g., Data Structures Unit 3 Summary" 
+                    value={newFile.title}
+                    onChange={(e) => setNewFile({ ...newFile, title: e.target.value })}
+                    className="glass border-white/10 bg-white/5 h-12 rounded-xl focus:border-accent" 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="subject" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Subject Area</Label>
+                  <Select onValueChange={(val) => setNewFile({ ...newFile, subject: val })}>
+                    <SelectTrigger className="glass border-white/10 bg-white/5 h-12 rounded-xl">
+                      <SelectValue placeholder="Select Subject" />
+                    </SelectTrigger>
+                    <SelectContent className="glass border-white/10">
+                      <SelectItem value="Machine Learning">Machine Learning</SelectItem>
+                      <SelectItem value="Computer Networks">Computer Networks</SelectItem>
+                      <SelectItem value="Data Structures">Data Structures</SelectItem>
+                      <SelectItem value="Cloud Computing">Cloud Computing</SelectItem>
+                      <SelectItem value="Cyber Security">Cyber Security</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Upload File</Label>
+                  <div className="relative group cursor-pointer">
+                    <input 
+                      type="file" 
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => setNewFile({ ...newFile, fileName: e.target.files?.[0]?.name || "" })}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                    />
+                    <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 group-hover:border-accent/50 transition-colors">
+                      {newFile.fileName ? (
+                        <>
+                          <CheckCircle2 className="w-8 h-8 text-green-400" />
+                          <span className="text-xs font-medium text-green-400 truncate max-w-[200px]">{newFile.fileName}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
+                          <span className="text-xs font-bold text-muted-foreground">Drop PDF/DOC or click to browse</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button 
+                  onClick={handleUpload}
+                  disabled={!newFile.title || !newFile.subject}
+                  className="w-full h-12 bg-accent hover:bg-accent/90 rounded-xl font-bold text-base shadow-[0_0_15px_rgba(72,118,245,0.4)]"
+                >
+                  Initialize Contribution
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </header>
 
         <div className="flex flex-col gap-3">
           {files.map((file, idx) => (
             <GlassCard key={idx} className="p-0 group hover:bg-white/5 transition-all border-white/5 relative overflow-hidden">
-              {/* Subtle side accent */}
               <div className={`absolute left-0 top-0 bottom-0 w-1 bg-current ${file.color} opacity-30 group-hover:opacity-100 transition-opacity`} />
               
               <div className="flex items-center justify-between p-4 md:p-5">
                 <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                  {/* Icon with background */}
                   <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} shrink-0 transition-transform group-hover:scale-105`}>
                     <FileText className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
@@ -81,7 +200,6 @@ export default function AcademicsPage() {
           ))}
         </div>
 
-        {/* Empty state hint */}
         <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
           <p className="text-sm text-muted-foreground italic">You've reached the end of your recent academic repository. <span className="text-accent font-bold cursor-pointer hover:underline">Load more files</span></p>
         </div>
