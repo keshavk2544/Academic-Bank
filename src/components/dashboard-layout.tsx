@@ -70,7 +70,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="p-4 mt-auto">
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-              {userRole[0].toUpperCase()}
+              {userRole[0]?.toUpperCase() || "S"}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-semibold truncate">Alex Rivera</span>
@@ -80,16 +80,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile Header */}
-      <header className="md:hidden flex items-center justify-between p-4 glass sticky top-0 z-40">
+      {/* Mobile Header - Reduced Size */}
+      <header className="md:hidden flex items-center justify-between px-4 py-2.5 glass sticky top-0 z-40">
         <div className="flex items-center gap-2">
-          <Zap className="w-6 h-6 text-primary" />
-          <span className="text-xl font-headline font-bold">PreRP</span>
+          <Zap className="w-5 h-5 text-primary" />
+          <span className="text-lg font-headline font-bold">PreRP</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-            <User className="w-4 h-4 text-primary" />
+        <div className="flex items-center gap-3">
+          <Bell className="w-4 h-4 text-muted-foreground" />
+          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+            <User className="w-3.5 h-3.5 text-primary" />
           </div>
         </div>
       </header>
