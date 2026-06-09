@@ -43,7 +43,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Student Info Card */}
           <GlassCard className="p-4 flex flex-col justify-between relative overflow-hidden group border-white/10">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
@@ -93,24 +93,6 @@ export default function Dashboard() {
               </div>
               <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
             </div>
-          </GlassCard>
-
-          {/* Ranking Card */}
-          <GlassCard className="flex flex-col gap-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Trophy className="w-16 h-16" />
-            </div>
-            <span className="text-sm font-medium text-muted-foreground">Current Ranking</span>
-            <div className="flex items-end gap-2">
-              <span className="text-4xl font-headline font-bold">#12</span>
-              <span className="text-xs text-muted-foreground mb-1">/ 240 Students</span>
-            </div>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`h-1 flex-1 rounded-full ${i <= 4 ? "bg-accent" : "bg-white/10"}`} />
-              ))}
-            </div>
-            <p className="text-[10px] text-muted-foreground">Top 5% of your class. Stellar!</p>
           </GlassCard>
 
           {/* Attendance Pulse Card */}
