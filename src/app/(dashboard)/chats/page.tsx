@@ -6,8 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { 
   Search, 
-  MoreVertical, 
-  CircleDashed, 
   ArrowLeft, 
   Phone, 
   Video, 
@@ -19,18 +17,16 @@ import {
   CheckCheck,
   Pin,
   Trash2,
-  Shield,
-  MoreHorizontal
+  Shield
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Theme Constants based on user requirements
+// Theme Constants
 const COLORS = {
   bg1: '#0f0c29',
   bg2: '#302b63',
   bg3: '#24243e',
   glass: 'rgba(255,255,255,0.08)',
-  glassBorder: 'rgba(255,255,255,0.15)',
   accent: '#a855f7',
   accent2: '#7c3aed',
 }
@@ -115,15 +111,14 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout>
-      {/* Integrated Chat Screen Container */}
       <div 
         className="fixed inset-0 md:left-64 flex z-0 overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Sidebar */}
+        {/* Sidebar - Reduced width to 280px */}
         <div className={cn(
-          "flex flex-col w-full md:w-[320px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
+          "flex flex-col w-full md:w-[280px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
           {/* Subtle E2E Encrypted Header */}
@@ -138,7 +133,7 @@ export default function ChatPage() {
           <div className="px-4 py-3 relative">
             <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
             <input 
-              placeholder="Search chats, groups…" 
+              placeholder="Search chats..." 
               className="w-full h-9 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -158,7 +153,7 @@ export default function ChatPage() {
                     : "text-white/50 hover:bg-white/5"
                 )}
               >
-                {tab}
+                {tab === 'personal' ? 'DM' : tab === 'groups' ? 'Grp' : tab}
               </button>
             ))}
           </div>
@@ -179,28 +174,23 @@ export default function ChatPage() {
                 >
                   <div className="relative shrink-0">
                     <div className={cn(
-                      "w-11 h-11 flex items-center justify-center text-white font-bold transition-transform",
+                      "w-10 h-10 flex items-center justify-center text-white font-bold transition-transform",
                       chat.color,
                       chat.type === 'group' ? "rounded-xl" : "rounded-full"
                     )}>
                       {chat.avatar}
                     </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <h4 className="font-bold text-sm truncate text-white">{chat.name}</h4>
+                      <h4 className="font-bold text-xs truncate text-white">{chat.name}</h4>
                       <span className="text-[10px] text-white/40">{chat.time}</span>
                     </div>
-                    <p className="text-xs text-white/50 truncate">{chat.preview}</p>
+                    <p className="text-[11px] text-white/50 truncate">{chat.preview}</p>
                   </div>
-                  {chat.unread ? (
-                    <div className="min-w-[18px] h-[18px] rounded-full bg-gradient-to-r from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-[10px] font-bold px-1.5 text-white">
-                      {chat.unread}
-                    </div>
-                  ) : null}
                 </div>
               ))}
             </div>
@@ -219,7 +209,7 @@ export default function ChatPage() {
               </div>
               <h2 className="text-2xl font-headline font-bold mb-2 text-white">Campus Aura</h2>
               <p className="text-sm text-white/40 leading-relaxed">
-                Select a campus group or start a conversation to coordinate study sessions and events.
+                Select a campus group or start a conversation to stay connected.
               </p>
             </div>
           ) : (
@@ -276,12 +266,6 @@ export default function ChatPage() {
               {/* Message List */}
               <ScrollArea className="flex-1 p-4 md:p-8" ref={scrollAreaRef}>
                 <div className="flex flex-col gap-2 max-w-4xl mx-auto">
-                  <div className="flex items-center gap-4 my-6">
-                    <div className="h-px bg-white/10 flex-1" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Today</span>
-                    <div className="h-px bg-white/10 flex-1" />
-                  </div>
-
                   {messages.map((msg, idx) => {
                     if (msg.sys) {
                       return (
@@ -336,17 +320,6 @@ export default function ChatPage() {
                               <span className="text-[9px] md:text-[10px] font-bold tracking-tight text-white/40">{msg.time}</span>
                               {isOut && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
                             </div>
-
-                            {/* Reactions */}
-                            {msg.reactions && (
-                              <div className="flex gap-1.5 mt-2">
-                                {msg.reactions.map((r: any, i: number) => (
-                                  <div key={i} className="bg-white/10 border border-white/10 rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1.5 cursor-pointer hover:bg-white/20 transition-colors">
-                                    {r.e} <span className="text-white/40 font-bold">{r.n}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -422,17 +395,6 @@ export default function ChatPage() {
                     <p className="text-sm text-white/60 leading-relaxed italic bg-white/5 p-4 rounded-2xl border border-white/5">
                       "{selectedChat?.bio}"
                     </p>
-                  </div>
-
-                  <div>
-                    <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Shared Content</h5>
-                    <div className="grid grid-cols-3 gap-3">
-                      {['🖼️','📸','🎨','🌅','🏙️','🎭'].map((t, i) => (
-                        <div key={i} className="aspect-square rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors flex items-center justify-center text-xl cursor-pointer shadow-lg">
-                          {t}
-                        </div>
-                      ))}
-                    </div>
                   </div>
 
                   <div className="pt-6 space-y-3">
