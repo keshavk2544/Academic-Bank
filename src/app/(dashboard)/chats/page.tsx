@@ -52,8 +52,8 @@ const INITIAL_MESSAGES: Record<number, any[]> = {
 
 export default function ChatPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
   // Consume Next.js 15 async props
-  const params = use(props.params);
-  const searchParamsProp = use(props.searchParams);
+  use(props.params);
+  use(props.searchParams);
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -260,7 +260,7 @@ export default function ChatPage(props: { params: Promise<any>; searchParams: Pr
                       <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", selectedChat?.online === true ? "bg-green-500" : "bg-muted-foreground")} />
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
                         {selectedChat?.type === 'group' 
-                          ? `${selectedChat.members} Pulsars`
+                          ? `${selectedChat.members} Active`
                           : selectedChat?.online ? 'Active Now' : 'Disconnected'
                         }
                       </p>
