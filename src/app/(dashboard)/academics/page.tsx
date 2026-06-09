@@ -148,12 +148,12 @@ export default function AcademicsPage() {
                 </button>
               </DialogTrigger>
               <DialogContent className="glass border-white/10 sm:max-w-[450px] rounded-[32px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
-                <DialogHeader className="p-6 pb-2">
+                <DialogHeader className="p-6 pb-2 shrink-0">
                   <DialogTitle className="text-2xl font-headline font-bold">Contribute to Vault</DialogTitle>
                   <p className="text-sm text-muted-foreground italic">Share your knowledge with the campus ecosystem.</p>
                 </DialogHeader>
                 
-                <ScrollArea className="flex-1 px-6">
+                <div className="flex-1 overflow-y-auto px-6">
                   <div className="grid gap-6 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Contributor Name</Label>
@@ -279,9 +279,9 @@ export default function AcademicsPage() {
                       </div>
                     </div>
                   </div>
-                </ScrollArea>
+                </div>
 
-                <DialogFooter className="p-6 pt-2">
+                <DialogFooter className="p-6 pt-2 shrink-0">
                   <Button 
                     onClick={handleUpload}
                     disabled={!newFile.title || !newFile.subject || !newFile.docType}
