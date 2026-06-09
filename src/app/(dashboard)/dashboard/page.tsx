@@ -65,6 +65,12 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[11px] font-mono font-medium">Q748291</span>
               </div>
+              <div className="col-span-2 p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors flex flex-col gap-0.5">
+                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 uppercase tracking-tighter">
+                  <Calendar className="w-2 h-2" /> Session Date
+                </div>
+                <span className="text-[11px] font-medium">Monday, May 15, 2025</span>
+              </div>
             </div>
 
             <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
