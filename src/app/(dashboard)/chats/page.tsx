@@ -3,15 +3,12 @@
 
 import { useState, useEffect, useRef, useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { GlassCard } from "@/components/glass-card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   Search, 
   MoreVertical, 
-  UserPlus, 
   CircleDashed, 
   SquarePen, 
   ArrowLeft, 
@@ -22,18 +19,14 @@ import {
   Paperclip, 
   Send, 
   Play, 
-  ChevronDown,
   CheckCheck,
-  Users,
   Pin,
   Trash2,
-  Copy,
-  Forward,
   Plus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Constants based on requested design
+// Theme Constants
 const COLORS = {
   bg1: '#0f0c29',
   bg2: '#302b63',
@@ -124,20 +117,21 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout>
+      {/* Full-screen Integrated Container (No "Box" structure) */}
       <div 
-        className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] overflow-hidden rounded-[24px] border border-white/10 shadow-2xl relative"
+        className="fixed inset-0 md:left-64 flex z-0 overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
       >
         
-        {/* Sidebar */}
+        {/* Integrated Sidebar */}
         <div className={cn(
           "flex flex-col w-full md:w-[320px] border-r border-white/10 bg-black/40 backdrop-blur-3xl transition-all duration-300",
           selectedChatId && "hidden md:flex"
         )}>
           {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5 pt-12 md:pt-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg shadow-[#a855f7]/20">
                 💬
               </div>
               <h1 className="text-lg font-headline font-bold tracking-tight">Aura</h1>
@@ -145,9 +139,6 @@ export default function ChatPage() {
             <div className="flex gap-1">
               <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
                 <CircleDashed className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
-                <UserPlus className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
                 <MoreVertical className="w-4 h-4" />
@@ -199,16 +190,15 @@ export default function ChatPage() {
                   )}
                 >
                   <div className="relative shrink-0">
-                    <Avatar className={cn(
-                      "w-11 h-11 border-2 border-transparent transition-transform",
+                    <div className={cn(
+                      "w-11 h-11 flex items-center justify-center text-white font-bold transition-transform",
+                      chat.color,
                       chat.type === 'group' ? "rounded-xl" : "rounded-full"
                     )}>
-                      <AvatarFallback className={cn("text-white font-bold", chat.color)}>
-                        {chat.avatar}
-                      </AvatarFallback>
-                    </Avatar>
+                      {chat.avatar}
+                    </div>
                     {chat.online === true && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1a1640] rounded-full" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0f0c29] rounded-full" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -228,51 +218,48 @@ export default function ChatPage() {
             </div>
           </ScrollArea>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-white/10 bg-black/20">
+          {/* Footer Action */}
+          <div className="p-4 bg-black/20 pb-24 md:pb-4">
             <Button className="w-full bg-gradient-to-r from-[#a855f7] to-[#7c3aed] hover:opacity-90 rounded-xl font-bold h-10 gap-2">
-              <SquarePen className="w-4 h-4" /> New Chat
+              <SquarePen className="w-4 h-4" /> New Message
             </Button>
           </div>
         </div>
 
-        {/* Chat Area */}
+        {/* Integrated Chat Area */}
         <div className={cn(
-          "flex-1 flex flex-col bg-white/[0.01] backdrop-blur-md relative",
+          "flex-1 flex flex-col bg-white/[0.01] relative",
           !selectedChatId && "hidden md:flex items-center justify-center text-center p-8"
         )}>
           {!selectedChatId ? (
             <div className="max-w-xs animate-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 rounded-[20px] bg-[#a855f7]/10 flex items-center justify-center text-4xl mb-6 mx-auto border border-[#a855f7]/20">
+              <div className="w-20 h-20 rounded-[28px] bg-gradient-to-tr from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-4xl mb-6 mx-auto border border-[#a855f7]/30 shadow-2xl">
                 🔮
               </div>
-              <h2 className="text-xl font-headline font-bold mb-2">Welcome to Aura</h2>
+              <h2 className="text-2xl font-headline font-bold mb-2">Campus Aura</h2>
               <p className="text-sm text-white/40 leading-relaxed">
-                Select a campus group or start a conversation to stay connected.
+                Choose a conversation to sync with your peers and campus events.
               </p>
             </div>
           ) : (
             <>
-              {/* Chat Header */}
-              <div className="p-3 md:p-4 border-b border-white/10 bg-white/5 backdrop-blur-3xl flex items-center justify-between z-10">
+              {/* Header */}
+              <div className="p-3 md:p-4 border-b border-white/10 bg-black/40 backdrop-blur-3xl flex items-center justify-between z-10 pt-12 md:pt-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="md:hidden rounded-full h-8 w-8"
+                    className="md:hidden rounded-full h-8 w-8 text-white"
                     onClick={() => setSelectedChatId(null)}
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
-                  <div className="relative">
-                    <Avatar className={cn(
-                      "w-10 h-10",
-                      selectedChat?.type === 'group' ? "rounded-xl" : "rounded-full"
-                    )}>
-                      <AvatarFallback className={cn("text-white font-bold", selectedChat?.color)}>
-                        {selectedChat?.avatar}
-                      </AvatarFallback>
-                    </Avatar>
+                  <div className={cn(
+                    "w-10 h-10 flex items-center justify-center text-white font-bold shrink-0",
+                    selectedChat?.color,
+                    selectedChat?.type === 'group' ? "rounded-xl" : "rounded-full"
+                  )}>
+                    {selectedChat?.avatar}
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-bold text-sm md:text-base truncate leading-tight">{selectedChat?.name}</h3>
@@ -306,9 +293,9 @@ export default function ChatPage() {
               </div>
 
               {/* Messages Area */}
-              <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-4 my-4">
+              <ScrollArea className="flex-1 p-4 md:p-8" ref={scrollAreaRef}>
+                <div className="flex flex-col gap-2 max-w-4xl mx-auto">
+                  <div className="flex items-center gap-4 my-6">
                     <div className="h-px bg-white/10 flex-1" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Today</span>
                     <div className="h-px bg-white/10 flex-1" />
@@ -317,7 +304,7 @@ export default function ChatPage() {
                   {messages.map((msg, idx) => {
                     if (msg.sys) {
                       return (
-                        <div key={idx} className="bg-white/5 border border-white/10 rounded-full px-4 py-1 mx-auto text-[10px] text-white/40 font-medium my-4">
+                        <div key={idx} className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mx-auto text-[10px] text-white/40 font-bold my-6 uppercase tracking-widest">
                           {msg.sys}
                         </div>
                       )
@@ -325,58 +312,56 @@ export default function ChatPage() {
                     const isOut = msg.type === 'out'
                     return (
                       <div key={idx} className={cn(
-                        "flex gap-2 max-w-[80%] md:max-w-[70%] group animate-in slide-in-from-bottom-1 duration-300",
+                        "flex gap-3 max-w-[85%] md:max-w-[70%] group animate-in slide-in-from-bottom-2 duration-300",
                         isOut ? "ml-auto flex-row-reverse" : "mr-auto"
                       )}>
                         {!isOut && (
-                          <Avatar className="w-7 h-7 self-end rounded-full shrink-0">
-                            <AvatarFallback className={cn("text-[9px] font-black text-white", msg.color)}>
-                              {msg.avatar || '?'}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className={cn("w-7 h-7 self-end rounded-full shrink-0 flex items-center justify-center text-[9px] font-black text-white", msg.color)}>
+                            {msg.avatar || '?'}
+                          </div>
                         )}
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                           <div className={cn(
-                            "p-2.5 px-3.5 rounded-2xl relative transition-all group-hover:shadow-lg backdrop-blur-md",
+                            "p-3 px-4 rounded-2xl relative transition-all group-hover:shadow-2xl backdrop-blur-md",
                             isOut 
-                              ? "bg-[#a855f7]/30 border border-[#a855f7]/20 rounded-br-none" 
+                              ? "bg-[#a855f7]/40 border border-[#a855f7]/20 rounded-br-none" 
                               : "bg-white/10 border border-white/10 rounded-bl-none"
                           )}>
                             {!isOut && selectedChat?.type === 'group' && (
-                              <p className="text-[10px] font-bold text-[#a855f7] mb-1 leading-none">{msg.from}</p>
+                              <p className="text-[11px] font-black text-[#a855f7] mb-1.5 uppercase tracking-wider">{msg.from}</p>
                             )}
                             
                             {msg.type === 'media' ? (
-                              <div className="w-44 h-32 rounded-lg bg-gradient-to-br from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-4xl">
+                              <div className="w-56 h-40 rounded-xl bg-gradient-to-br from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-5xl border border-white/10">
                                 🖼️
                               </div>
                             ) : msg.type === 'voice' ? (
-                              <div className="flex items-center gap-3 min-w-[160px]">
-                                <Button size="icon" className="w-7 h-7 rounded-full bg-[#a855f7] hover:bg-[#7c3aed] transition-colors p-0">
-                                  <Play className="w-3 h-3 fill-white" />
+                              <div className="flex items-center gap-4 min-w-[180px]">
+                                <Button size="icon" className="w-8 h-8 rounded-full bg-[#a855f7] hover:bg-[#7c3aed] transition-colors p-0 shadow-lg shadow-[#a855f7]/20">
+                                  <Play className="w-3.5 h-3.5 fill-white" />
                                 </Button>
-                                <div className="flex-1 flex gap-0.5 items-center h-5">
-                                  {[8,14,20,16,24,18,12,22,10].map((h, i) => (
-                                    <div key={i} className="w-0.5 bg-[#a855f7]/50 rounded-full" style={{ height: `${h}px` }} />
+                                <div className="flex-1 flex gap-0.5 items-center h-6">
+                                  {[8,14,20,16,24,18,12,22,10,18,14,20].map((h, i) => (
+                                    <div key={i} className="w-0.5 bg-[#a855f7]/60 rounded-full" style={{ height: `${h}px` }} />
                                   ))}
                                 </div>
-                                <span className="text-[9px] text-white/40">{msg.duration}</span>
+                                <span className="text-[10px] font-bold text-white/40">{msg.duration}</span>
                               </div>
                             ) : (
-                              <p className="text-sm leading-relaxed text-white/90">{msg.text}</p>
+                              <p className="text-sm md:text-base leading-relaxed text-white/90">{msg.text}</p>
                             )}
 
-                            <div className="flex items-center gap-1 mt-1 justify-end opacity-50">
-                              <span className="text-[9px] font-medium">{msg.time}</span>
-                              {isOut && <CheckCheck className="w-3 h-3 text-blue-400" />}
+                            <div className="flex items-center gap-1.5 mt-2 justify-end opacity-60">
+                              <span className="text-[9px] md:text-[10px] font-bold tracking-tight">{msg.time}</span>
+                              {isOut && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
                             </div>
 
                             {/* Reactions */}
                             {msg.reactions && (
-                              <div className="flex gap-1 mt-1.5">
+                              <div className="flex gap-1.5 mt-2">
                                 {msg.reactions.map((r: any, i: number) => (
-                                  <div key={i} className="bg-white/10 border border-white/10 rounded-full px-1.5 py-0.5 text-[9px] flex items-center gap-1 cursor-pointer hover:bg-white/20">
-                                    {r.e} <span className="text-white/40">{r.n}</span>
+                                  <div key={i} className="bg-white/10 border border-white/10 rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1.5 cursor-pointer hover:bg-white/20 transition-colors">
+                                    {r.e} <span className="text-white/40 font-bold">{r.n}</span>
                                   </div>
                                 ))}
                               </div>
@@ -390,9 +375,9 @@ export default function ChatPage() {
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="p-4 bg-black/40 border-t border-white/10 backdrop-blur-3xl">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5">
+              <div className="p-4 md:p-6 bg-black/40 border-t border-white/10 backdrop-blur-3xl pb-24 md:pb-6">
+                <div className="max-w-4xl mx-auto flex items-center gap-3">
+                  <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-10 w-10 text-white/40 hover:text-white rounded-xl">
                       <Smile className="w-5 h-5" />
                     </Button>
@@ -401,10 +386,10 @@ export default function ChatPage() {
                     </Button>
                   </div>
                   
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 min-h-[42px] flex items-center focus-within:border-[#a855f7]/50 transition-all">
+                  <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 min-h-[48px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner">
                     <input 
                       placeholder="Type a message…" 
-                      className="w-full bg-transparent border-none outline-none text-sm py-1 placeholder:text-white/30"
+                      className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 placeholder:text-white/20"
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       onKeyDown={(e) => {
@@ -417,10 +402,10 @@ export default function ChatPage() {
                   </div>
 
                   <Button 
-                    className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] shadow-lg shadow-[#a855f7]/30 hover:scale-105 active:scale-95 transition-all p-0 shrink-0"
+                    className="h-12 w-12 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] shadow-xl shadow-[#a855f7]/30 hover:scale-105 active:scale-95 transition-all p-0 shrink-0"
                     onClick={handleSendMessage}
                   >
-                    <Send className="w-4 h-4 text-white" />
+                    <Send className="w-5 h-5 text-white" />
                   </Button>
                 </div>
               </div>
@@ -428,54 +413,53 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Profile Panel */}
+        {/* Profile Integrated Panel */}
         <div className={cn(
-          "bg-black/40 backdrop-blur-3xl border-l border-white/10 transition-all duration-300 overflow-hidden",
-          isProfileOpen ? "w-full md:w-[260px]" : "w-0"
+          "bg-black/60 backdrop-blur-3xl border-l border-white/10 transition-all duration-300 overflow-hidden",
+          isProfileOpen ? "w-full md:w-[300px]" : "w-0"
         )}>
           {selectedChat && (
-            <div className="flex flex-col h-full min-w-[260px] p-6 text-center">
-              <div className="flex flex-col items-center mb-6">
-                <Avatar className={cn(
-                  "w-20 h-20 border-3 border-[#a855f7]/30 mb-4 shadow-2xl shrink-0",
+            <div className="flex flex-col h-full min-w-[300px] p-8 text-center pt-12 md:pt-8">
+              <div className="flex flex-col items-center mb-8">
+                <div className={cn(
+                  "w-24 h-24 border-3 border-[#a855f7]/30 mb-5 shadow-2xl shrink-0 flex items-center justify-center text-4xl font-black text-white",
+                  selectedChat?.color,
                   selectedChat?.type === 'group' ? "rounded-3xl" : "rounded-full"
                 )}>
-                  <AvatarFallback className={cn("text-3xl font-black text-white", selectedChat?.color)}>
-                    {selectedChat?.avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <h3 className="text-lg font-headline font-bold truncate w-full">{selectedChat?.name}</h3>
-                <p className="text-xs text-green-400 font-medium mt-1">
+                  {selectedChat?.avatar}
+                </div>
+                <h3 className="text-xl font-headline font-bold truncate w-full">{selectedChat?.name}</h3>
+                <p className="text-sm text-green-400 font-bold mt-1 uppercase tracking-widest">
                   {selectedChat?.type === 'group' ? `${selectedChat.members} Members` : 'Online'}
                 </p>
               </div>
 
-              <ScrollArea className="flex-1 -mx-2 px-2">
-                <div className="text-left space-y-6">
+              <ScrollArea className="flex-1 -mx-4 px-4">
+                <div className="text-left space-y-8">
                   <div>
-                    <h5 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">About</h5>
-                    <p className="text-xs text-white/60 leading-relaxed italic bg-white/5 p-3 rounded-xl border border-white/5">
+                    <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">About</h5>
+                    <p className="text-sm text-white/60 leading-relaxed italic bg-white/5 p-4 rounded-2xl border border-white/5">
                       "{selectedChat?.bio}"
                     </p>
                   </div>
 
                   <div>
-                    <h5 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">Recent Media</h5>
-                    <div className="grid grid-cols-3 gap-2">
+                    <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Shared Content</h5>
+                    <div className="grid grid-cols-3 gap-3">
                       {['🖼️','📸','🎨','🌅','🏙️','🎭'].map((t, i) => (
-                        <div key={i} className="aspect-square rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors flex items-center justify-center text-lg cursor-pointer">
+                        <div key={i} className="aspect-square rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors flex items-center justify-center text-xl cursor-pointer shadow-lg">
                           {t}
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="pt-4 space-y-2">
-                    <Button variant="ghost" className="w-full justify-start text-[11px] font-bold gap-3 rounded-xl hover:bg-white/5 h-10">
-                      <Pin className="w-4 h-4 text-[#a855f7]" /> Starred Messages
+                  <div className="pt-6 space-y-3">
+                    <Button variant="ghost" className="w-full justify-start text-xs font-bold gap-4 rounded-2xl hover:bg-white/5 h-12">
+                      <Pin className="w-4 h-4 text-[#a855f7]" /> Starred Items
                     </Button>
-                    <Button variant="ghost" className="w-full justify-start text-[11px] font-bold gap-3 rounded-xl hover:bg-red-500/10 text-red-400 h-10">
-                      <Trash2 className="w-4 h-4" /> Block Contact
+                    <Button variant="ghost" className="w-full justify-start text-xs font-bold gap-4 rounded-2xl hover:bg-red-500/10 text-red-400 h-12">
+                      <Trash2 className="w-4 h-4" /> Block Account
                     </Button>
                   </div>
                 </div>
