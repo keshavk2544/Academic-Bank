@@ -5,12 +5,10 @@ import { useState, useEffect, useRef, useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   Search, 
   MoreVertical, 
   CircleDashed, 
-  SquarePen, 
   ArrowLeft, 
   Phone, 
   Video, 
@@ -21,8 +19,7 @@ import {
   Play, 
   CheckCheck,
   Pin,
-  Trash2,
-  Plus
+  Trash2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -117,7 +114,7 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout>
-      {/* Full-screen Integrated Container (No "Box" structure) */}
+      {/* Full-screen Integrated Container */}
       <div 
         className="fixed inset-0 md:left-64 flex z-0 overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${COLORS.bg1} 0%, ${COLORS.bg2} 50%, ${COLORS.bg3} 100%)` }}
@@ -134,7 +131,7 @@ export default function ChatPage() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-white font-bold shadow-lg shadow-[#a855f7]/20">
                 💬
               </div>
-              <h1 className="text-lg font-headline font-bold tracking-tight">Aura</h1>
+              <h1 className="text-lg font-headline font-bold tracking-tight text-white">Aura</h1>
             </div>
             <div className="flex gap-1">
               <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white rounded-lg">
@@ -151,7 +148,7 @@ export default function ChatPage() {
             <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
             <input 
               placeholder="Search chats, groups…" 
-              className="w-full h-10 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-[#a855f7] transition-all"
+              className="w-full h-10 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-[#a855f7] transition-all text-white placeholder:text-white/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -176,7 +173,7 @@ export default function ChatPage() {
           </div>
 
           {/* Chat List */}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 pb-24 md:pb-4">
             <div className="p-0">
               {filteredChats.map(chat => (
                 <div
@@ -203,13 +200,13 @@ export default function ChatPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <h4 className="font-bold text-sm truncate">{chat.name}</h4>
+                      <h4 className="font-bold text-sm truncate text-white">{chat.name}</h4>
                       <span className="text-[10px] text-white/40">{chat.time}</span>
                     </div>
                     <p className="text-xs text-white/50 truncate">{chat.preview}</p>
                   </div>
                   {chat.unread ? (
-                    <div className="min-w-[18px] h-[18px] rounded-full bg-gradient-to-r from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-[10px] font-bold px-1.5">
+                    <div className="min-w-[18px] h-[18px] rounded-full bg-gradient-to-r from-[#a855f7] to-[#7c3aed] flex items-center justify-center text-[10px] font-bold px-1.5 text-white">
                       {chat.unread}
                     </div>
                   ) : null}
@@ -217,13 +214,6 @@ export default function ChatPage() {
               ))}
             </div>
           </ScrollArea>
-
-          {/* Footer Action */}
-          <div className="p-4 bg-black/20 pb-24 md:pb-4">
-            <Button className="w-full bg-gradient-to-r from-[#a855f7] to-[#7c3aed] hover:opacity-90 rounded-xl font-bold h-10 gap-2">
-              <SquarePen className="w-4 h-4" /> New Message
-            </Button>
-          </div>
         </div>
 
         {/* Integrated Chat Area */}
@@ -236,7 +226,7 @@ export default function ChatPage() {
               <div className="w-20 h-20 rounded-[28px] bg-gradient-to-tr from-[#a855f7]/20 to-[#7c3aed]/20 flex items-center justify-center text-4xl mb-6 mx-auto border border-[#a855f7]/30 shadow-2xl">
                 🔮
               </div>
-              <h2 className="text-2xl font-headline font-bold mb-2">Campus Aura</h2>
+              <h2 className="text-2xl font-headline font-bold mb-2 text-white">Campus Aura</h2>
               <p className="text-sm text-white/40 leading-relaxed">
                 Choose a conversation to sync with your peers and campus events.
               </p>
@@ -262,7 +252,7 @@ export default function ChatPage() {
                     {selectedChat?.avatar}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-sm md:text-base truncate leading-tight">{selectedChat?.name}</h3>
+                    <h3 className="font-bold text-sm md:text-base truncate leading-tight text-white">{selectedChat?.name}</h3>
                     <p className={cn(
                       "text-[10px] md:text-xs mt-0.5",
                       selectedChat?.online === true ? "text-green-400 font-medium" : "text-white/40"
@@ -352,7 +342,7 @@ export default function ChatPage() {
                             )}
 
                             <div className="flex items-center gap-1.5 mt-2 justify-end opacity-60">
-                              <span className="text-[9px] md:text-[10px] font-bold tracking-tight">{msg.time}</span>
+                              <span className="text-[9px] md:text-[10px] font-bold tracking-tight text-white/40">{msg.time}</span>
                               {isOut && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
                             </div>
 
@@ -389,7 +379,7 @@ export default function ChatPage() {
                   <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 min-h-[48px] flex items-center focus-within:border-[#a855f7]/50 transition-all shadow-inner">
                     <input 
                       placeholder="Type a message…" 
-                      className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 placeholder:text-white/20"
+                      className="w-full bg-transparent border-none outline-none text-sm md:text-base py-1 text-white placeholder:text-white/20"
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       onKeyDown={(e) => {
@@ -428,7 +418,7 @@ export default function ChatPage() {
                 )}>
                   {selectedChat?.avatar}
                 </div>
-                <h3 className="text-xl font-headline font-bold truncate w-full">{selectedChat?.name}</h3>
+                <h3 className="text-xl font-headline font-bold truncate w-full text-white">{selectedChat?.name}</h3>
                 <p className="text-sm text-green-400 font-bold mt-1 uppercase tracking-widest">
                   {selectedChat?.type === 'group' ? `${selectedChat.members} Members` : 'Online'}
                 </p>
@@ -455,7 +445,7 @@ export default function ChatPage() {
                   </div>
 
                   <div className="pt-6 space-y-3">
-                    <Button variant="ghost" className="w-full justify-start text-xs font-bold gap-4 rounded-2xl hover:bg-white/5 h-12">
+                    <Button variant="ghost" className="w-full justify-start text-xs font-bold gap-4 rounded-2xl hover:bg-white/5 h-12 text-white">
                       <Pin className="w-4 h-4 text-[#a855f7]" /> Starred Items
                     </Button>
                     <Button variant="ghost" className="w-full justify-start text-xs font-bold gap-4 rounded-2xl hover:bg-red-500/10 text-red-400 h-12">
