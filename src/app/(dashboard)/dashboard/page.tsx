@@ -23,7 +23,6 @@ export default function Dashboard() {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-1">Command Center</h2>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">Welcome back, Alex.</h1>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/5 border border-white/10 px-4 py-2 rounded-2xl">
