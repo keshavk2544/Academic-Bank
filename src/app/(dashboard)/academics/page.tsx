@@ -258,17 +258,18 @@ export default function AcademicsPage() {
               
               <div className="flex items-center justify-between p-4 md:p-5">
                 <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                  <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} shrink-0 transition-transform group-hover:scale-105`}>
-                    <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                  <div className="flex flex-col items-center gap-2 shrink-0">
+                    <div className={`p-3 md:p-4 rounded-2xl bg-white/5 border border-white/10 ${file.color} transition-transform group-hover:scale-105`}>
+                      <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                    </div>
+                    <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", file.color)}>
+                      {file.docType}
+                    </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                        <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{file.type}</span>
-                       <span className="w-1 h-1 rounded-full bg-white/20" />
-                       <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-accent-foreground uppercase tracking-widest">
-                          {file.docType}
-                       </span>
                        <span className="w-1 h-1 rounded-full bg-white/20" />
                        <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5" /> {file.date}
