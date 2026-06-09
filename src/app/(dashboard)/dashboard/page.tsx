@@ -1,6 +1,7 @@
 
 "use client"
 
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { Progress } from "@/components/ui/progress"
@@ -22,6 +23,23 @@ import {
 } from "lucide-react"
 
 export default function Dashboard() {
+  const [currentTime, setCurrentTime] = useState<string>("--:--:--");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      }));
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -55,11 +73,17 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[11px] font-mono font-medium">Q748291</span>
               </div>
-              <div className="col-span-2 p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors flex flex-col gap-0.5">
+              <div className="p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors flex flex-col gap-0.5">
                 <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 uppercase tracking-tighter">
-                  <Calendar className="w-2 h-2" /> Session Date
+                  <Calendar className="w-2 h-2" /> Date
                 </div>
-                <span className="text-[11px] font-medium">Monday, May 15, 2025</span>
+                <span className="text-[11px] font-medium">May 15, 2025</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/10 hover:border-orange-500/20 transition-colors flex flex-col gap-0.5">
+                <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400 uppercase tracking-tighter">
+                  <Clock className="w-2 h-2" /> Live Clock
+                </div>
+                <span className="text-[11px] font-mono font-medium">{currentTime}</span>
               </div>
             </div>
 
