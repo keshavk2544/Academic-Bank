@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, use } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { 
@@ -62,7 +62,11 @@ const SUBJECT_OPTIONS = [
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
-export default function AcademicsPage() {
+export default function AcademicsPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
+  // Unwrap async props for Next.js 15 compatibility
+  use(props.params);
+  use(props.searchParams);
+
   const [contributorName, setContributorName] = useState("Alex Rivera");
 
   const [files, setFiles] = useState([

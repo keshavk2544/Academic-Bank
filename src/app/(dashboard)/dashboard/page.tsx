@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { Progress } from "@/components/ui/progress"
@@ -23,7 +23,11 @@ import {
   School
 } from "lucide-react"
 
-export default function Dashboard() {
+export default function Dashboard(props: { params: Promise<any>; searchParams: Promise<any> }) {
+  // Unwrap async props for Next.js 15 compatibility
+  use(props.params);
+  use(props.searchParams);
+
   const router = useRouter();
   const [currentTime, setCurrentTime] = useState<string>("--:--:--");
 

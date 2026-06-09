@@ -1,7 +1,7 @@
 
 "use client"
 
-import { ReactNode, useEffect, useState, Suspense } from "react"
+import { ReactNode, useEffect, useState, Suspense, use } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { 
@@ -28,7 +28,10 @@ const navItems: NavItem[] = [
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
-function NavigationContent({ children }: { children: ReactNode }) {
+function NavigationContent({ children, params }: { children: ReactNode; params?: Promise<any> }) {
+  // Consume params if provided for Next.js 15
+  if (params) use(params);
+
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [userRole, setUserRole] = useState<string>("student")
@@ -110,10 +113,10 @@ function NavigationContent({ children }: { children: ReactNode }) {
   )
 }
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+export function DashboardLayout({ children, params }: { children: ReactNode; params?: Promise<any> }) {
   return (
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
-      <NavigationContent>{children}</NavigationContent>
+      <NavigationContent params={params}>{children}</NavigationContent>
     </Suspense>
   )
 }
