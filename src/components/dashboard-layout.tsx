@@ -9,8 +9,7 @@ import {
   Library, 
   Wrench, 
   User, 
-  Zap,
-  MessageSquare
+  Zap
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -23,7 +22,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Library, label: "Repo", href: "/academics" },
-  { icon: MessageSquare, label: "Chats", href: "/chats" },
   { icon: Wrench, label: "Tools", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
@@ -39,9 +37,6 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole") || "student")
   }, [])
-
-  // Check if we are in a sub-view (like an active chat) to hide the mobile nav
-  const isDetailView = pathname === '/chats' && !!searchParams.get('id')
 
   return (
     <div className="flex flex-col min-h-screen pb-20 md:pb-0 md:pl-64">
@@ -90,10 +85,10 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
         {children}
       </main>
 
-      {/* Mobile Bottom Navigation - Hidden when in detail view */}
+      {/* Mobile Bottom Navigation */}
       <nav className={cn(
         "md:hidden fixed bottom-0 left-0 w-full glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 rounded-t-[32px] transition-transform duration-300",
-        isDetailView ? "translate-y-full" : "translate-y-0"
+        "translate-y-0"
       )}>
         {navItems.map((item) => (
           <Link
