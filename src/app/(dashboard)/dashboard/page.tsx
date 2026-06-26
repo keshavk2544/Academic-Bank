@@ -10,10 +10,8 @@ import {
   Clock, 
   QrCode, 
   Trophy, 
-  ArrowUpRight, 
   CheckCircle2,
   FileText,
-  AlertCircle,
   Bell,
   Sparkles,
   User,
@@ -117,43 +115,6 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
               </div>
             </div>
           </GlassCard>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8">
-          {/* Critical Updates */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-headline font-bold flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-400" /> Critical Notices
-              </h3>
-              <button className="text-xs text-primary font-semibold hover:underline">See All</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <GlassCard className="p-5 border-l-4 border-l-red-500 bg-red-500/5 group hover:bg-red-500/10">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="px-2 py-0.5 rounded-full bg-red-500 text-[10px] font-bold uppercase tracking-wider">Urgent</span>
-                  <span className="text-[10px] text-muted-foreground">2 hrs ago</span>
-                </div>
-                <h4 className="font-bold mb-1">Mid-Semester Exam Schedule Released</h4>
-                <p className="text-sm text-muted-foreground mb-3 leading-relaxed">The official schedule for the Semester 5 Mid-exams is now live. Check your respective department blocks.</p>
-                <button className="flex items-center gap-1 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
-                  View Document <ArrowUpRight className="w-3 h-3" />
-                </button>
-              </GlassCard>
-
-              <GlassCard className="p-5 border-l-4 border-l-purple-500 bg-purple-500/5 group hover:bg-purple-500/10">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500 text-[10px] font-bold uppercase tracking-wider">Placement</span>
-                  <span className="text-[10px] text-muted-foreground">Yesterday</span>
-                </div>
-                <h4 className="font-bold mb-1">Google Inc. - Virtual Info Session</h4>
-                <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Register for the upcoming engineering recruitment drive for Batch 2026. Limited slots available.</p>
-                <button className="flex items-center gap-1 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
-                  Register Now <ArrowUpRight className="w-3 h-3" />
-                </button>
-              </GlassCard>
-            </div>
-          </div>
         </div>
       </div>
     </DashboardLayout>
