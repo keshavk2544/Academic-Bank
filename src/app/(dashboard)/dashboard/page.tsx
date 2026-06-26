@@ -17,7 +17,8 @@ import {
   User,
   CreditCard,
   Hash,
-  School
+  School,
+  Library
 } from "lucide-react"
 
 export default function Dashboard(props: { params: Promise<any>; searchParams: Promise<any> }) {
@@ -48,7 +49,7 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Student Info Card */}
-          <GlassCard className="p-4 flex flex-col justify-between relative overflow-hidden group border-white/10">
+          <GlassCard className="p-5 flex flex-col justify-between relative overflow-hidden group border-white/10">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
             
             {/* Top Right Options */}
@@ -64,33 +65,33 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
               </button>
             </div>
 
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
-                <User className="w-6 h-6 text-primary" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-inner">
+                <User className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-headline font-bold leading-none mb-1">Alex Rivera</h3>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-widest">
-                  <School className="w-3 h-3" /> B.Tech CSE
+                <h3 className="text-xl font-headline font-bold leading-none mb-1.5">Alex Rivera</h3>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest">
+                  <School className="w-3 h-3" /> B.Tech CSE • Semester 6
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[10px] font-bold text-blue-400 uppercase tracking-tighter">
+                <div className="flex items-center gap-1 text-[9px] font-bold text-blue-400 uppercase tracking-tighter">
                   <Hash className="w-2.5 h-2.5" /> Roll No
                 </div>
                 <span className="text-sm font-headline font-medium">22CSE1042</span>
               </div>
               <div className="p-2.5 rounded-xl bg-purple-500/5 border border-purple-500/10 hover:border-purple-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[10px] font-bold text-purple-400 uppercase tracking-tighter">
+                <div className="flex items-center gap-1 text-[9px] font-bold text-purple-400 uppercase tracking-tighter">
                   <CreditCard className="w-2.5 h-2.5" /> QID
                 </div>
                 <span className="text-sm font-headline font-medium">Q748291</span>
               </div>
               <div className="p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 uppercase tracking-tighter">
+                <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-400 uppercase tracking-tighter">
                   <Calendar className="w-2.5 h-2.5" /> Date
                 </div>
                 <span className="text-sm font-headline font-medium">May 15, 2025</span>
@@ -102,13 +103,31 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
               </div>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between gap-3">
+            {/* NEW: Navigation Options */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <button 
+                onClick={() => router.push('/tools')}
+                className="flex items-center justify-center gap-2.5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-primary/10 hover:border-primary/40 transition-all group"
+              >
+                <Sparkles className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Start Quiz</span>
+              </button>
+              <button 
+                onClick={() => router.push('/academics')}
+                className="flex items-center justify-center gap-2.5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-accent/10 hover:border-accent/40 transition-all group"
+              >
+                <Library className="w-4 h-4 text-accent group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Repository</span>
+              </button>
+            </div>
+
+            <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-3">
               <button 
                 onClick={() => router.push('/attendance')}
-                className="flex-1 py-2 px-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
+                className="flex-1 py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Mark your attendance</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Mark Attendance</span>
               </button>
               <div className="text-right">
                 <span className="text-xl font-headline font-bold text-green-400">87.5%</span>
