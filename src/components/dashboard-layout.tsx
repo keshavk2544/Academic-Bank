@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ReactNode, useEffect, useState, Suspense, use } from "react"
@@ -8,7 +9,8 @@ import {
   Library, 
   BrainCircuit, 
   User, 
-  Zap
+  Zap,
+  ShieldCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -16,6 +18,7 @@ interface NavItem {
   icon: any;
   label: string;
   href: string;
+  adminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -23,19 +26,20 @@ const navItems: NavItem[] = [
   { icon: Library, label: "Repo", href: "/academics" },
   { icon: BrainCircuit, label: "Quiz", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
+  { icon: ShieldCheck, label: "Admin", href: "/admin", adminOnly: true },
 ]
 
 function NavigationContent({ children, params }: { children: ReactNode; params?: Promise<any> }) {
-  // Consume params if provided for Next.js 15
   if (params) use(params);
 
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [userRole, setUserRole] = useState<string>("student")
 
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole") || "student")
   }, [])
+
+  const filteredNavItems = navItems.filter(item => !item.adminOnly || userRole === "admin")
 
   return (
     <div className="flex flex-col min-h-screen pb-20 md:pb-0 md:pl-64">
@@ -45,11 +49,11 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
           <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
             <Zap className="w-6 h-6 text-primary" />
           </div>
-          <span className="text-xl font-headline font-bold tracking-tight">PreRP</span>
+          <span className="text-xl font-headline font-bold tracking-tight text-glow">PreRP</span>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -68,7 +72,7 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
 
         <div className="p-4 mt-auto">
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">
               {userRole[0]?.toUpperCase() || "S"}
             </div>
             <div className="flex flex-col overflow-hidden">
@@ -86,10 +90,10 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
 
       {/* Mobile Bottom Navigation */}
       <nav className={cn(
-        "md:hidden fixed bottom-0 left-0 w-full glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 rounded-t-[32px] transition-transform duration-300",
+        "md:hidden fixed bottom-0 left-0 w-full glass border-t border-white/10 px-6 py-3 flex justify-around items-center z-50 rounded-t-[32px] transition-transform duration-300",
         "translate-y-0"
       )}>
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
