@@ -18,7 +18,8 @@ import {
   CreditCard,
   Hash,
   School,
-  Library
+  Library,
+  BrainCircuit
 } from "lucide-react"
 
 export default function Dashboard(props: { params: Promise<any>; searchParams: Promise<any> }) {
@@ -120,14 +121,14 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
               </div>
             </GlassCard>
 
-            {/* QUICK ACTIONS: Moved below the details box */}
+            {/* QUICK ACTIONS */}
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => router.push('/tools')}
                 className="flex flex-col items-center justify-center gap-3 p-6 rounded-[24px] glass border-white/10 hover:bg-primary/10 hover:border-primary/40 transition-all group shadow-xl"
               >
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
-                  <Sparkles className="w-6 h-6" />
+                  <BrainCircuit className="w-6 h-6" />
                 </div>
                 <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/70 group-hover:text-white transition-colors">Start Quiz</span>
               </button>
@@ -144,7 +145,7 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
             </div>
           </div>
 
-          {/* Column 2: Potential for future widgets or placeholder */}
+          {/* Column 2 */}
           <div className="hidden md:block">
              <GlassCard className="h-full border-white/5 bg-white/5 flex flex-col items-center justify-center text-center p-8 opacity-40">
                 <Sparkles className="w-12 h-12 text-muted-foreground mb-4" />
