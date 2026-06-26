@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -13,12 +14,13 @@ import {
   Mail, 
   Phone, 
   Award, 
-  Zap,
+  Zap, 
   Star,
   ChevronRight
 } from "lucide-react"
 
 export default function ProfilePage() {
+  const router = useRouter()
   const [role, setRole] = useState("student")
 
   useEffect(() => {
@@ -29,6 +31,11 @@ export default function ProfilePage() {
     localStorage.setItem("userRole", newRole)
     setRole(newRole)
     window.location.reload()
+  }
+
+  const handleSignOut = () => {
+    localStorage.removeItem("userRole")
+    router.push("/")
   }
 
   return (
@@ -148,7 +155,11 @@ export default function ProfilePage() {
               </div>
             </GlassCard>
 
-            <Button variant="ghost" className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 h-12 rounded-xl border border-red-500/20">
+            <Button 
+              onClick={handleSignOut}
+              variant="ghost" 
+              className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 h-12 rounded-xl border border-red-500/20"
+            >
               <LogOut className="w-4 h-4 mr-2" /> Sign Out from PreRP
             </Button>
           </div>
