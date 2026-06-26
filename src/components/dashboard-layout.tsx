@@ -7,7 +7,7 @@ import { usePathname, useSearchParams } from "next/navigation"
 import { 
   LayoutDashboard, 
   Library, 
-  Wrench, 
+  Sparkles, 
   User, 
   Zap
 } from "lucide-react"
@@ -22,7 +22,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Library, label: "Repo", href: "/academics" },
-  { icon: Wrench, label: "Tools", href: "/tools" },
+  { icon: Sparkles, label: "Quiz", href: "/tools" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
