@@ -57,7 +57,7 @@ export default function ProfilePage() {
 
           <div className="text-center md:text-left flex-1 space-y-4">
             <div>
-              <h1 className="text-3xl font-headline font-bold">Alex Rivera</h1>
+              <h1 className="text-3xl font-headline font-bold">Keshav Krishan</h1>
               <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-2 text-sm mt-1">
                 Computer Science & Engineering • Class of 2026
               </p>
@@ -85,7 +85,7 @@ export default function ProfilePage() {
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Email Address</p>
                   <div className="flex items-center gap-3 text-sm">
-                    <Mail className="w-4 h-4 text-primary" /> alex.rivera@pre.university.edu
+                    <Mail className="w-4 h-4 text-primary" /> keshav.krishan@pre.university.edu
                   </div>
                 </div>
                 <div className="space-y-1">

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, use } from "react"
@@ -73,7 +74,7 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
                   <User className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-headline font-bold leading-none mb-1.5">Alex Rivera</h3>
+                  <h3 className="text-2xl font-headline font-bold leading-none mb-1.5">Keshav Krishan</h3>
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest">
                     <School className="w-3 h-3" /> B.Tech CSE • Semester 6
                   </div>

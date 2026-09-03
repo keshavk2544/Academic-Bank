@@ -67,10 +67,10 @@ export default function AcademicsPage(props: { params: Promise<any>; searchParam
   use(props.params);
   use(props.searchParams);
 
-  const [contributorName, setContributorName] = useState("Alex Rivera");
+  const [contributorName, setContributorName] = useState("Keshav Krishan");
 
   const [files, setFiles] = useState([
-    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "Machine Learning", docType: "NOTES", contributor: "Alex Rivera" },
+    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", color: "text-blue-400", type: "Machine Learning", docType: "NOTES", contributor: "Keshav Krishan" },
     { title: "Computer Networks Lab Manual", size: "12.8 MB", date: "1 week ago", color: "text-purple-400", type: "Computer Networks", docType: "MFT", contributor: "Sarah Jenkins" },
     { title: "Operating Systems Lecture 15", size: "1.5 MB", date: "Today", color: "text-pink-400", type: "Operating Systems", docType: "NOTES", contributor: "Michael Chen" },
     { title: "Java Advanced Concepts", size: "2.1 MB", date: "3 days ago", color: "text-orange-400", type: "Web Technologies", docType: "IMP TOPIC", contributor: "Priya Sharma" },

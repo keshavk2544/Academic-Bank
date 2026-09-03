@@ -23,14 +23,14 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const MOCK_STUDENTS = [
-  { id: "22CSE1042", name: "Alex Rivera", email: "alex.r@univ.edu", semester: "6", status: "Active" },
+  { id: "22CSE1042", name: "Keshav Krishan", email: "keshav.k@univ.edu", semester: "6", status: "Active" },
   { id: "22CSE1045", name: "Sarah Jenkins", email: "sarah.j@univ.edu", semester: "6", status: "Probation" },
   { id: "22CSE1050", name: "Michael Chen", email: "m.chen@univ.edu", semester: "4", status: "Active" },
   { id: "22CSE1055", name: "Priya Sharma", email: "priya.s@univ.edu", semester: "6", status: "Inactive" },
 ];
 
 const MOCK_REPO_FILES = [
-  { id: 1, title: "Machine Learning Unit 2 Notes", contributor: "Alex Rivera", date: "2 hrs ago", status: "Pending" },
+  { id: 1, title: "Machine Learning Unit 2 Notes", contributor: "Keshav Krishan", date: "2 hrs ago", status: "Pending" },
   { id: 2, title: "Database Systems PYQ 2024", contributor: "Sarah Jenkins", date: "5 hrs ago", status: "Pending" },
   { id: 3, title: "Operating Systems Lab Manual", contributor: "Jordan Lee", date: "Yesterday", status: "Approved" },
 ];

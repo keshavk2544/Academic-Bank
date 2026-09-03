@@ -76,7 +76,7 @@ function NavigationContent({ children, params }: { children: ReactNode; params?:
               {userRole[0]?.toUpperCase() || "S"}
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold truncate">Alex Rivera</span>
+              <span className="text-sm font-semibold truncate">Keshav Krishan</span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{userRole}</span>
             </div>
           </div>
