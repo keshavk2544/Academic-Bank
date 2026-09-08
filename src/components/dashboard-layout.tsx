@@ -55,7 +55,7 @@ function NavigationContent({ children }: { children: ReactNode }) {
                 >
                   <Link href={item.href} className="relative flex justify-center items-center w-full h-full">
                     <span className={cn(
-                      "icon absolute block transition-all duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]",
+                      "icon absolute block transition-all duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)]",
                       isActive ? "translate-y-[-32px] text-[#ffaa00] drop-shadow-[0_5px_8px_rgba(255,170,0,0.4)]" : "text-[#d0d0d0]"
                     )}>
                       <Icon className="w-7 h-7" />
@@ -68,11 +68,10 @@ function NavigationContent({ children }: { children: ReactNode }) {
             {/* The Moving Wave Cutout Indicator */}
             {activeIndex !== -1 && (
               <div 
-                className="indicator absolute top-[-33px] w-[68px] h-[68px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] z-0"
+                className="indicator absolute top-[-33px] w-[68px] h-[68px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)] z-0"
                 style={{ 
-                  left: "12.5%", // Initial center for 4 items (100 / 4 / 2)
-                  transform: `translateX(calc(-50% + ${activeIndex * 25}% * (360/100)))`, // Percentage based movement
-                  // More robust for fixed-width:
+                  left: "0", 
+                  transform: `translateX(${activeIndex * 100}%)`,
                   transitionProperty: 'transform',
                 }}
               >
@@ -90,7 +89,6 @@ function NavigationContent({ children }: { children: ReactNode }) {
         .indicator {
            /* Fixed calculation for 4 items in a relative flex container */
            left: 0;
-           transform: translateX(${activeIndex * 25}%);
            margin-left: calc(12.5% - 34px);
         }
         .indicator::before {
