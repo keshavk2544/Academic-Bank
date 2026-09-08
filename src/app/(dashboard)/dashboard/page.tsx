@@ -4,9 +4,6 @@
 import { useState, useEffect, use } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useRouter } from "next/navigation"
-import { 
-  Wifi
-} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function Dashboard(props: { params: Promise<any>; searchParams: Promise<any> }) {
@@ -52,22 +49,9 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Main Content Area (Empty for now after removing metrics) */}
         <div className="px-6 mt-16 space-y-10">
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-card p-6 rounded-[2.5rem] border border-white/5">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4 block">Attendance</span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-headline font-black text-primary">87</span>
-                <span className="text-xs font-bold text-primary/60">%</span>
-              </div>
-            </div>
-            <div className="bg-card p-6 rounded-[2.5rem] border border-white/5">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4 block">Time Pulse</span>
-              <span className="text-3xl font-headline font-black tracking-tighter">{currentTime}</span>
-            </div>
-          </div>
+          {/* Room for future content widgets */}
         </div>
       </div>
     </DashboardLayout>
