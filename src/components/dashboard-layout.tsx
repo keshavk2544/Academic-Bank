@@ -27,13 +27,12 @@ const navItems: NavItem[] = [
 
 function NavigationContent({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const [userRole, setUserRole] = useState<string>("student")
-
-  useEffect(() => {
-    setUserRole(localStorage.getItem("userRole") || "student")
-  }, [])
-
-  const activeIndex = navItems.findIndex(item => item.href === pathname)
+  
+  // Find the exact active index for stable movement
+  const activeIndex = navItems.findIndex(item => {
+    if (item.href === '/dashboard' && pathname === '/dashboard') return true;
+    return pathname.startsWith(item.href) && item.href !== '/dashboard';
+  }) || 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -41,12 +40,12 @@ function NavigationContent({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Floating Wave Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 h-24 flex justify-center items-center z-[100] pointer-events-none">
-        <div className="navigation relative w-[360px] h-16 bg-[#111111] rounded-[25px] flex justify-center items-center px-2 shadow-2xl pointer-events-auto">
+      {/* Floating Wave Navigation - Compact & Bottom-Pinned */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 flex justify-center items-center z-[100] pointer-events-none">
+        <div className="navigation relative w-full max-w-[360px] h-16 bg-[#111111] rounded-t-[2rem] flex justify-center items-center px-2 border-t border-x border-white/10 shadow-2xl pointer-events-auto">
           <ul className="relative flex w-full">
             {navItems.map((item, idx) => {
-              const isActive = pathname === item.href;
+              const isActive = activeIndex === idx;
               const Icon = item.icon;
               
               return (
@@ -69,15 +68,15 @@ function NavigationContent({ children }: { children: ReactNode }) {
             {/* The Moving Wave Cutout Indicator */}
             {activeIndex !== -1 && (
               <div 
-                className="indicator absolute top-[-32px] w-[65px] h-[65px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] z-0"
+                className="indicator absolute top-[-33px] w-[68px] h-[68px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] z-0"
                 style={{ 
-                  transform: `translateX(calc(${activeIndex * (100 / navItems.length)}% + ${(100 / navItems.length / 2)}% - 32.5px))`,
-                  left: 0
+                  left: "12.5%", // Initial center for 4 items (100 / 4 / 2)
+                  transform: `translateX(calc(-50% + ${activeIndex * 25}% * (360/100)))`, // Percentage based movement
+                  // More robust for fixed-width:
+                  transitionProperty: 'transform',
                 }}
               >
-                {/* Wavy side curves */}
-                <div className="before absolute top-[21px] left-[-23px] w-5 h-5 bg-transparent rounded-tr-[20px] shadow-[5px_-10px_0_0_black]" />
-                <div className="after absolute top-[21px] right-[-23px] w-5 h-5 bg-transparent rounded-tl-[20px] shadow-[-5px_-10px_0_0_black]" />
+                {/* Wavy curve logic is handled via Styled JSX for absolute sync */}
               </div>
             )}
           </ul>
@@ -88,14 +87,33 @@ function NavigationContent({ children }: { children: ReactNode }) {
         .navigation {
           box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
-        .list.active .icon {
-          color: #ffaa00;
+        .indicator {
+           /* Fixed calculation for 4 items in a relative flex container */
+           left: 0;
+           transform: translateX(${activeIndex * 25}%);
+           margin-left: calc(12.5% - 34px);
         }
         .indicator::before {
           content: '';
+          position: absolute;
+          top: 22px;
+          left: -22px;
+          width: 20px;
+          height: 20px;
+          background: transparent;
+          border-top-right-radius: 20px;
+          box-shadow: 2px -10px 0 0 black;
         }
         .indicator::after {
           content: '';
+          position: absolute;
+          top: 22px;
+          right: -22px;
+          width: 20px;
+          height: 20px;
+          background: transparent;
+          border-top-left-radius: 20px;
+          box-shadow: -2px -10px 0 0 black;
         }
       `}</style>
     </div>
