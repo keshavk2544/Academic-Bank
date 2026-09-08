@@ -10,7 +10,7 @@ import { LogIn } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [role, setRole] = useState<"student" | "faculty" | "admin">("student")
+  const [role, setRole] = useState<"student" | "admin">("student")
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 z-10">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <h1 className="text-4xl font-headline font-bold tracking-tight text-glow">PreRP</h1>
+            <h1 className="text-4xl font-headline font-bold tracking-tight text-glow" data-ai-hint="futuristic logo">PreRP</h1>
           </div>
           <p className="text-muted-foreground font-body">The futuristic campus ecosystem.</p>
         </div>
@@ -35,7 +35,7 @@ export default function LoginPage() {
         <GlassCard className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="flex p-1 bg-white/5 rounded-xl border border-white/10">
-              {(["student", "faculty", "admin"] as const).map((r) => (
+              {(["student", "admin"] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="id" className="text-xs text-muted-foreground uppercase tracking-wider">
-                {role === "student" ? "Student ID" : "Employee ID"}
+                {role === "student" ? "Student ID" : "Administrator ID"}
               </Label>
               <Input
                 id="id"

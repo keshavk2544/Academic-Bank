@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -85,7 +84,7 @@ export default function ProfilePage() {
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Email Address</p>
                   <div className="flex items-center gap-3 text-sm">
-                    <Mail className="w-4 h-4 text-primary" /> keshav.krishan@pre.university.edu
+                    <Mail className="w-4 h-4 text-primary" /> keshav.krishan@univ.edu
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -137,13 +136,6 @@ export default function ProfilePage() {
                   className={`w-full h-11 rounded-xl ${role === "student" ? "bg-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]" : "glass border-white/10"}`}
                 >
                   Student View
-                </Button>
-                <Button 
-                  onClick={() => switchRole("faculty")}
-                  variant={role === "faculty" ? "default" : "outline"} 
-                  className={`w-full h-11 rounded-xl ${role === "faculty" ? "bg-accent shadow-[0_0_15px_rgba(72,118,245,0.3)]" : "glass border-white/10"}`}
-                >
-                  Faculty View
                 </Button>
                 <Button 
                   onClick={() => switchRole("admin")}
