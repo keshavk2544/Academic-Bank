@@ -5,26 +5,26 @@
 
 @layer base {
   :root {
-    --background: 250 20% 4%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --card: 250 20% 8%;
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 100%;
-    --popover: 250 20% 6%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 100%;
-    --primary: 258 90% 66%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 250 20% 12%;
+    --primary: 47 95% 55%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 250 20% 15%;
-    --muted-foreground: 250 10% 70%;
-    --accent: 226 90% 62%;
-    --accent-foreground: 0 0% 100%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 47 95% 55%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 250 20% 15%;
-    --input: 250 20% 15%;
-    --ring: 258 90% 66%;
-    --radius: 1.5rem;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 47 95% 55%;
+    --radius: 2rem;
   }
 }
 
@@ -33,37 +33,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-                      radial-gradient(circle at 100% 0%, rgba(72, 118, 245, 0.05) 0%, transparent 40%);
+    @apply bg-background text-foreground font-body antialiased;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    @apply bg-card border border-white/5 shadow-2xl;
   }
-  .glass-card {
-    @apply glass rounded-2xl p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20;
+  .yellow-header {
+    @apply bg-primary text-black rounded-b-[3rem] p-8 pb-12 relative;
   }
-  .text-glow {
-    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  .pill-input {
+    @apply rounded-full bg-black text-white border-none h-14 px-6;
   }
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+  .card-item {
+    @apply bg-card rounded-[2rem] p-5 flex items-center justify-between transition-all hover:bg-muted/50;
   }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+  .icon-box {
+    @apply w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-black;
   }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-white/20;
-  }
-}
-
-@keyframes scan {
-  0%, 100% { top: 0% }
-  50% { top: 100% }
 }

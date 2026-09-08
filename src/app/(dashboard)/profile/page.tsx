@@ -1,9 +1,9 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { 
   User, 
@@ -15,7 +15,10 @@ import {
   Award, 
   Zap, 
   Star,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  Edit2,
+  Copy
 } from "lucide-react"
 
 export default function ProfilePage() {
@@ -39,122 +42,104 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
-        <header className="flex flex-col md:flex-row items-center gap-8 bg-primary/5 p-8 rounded-[40px] border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10" />
-          
-          <div className="relative group">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-[40px] glass border-2 border-primary/30 p-1 group-hover:border-primary transition-all duration-500">
-              <div className="w-full h-full rounded-[36px] overflow-hidden bg-white/5 flex items-center justify-center">
-                <User className="w-16 h-16 text-muted-foreground/30" />
-              </div>
-            </div>
-            <button className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-xl shadow-lg hover:scale-110 transition-transform">
-              <Settings className="w-4 h-4" />
-            </button>
+      <div className="min-h-screen bg-black text-white pb-32">
+        <header className="yellow-header h-[250px] flex flex-col items-center justify-center text-center">
+          <div className="absolute top-8 left-8">
+            <Edit2 className="w-6 h-6" />
+          </div>
+          <div className="absolute top-8 right-8">
+            <Copy className="w-6 h-6" />
           </div>
 
-          <div className="text-center md:text-left flex-1 space-y-4">
-            <div>
-              <h1 className="text-3xl font-headline font-bold">Keshav Krishan</h1>
-              <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-2 text-sm mt-1">
-                Computer Science & Engineering • Class of 2026
-              </p>
+          <div className="relative mt-8">
+            <div className="w-32 h-32 rounded-full border-[6px] border-black bg-muted overflow-hidden">
+               <img 
+                src="https://picsum.photos/seed/keshav/200" 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+                data-ai-hint="student profile"
+              />
             </div>
-            
-            <div className="flex flex-wrap justify-center md:justify-start gap-3">
-              <span className="px-4 py-1.5 rounded-full glass border-white/10 text-xs font-bold text-primary flex items-center gap-2">
-                <Star className="w-3 h-3" /> Gold Medalist
-              </span>
-              <span className="px-4 py-1.5 rounded-full glass border-white/10 text-xs font-bold text-accent flex items-center gap-2">
-                <Shield className="w-3 h-3" /> Verified Student
-              </span>
-              <span className="px-4 py-1.5 rounded-full glass border-white/10 text-xs font-bold text-pink-400 flex items-center gap-2">
-                <Zap className="w-3 h-3" /> 15 Day Streak
-              </span>
-            </div>
+          </div>
+          <div className="mt-4">
+            <h1 className="text-3xl font-headline font-bold">Keshav Krishan</h1>
+            <p className="text-black/60 font-bold uppercase text-[10px] tracking-widest">{role}</p>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-8">
-            <GlassCard className="space-y-6">
-              <h3 className="text-xl font-headline font-bold">Contact Details</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Email Address</p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Mail className="w-4 h-4 text-primary" /> keshav.krishan@univ.edu
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Mobile Number</p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Phone className="w-4 h-4 text-primary" /> +1 (555) 234-5678
-                  </div>
-                </div>
-              </div>
-            </GlassCard>
-
-            <GlassCard className="space-y-6">
-              <h3 className="text-xl font-headline font-bold">Achievement Showcase</h3>
-              <div className="space-y-4">
-                {[
-                  { title: "Quiz Master", desc: "Top 1% in all subjects", icon: Award, date: "May 2025" },
-                  { title: "Perfect Pulse", desc: "100% attendance for 30 days", icon: Zap, date: "Apr 2025" },
-                ].map((ach, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl glass border-white/10">
-                        <ach.icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm">{ach.title}</h4>
-                        <p className="text-xs text-muted-foreground">{ach.desc}</p>
-                      </div>
-                    </div>
-                    <div className="text-right flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">{ach.date}</span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </GlassCard>
+        <div className="px-6 mt-8 space-y-8">
+          <div className="flex gap-3 justify-center">
+            <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5">
+              <Settings className="w-5 h-5" />
+            </button>
+            <button className="bg-card flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 border border-white/5 font-bold">
+              <Plus className="w-5 h-5" /> Add New Detail
+            </button>
+            <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5">
+              <Copy className="w-5 h-5" />
+            </button>
           </div>
 
-          <div className="space-y-8">
-            <GlassCard className="space-y-6">
-              <h3 className="text-lg font-bold">Admin Controls</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Developer Mode: Switch roles to test the UI experience for different users.
-              </p>
-              <div className="flex flex-col gap-3">
-                <Button 
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold font-headline">Information</h2>
+              <button className="text-[10px] font-black uppercase tracking-widest opacity-40">Edit</button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="card-item">
+                <div className="flex items-center gap-4">
+                  <div className="icon-box">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold">Email Address</h4>
+                    <p className="text-xs text-muted-foreground">keshav.k@univ.edu</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-item">
+                <div className="flex items-center gap-4">
+                  <div className="icon-box">
+                    <Phone className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold">Phone Number</h4>
+                    <p className="text-xs text-muted-foreground">+1 (555) 000-0000</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-lg font-bold font-headline">Controls</h2>
+            <div className="bg-card p-6 rounded-[2.5rem] border border-white/5 space-y-4">
+              <p className="text-xs text-muted-foreground">Switch roles for development preview.</p>
+              <div className="flex gap-2">
+                <button 
                   onClick={() => switchRole("student")}
-                  variant={role === "student" ? "default" : "outline"} 
-                  className={`w-full h-11 rounded-xl ${role === "student" ? "bg-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]" : "glass border-white/10"}`}
+                  className={cn("flex-1 py-3 rounded-full text-xs font-bold transition-all", role === "student" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
                 >
-                  Student View
-                </Button>
-                <Button 
+                  Student
+                </button>
+                <button 
                   onClick={() => switchRole("admin")}
-                  variant={role === "admin" ? "default" : "outline"} 
-                  className={`w-full h-11 rounded-xl ${role === "admin" ? "bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)]" : "glass border-white/10"}`}
+                  className={cn("flex-1 py-3 rounded-full text-xs font-bold transition-all", role === "admin" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
                 >
-                  Admin View
-                </Button>
+                  Admin
+                </button>
               </div>
-            </GlassCard>
-
-            <Button 
-              onClick={handleSignOut}
-              variant="ghost" 
-              className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 h-12 rounded-xl border border-red-500/20"
-            >
-              <LogOut className="w-4 h-4 mr-2" /> Sign Out from PreRP
-            </Button>
-          </div>
+              <Button 
+                onClick={handleSignOut}
+                variant="destructive"
+                className="w-full h-14 rounded-full font-bold"
+              >
+                <LogOut className="w-4 h-4 mr-2" /> Sign Out
+              </Button>
+            </div>
+          </section>
         </div>
       </div>
     </DashboardLayout>
