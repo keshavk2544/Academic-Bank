@@ -9,12 +9,9 @@ import {
   Heart, 
   Hexagon, 
   MessageCircleQuestion,
-  ShieldCheck,
   Home,
   Flame,
-  Settings,
-  Archive,
-  BookOpen
+  Settings
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,7 +19,6 @@ interface NavItem {
   icon: any
   label: string
   href: string
-  adminOnly?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -40,64 +36,50 @@ function NavigationContent({ children }: { children: ReactNode }) {
     setUserRole(localStorage.getItem("userRole") || "student")
   }, [])
 
-  // Find the index of the active nav item for the custom curve positioning
   const activeIndex = navItems.findIndex(item => item.href === pathname)
-  const leftPosition = activeIndex === -1 ? 0 : (activeIndex * 100) / navItems.length
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
-      {/* Main Content Area */}
-      <main className="flex-1 w-full pb-32">
+      <main className="flex-1 w-full pb-24">
         {children}
       </main>
 
-      {/* Floating Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-[100] px-4 flex justify-center pointer-events-none">
-        <div className="relative w-full max-w-lg h-20 bg-black rounded-[2.5rem] border border-white/10 flex items-center justify-around pointer-events-auto">
+      {/* Compact Sticky Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-transparent z-[100] flex justify-center pointer-events-none">
+        <div className="relative w-full max-w-lg h-16 bg-black rounded-t-[2rem] border-t border-x border-white/10 flex items-center justify-around pointer-events-auto">
           
-          {/* Custom Curve for Active Item */}
+          {/* Active Indicator Cutout */}
           {activeIndex !== -1 && (
             <div 
               className="absolute top-0 transition-all duration-300 ease-in-out -translate-y-1/2"
-              style={{ left: `calc(${activeIndex * 25 + 12.5}% - 3rem)` }}
+              style={{ left: `calc(${activeIndex * 25 + 12.5}% - 2.5rem)` }}
             >
-              <div className="relative w-24 h-24 flex items-center justify-center">
-                {/* The "Cutout" background mimic */}
-                <div className="absolute inset-0 bg-black rounded-full border-4 border-black" />
-                <div className="z-10 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.3)]">
-                  {/* Icon of the active item */}
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black rounded-full border-[3px] border-black" />
+                <div className="z-10 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                   {(() => {
                     const ActiveIcon = navItems[activeIndex].icon;
-                    return <ActiveIcon className="w-8 h-8 text-black font-black" />;
+                    return <ActiveIcon className="w-7 h-7 text-black font-black" />;
                   })()}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Nav Items Mapper */}
           {navItems.map((item, idx) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "relative z-20 flex flex-col items-center justify-center w-20 h-full transition-all",
+                "relative z-20 flex flex-col items-center justify-center w-16 h-full transition-all",
                 pathname === item.href ? "opacity-0 scale-50" : "opacity-40 hover:opacity-100"
               )}
             >
-              <item.icon className="w-6 h-6 text-white" />
+              <item.icon className="w-5 h-5 text-white" />
             </Link>
           ))}
         </div>
       </nav>
-      
-      {/* Style for the cutout curve corners */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(-50%); }
-          50% { transform: translateY(-55%); }
-        }
-      `}</style>
     </div>
   )
 }
