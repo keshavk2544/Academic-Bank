@@ -5,11 +5,8 @@ import { ReactNode, Suspense, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  Hourglass, 
-  Heart, 
-  Hexagon, 
-  MessageCircleQuestion,
   Home,
+  Heart,
   Flame,
   Settings
 } from "lucide-react"
@@ -44,42 +41,63 @@ function NavigationContent({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Compact Sticky Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-transparent z-[100] flex justify-center pointer-events-none">
-        <div className="relative w-full max-w-lg h-16 bg-black rounded-t-[2rem] border-t border-x border-white/10 flex items-center justify-around pointer-events-auto">
-          
-          {/* Active Indicator Cutout */}
-          {activeIndex !== -1 && (
-            <div 
-              className="absolute top-0 transition-all duration-300 ease-in-out -translate-y-1/2"
-              style={{ left: `calc(${activeIndex * 25 + 12.5}% - 2.5rem)` }}
-            >
-              <div className="relative w-20 h-20 flex items-center justify-center">
-                <div className="absolute inset-0 bg-black rounded-full border-[3px] border-black" />
-                <div className="z-10 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                  {(() => {
-                    const ActiveIcon = navItems[activeIndex].icon;
-                    return <ActiveIcon className="w-7 h-7 text-black font-black" />;
-                  })()}
-                </div>
+      {/* Floating Wave Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 h-24 flex justify-center items-center z-[100] pointer-events-none">
+        <div className="navigation relative w-[360px] h-16 bg-[#111111] rounded-[25px] flex justify-center items-center px-2 shadow-2xl pointer-events-auto">
+          <ul className="relative flex w-full">
+            {navItems.map((item, idx) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              
+              return (
+                <li 
+                  key={item.href} 
+                  className={cn("list relative list-none flex-1 h-16 z-10", isActive && "active")}
+                >
+                  <Link href={item.href} className="relative flex justify-center items-center w-full h-full">
+                    <span className={cn(
+                      "icon absolute block transition-all duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]",
+                      isActive ? "translate-y-[-32px] text-[#ffaa00] drop-shadow-[0_5px_8px_rgba(255,170,0,0.4)]" : "text-[#d0d0d0]"
+                    )}>
+                      <Icon className="w-7 h-7" />
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+            
+            {/* The Moving Wave Cutout Indicator */}
+            {activeIndex !== -1 && (
+              <div 
+                className="indicator absolute top-[-32px] w-[65px] h-[65px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] z-0"
+                style={{ 
+                  transform: `translateX(calc(${activeIndex * (100 / navItems.length)}% + ${(100 / navItems.length / 2)}% - 32.5px))`,
+                  left: 0
+                }}
+              >
+                {/* Wavy side curves */}
+                <div className="before absolute top-[21px] left-[-23px] w-5 h-5 bg-transparent rounded-tr-[20px] shadow-[5px_-10px_0_0_black]" />
+                <div className="after absolute top-[21px] right-[-23px] w-5 h-5 bg-transparent rounded-tl-[20px] shadow-[-5px_-10px_0_0_black]" />
               </div>
-            </div>
-          )}
-
-          {navItems.map((item, idx) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "relative z-20 flex flex-col items-center justify-center w-16 h-full transition-all",
-                pathname === item.href ? "opacity-0 scale-50" : "opacity-40 hover:opacity-100"
-              )}
-            >
-              <item.icon className="w-5 h-5 text-white" />
-            </Link>
-          ))}
+            )}
+          </ul>
         </div>
       </nav>
+
+      <style jsx>{`
+        .navigation {
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        .list.active .icon {
+          color: #ffaa00;
+        }
+        .indicator::before {
+          content: '';
+        }
+        .indicator::after {
+          content: '';
+        }
+      `}</style>
     </div>
   )
 }
