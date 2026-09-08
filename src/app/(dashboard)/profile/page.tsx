@@ -11,7 +11,9 @@ import {
   Mail, 
   Phone, 
   ChevronRight,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Settings,
+  Shield
 } from "lucide-react"
 
 export default function ProfilePage() {
@@ -36,8 +38,18 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-black text-white pb-32">
-        {/* Inspiration Header: Centered Image overlapping Yellow Box */}
-        <header className="px-6 pt-12 flex flex-col items-center">
+        {/* Optimized Header: Reduced padding and added status room */}
+        <header className="px-6 pt-6 flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-6 px-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+              <Shield className="w-3 h-3 text-primary" />
+              <span className="text-[9px] font-black uppercase tracking-widest">Secure Session</span>
+            </div>
+            <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 transition-all active:scale-90">
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
+
           <div className="relative z-10 -mb-12">
             <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl">
               <img 
