@@ -1,36 +1,35 @@
 
 "use client"
 
-import { ReactNode, useEffect, useState, Suspense } from "react"
+import { ReactNode, Suspense, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  LayoutDashboard, 
-  Library, 
-  BrainCircuit, 
-  User, 
+  Hourglass, 
+  Heart, 
+  Hexagon, 
+  MessageCircleQuestion,
   ShieldCheck,
-  Plus,
-  Heart,
-  HelpCircle,
-  Hexagon,
-  Hourglass,
-  MessageCircleQuestion
+  Home,
+  Flame,
+  Settings,
+  Archive,
+  BookOpen
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
-  icon: any;
-  label: string;
-  href: string;
-  adminOnly?: boolean;
+  icon: any
+  label: string
+  href: string
+  adminOnly?: boolean
 }
 
 const navItems: NavItem[] = [
-  { icon: Hourglass, label: "Dashboard", href: "/dashboard" },
+  { icon: Home, label: "Home", href: "/dashboard" },
   { icon: Heart, label: "Profile", href: "/profile" },
-  { icon: Hexagon, label: "Repo", href: "/academics" },
-  { icon: MessageCircleQuestion, label: "Quiz", href: "/tools" },
+  { icon: Flame, label: "Vault", href: "/academics" },
+  { icon: Settings, label: "Tools", href: "/tools" },
 ]
 
 function NavigationContent({ children }: { children: ReactNode }) {
@@ -41,74 +40,64 @@ function NavigationContent({ children }: { children: ReactNode }) {
     setUserRole(localStorage.getItem("userRole") || "student")
   }, [])
 
-  const filteredNavItems = navItems.filter(item => !item.adminOnly || userRole === "admin")
+  // Find the index of the active nav item for the custom curve positioning
+  const activeIndex = navItems.findIndex(item => item.href === pathname)
+  const leftPosition = activeIndex === -1 ? 0 : (activeIndex * 100) / navItems.length
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
-      {/* Desktop Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-card hidden md:flex flex-col border-r border-white/5 z-50">
-        <div className="p-8">
-          <span className="text-3xl font-headline font-bold text-primary italic">PreRP</span>
-        </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {filteredNavItems.map((item) => (
+      {/* Main Content Area */}
+      <main className="flex-1 w-full pb-32">
+        {children}
+      </main>
+
+      {/* Floating Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-[100] px-4 flex justify-center pointer-events-none">
+        <div className="relative w-full max-w-lg h-20 bg-black rounded-[2.5rem] border border-white/10 flex items-center justify-around pointer-events-auto">
+          
+          {/* Custom Curve for Active Item */}
+          {activeIndex !== -1 && (
+            <div 
+              className="absolute top-0 transition-all duration-300 ease-in-out -translate-y-1/2"
+              style={{ left: `calc(${activeIndex * 25 + 12.5}% - 3rem)` }}
+            >
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                {/* The "Cutout" background mimic */}
+                <div className="absolute inset-0 bg-black rounded-full border-4 border-black" />
+                <div className="z-10 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.3)]">
+                  {/* Icon of the active item */}
+                  {(() => {
+                    const ActiveIcon = navItems[activeIndex].icon;
+                    return <ActiveIcon className="w-8 h-8 text-black font-black" />;
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Nav Items Mapper */}
+          {navItems.map((item, idx) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-4 px-6 py-4 rounded-[2rem] transition-all",
-                pathname === item.href 
-                  ? "bg-primary text-black font-bold" 
-                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                "relative z-20 flex flex-col items-center justify-center w-20 h-full transition-all",
+                pathname === item.href ? "opacity-0 scale-50" : "opacity-40 hover:opacity-100"
               )}
             >
-              <item.icon className="w-5 h-5" />
-              <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+              <item.icon className="w-6 h-6 text-white" />
             </Link>
           ))}
-          {userRole === "admin" && (
-            <Link
-              href="/admin"
-              className={cn(
-                "flex items-center gap-4 px-6 py-4 rounded-[2rem] transition-all",
-                pathname === "/admin" 
-                  ? "bg-primary text-black font-bold" 
-                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-              )}
-            >
-              <ShieldCheck className="w-5 h-5" />
-              <span className="text-xs font-black uppercase tracking-widest">Admin</span>
-            </Link>
-          )}
-        </nav>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 w-full">
-        {children}
-      </main>
-
-      {/* Inspiration Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-card/90 backdrop-blur-3xl rounded-[2.5rem] h-20 border border-white/10 px-8 flex justify-between items-center z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-        <Link href="/dashboard" className={cn("transition-all", pathname === "/dashboard" ? "text-primary" : "text-white/30")}>
-          <Hourglass className="w-6 h-6" />
-        </Link>
-        <Link href="/profile" className={cn("transition-all", pathname === "/profile" ? "text-primary" : "text-white/30")}>
-          <Heart className="w-6 h-6" />
-        </Link>
-        
-        {/* Central Plus Button */}
-        <div className="w-16 h-16 bg-white rounded-full -translate-y-8 flex items-center justify-center shadow-xl shadow-white/20 cursor-pointer hover:scale-110 active:scale-95 transition-transform">
-          <Plus className="w-8 h-8 text-black" />
         </div>
-
-        <Link href="/academics" className={cn("transition-all", pathname === "/academics" ? "text-primary" : "text-white/30")}>
-          <Hexagon className="w-6 h-6" />
-        </Link>
-        <Link href="/tools" className={cn("transition-all", pathname === "/tools" ? "text-primary" : "text-white/30")}>
-          <MessageCircleQuestion className="w-6 h-6" />
-        </Link>
       </nav>
+      
+      {/* Style for the cutout curve corners */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(-50%); }
+          50% { transform: translateY(-55%); }
+        }
+      `}</style>
     </div>
   )
 }
