@@ -7,21 +7,11 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { 
-  User, 
-  Settings, 
   LogOut, 
-  Shield, 
   Mail, 
   Phone, 
-  Award, 
-  Zap, 
-  Star,
   ChevronRight,
-  Plus,
-  Edit2,
-  Copy,
-  SlidersHorizontal,
-  Bell
+  SlidersHorizontal
 } from "lucide-react"
 
 export default function ProfilePage() {
@@ -65,19 +55,7 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        <div className="flex gap-3 px-6 -mt-6 relative z-20">
-          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
-            <Edit2 className="w-5 h-5 text-white/70" />
-          </button>
-          <button className="bg-card flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 border border-white/5 font-bold shadow-xl transition-transform active:scale-95 text-xs">
-            <Plus className="w-4 h-4" /> Add New Detail
-          </button>
-          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
-            <Copy className="w-5 h-5 text-white/70" />
-          </button>
-        </div>
-
-        <div className="px-6 mt-10 space-y-8">
+        <div className="px-6 mt-16 space-y-8">
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
               <h2 className="text-xl font-bold font-headline tracking-tight">Identity Details</h2>

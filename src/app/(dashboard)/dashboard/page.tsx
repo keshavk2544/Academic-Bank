@@ -3,25 +3,14 @@
 
 import { useState, useEffect, use } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { Progress } from "@/components/ui/progress"
 import { useRouter } from "next/navigation"
 import { 
-  Search,
   BrainCircuit, 
   Library,
-  ChevronRight,
-  Clock,
-  Scan,
-  User,
-  LayoutGrid,
-  Plus,
-  Edit2,
-  Copy,
-  SlidersHorizontal,
   Eye,
-  Download
+  Download,
+  SlidersHorizontal
 } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 export default function Dashboard(props: { params: Promise<any>; searchParams: Promise<any> }) {
@@ -62,27 +51,13 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
           </div>
           
           <div className="bg-primary w-full rounded-[3.5rem] pt-16 pb-8 text-center text-black px-6 shadow-xl relative overflow-hidden">
-             {/* Decorative pattern if needed, but keeping it clean for now */}
              <h1 className="text-3xl font-headline font-black tracking-tighter leading-none mb-1">Keshav Krishan</h1>
              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Admin</p>
           </div>
         </header>
 
-        {/* Action Row below header */}
-        <div className="flex gap-3 px-6 -mt-6 relative z-20">
-          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
-            <Edit2 className="w-5 h-5 text-white/70" />
-          </button>
-          <button className="bg-card flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 border border-white/5 font-bold shadow-xl transition-transform active:scale-95 text-xs">
-            <Plus className="w-4 h-4" /> Add New Detail
-          </button>
-          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
-            <Copy className="w-5 h-5 text-white/70" />
-          </button>
-        </div>
-
         {/* Main Content */}
-        <div className="px-6 mt-10 space-y-10">
+        <div className="px-6 mt-16 space-y-10">
           {/* Recently Searched Style Section */}
           <section className="space-y-6">
             <div className="flex items-center justify-between px-2">
