@@ -5,7 +5,6 @@ import { useState, useEffect, use } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useRouter } from "next/navigation"
 import { 
-  SlidersHorizontal,
   Wifi
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -55,21 +54,6 @@ export default function Dashboard(props: { params: Promise<any>; searchParams: P
 
         {/* Main Content */}
         <div className="px-6 mt-16 space-y-10">
-          {/* Academic Hub Section */}
-          <section className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-xl font-bold font-headline tracking-tight">Academic Hub</h2>
-              <SlidersHorizontal className="w-5 h-5 opacity-40" />
-            </div>
-
-            <button 
-              onClick={() => router.push('/academics')}
-              className="w-full py-4 bg-primary rounded-[2rem] text-black font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-transform active:scale-95"
-            >
-              View Full Hub
-            </button>
-          </section>
-
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-card p-6 rounded-[2.5rem] border border-white/5">
