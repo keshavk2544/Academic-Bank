@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { GlassCard } from "@/components/glass-card"
-import { Zap, LogIn } from "lucide-react"
+import { LogIn } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,9 +27,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 z-10">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="p-3 rounded-2xl bg-primary/20 glass border border-primary/30 animate-float">
-              <Zap className="w-8 h-8 text-primary" />
-            </div>
             <h1 className="text-4xl font-headline font-bold tracking-tight text-glow">PreRP</h1>
           </div>
           <p className="text-muted-foreground font-body">The futuristic campus ecosystem.</p>
