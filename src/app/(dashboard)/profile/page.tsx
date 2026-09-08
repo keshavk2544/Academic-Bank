@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Plus,
   Edit2,
-  Copy
+  Copy,
+  SlidersHorizontal,
+  Bell
 } from "lucide-react"
 
 export default function ProfilePage() {
@@ -44,17 +46,11 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-black text-white pb-32">
-        <header className="yellow-header h-[250px] flex flex-col items-center justify-center text-center">
-          <div className="absolute top-8 left-8">
-            <Edit2 className="w-6 h-6" />
-          </div>
-          <div className="absolute top-8 right-8">
-            <Copy className="w-6 h-6" />
-          </div>
-
-          <div className="relative mt-8">
-            <div className="w-32 h-32 rounded-full border-[6px] border-black bg-muted overflow-hidden">
-               <img 
+        {/* Inspiration Header: Centered Image overlapping Yellow Box */}
+        <header className="px-6 pt-12 flex flex-col items-center">
+          <div className="relative z-10 -mb-12">
+            <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl">
+              <img 
                 src="https://picsum.photos/seed/keshav/200" 
                 alt="Profile" 
                 className="w-full h-full object-cover"
@@ -62,72 +58,80 @@ export default function ProfilePage() {
               />
             </div>
           </div>
-          <div className="mt-4">
-            <h1 className="text-3xl font-headline font-bold">Keshav Krishan</h1>
-            <p className="text-black/60 font-bold uppercase text-[10px] tracking-widest">{role}</p>
+          
+          <div className="bg-primary w-full rounded-[3.5rem] pt-16 pb-8 text-center text-black px-6 shadow-xl">
+             <h1 className="text-3xl font-headline font-black tracking-tighter leading-none mb-1">Keshav Krishan</h1>
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">{role}</p>
           </div>
         </header>
 
-        <div className="px-6 mt-8 space-y-8">
-          <div className="flex gap-3 justify-center">
-            <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5">
-              <Settings className="w-5 h-5" />
-            </button>
-            <button className="bg-card flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 border border-white/5 font-bold">
-              <Plus className="w-5 h-5" /> Add New Detail
-            </button>
-            <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5">
-              <Copy className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="flex gap-3 px-6 -mt-6 relative z-20">
+          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
+            <Edit2 className="w-5 h-5 text-white/70" />
+          </button>
+          <button className="bg-card flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 border border-white/5 font-bold shadow-xl transition-transform active:scale-95 text-xs">
+            <Plus className="w-4 h-4" /> Add New Detail
+          </button>
+          <button className="bg-card w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl transition-transform active:scale-90">
+            <Copy className="w-5 h-5 text-white/70" />
+          </button>
+        </div>
 
+        <div className="px-6 mt-10 space-y-8">
           <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold font-headline">Information</h2>
-              <button className="text-[10px] font-black uppercase tracking-widest opacity-40">Edit</button>
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-xl font-bold font-headline tracking-tight">Identity Details</h2>
+              <SlidersHorizontal className="w-5 h-5 opacity-40" />
             </div>
 
-            <div className="space-y-3">
-              <div className="card-item">
-                <div className="flex items-center gap-4">
-                  <div className="icon-box">
+            <div className="space-y-4">
+              <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
+                <div className="pl-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-bold">Email Address</h4>
-                    <p className="text-xs text-muted-foreground">keshav.k@univ.edu</p>
+                    <h3 className="text-sm font-bold">Email Address</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">keshav.k@univ.edu</p>
                   </div>
                 </div>
+                <button className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-transform active:scale-90">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="card-item">
-                <div className="flex items-center gap-4">
-                  <div className="icon-box">
+              <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
+                <div className="pl-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                     <Phone className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-bold">Phone Number</h4>
-                    <p className="text-xs text-muted-foreground">+1 (555) 000-0000</p>
+                    <h3 className="text-sm font-bold">Phone Connection</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">+1 (555) 000-0000</p>
                   </div>
                 </div>
+                <button className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-transform active:scale-90">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-lg font-bold font-headline">Controls</h2>
-            <div className="bg-card p-6 rounded-[2.5rem] border border-white/5 space-y-4">
-              <p className="text-xs text-muted-foreground">Switch roles for development preview.</p>
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-xl font-bold font-headline tracking-tight">Developer Mode</h2>
+            </div>
+            <div className="bg-card p-6 rounded-[2.5rem] border border-white/5 space-y-6">
               <div className="flex gap-2">
                 <button 
                   onClick={() => switchRole("student")}
-                  className={cn("flex-1 py-3 rounded-full text-xs font-bold transition-all", role === "student" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
+                  className={cn("flex-1 py-3 rounded-full text-[10px] font-black uppercase transition-all", role === "student" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
                 >
                   Student
                 </button>
                 <button 
                   onClick={() => switchRole("admin")}
-                  className={cn("flex-1 py-3 rounded-full text-xs font-bold transition-all", role === "admin" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
+                  className={cn("flex-1 py-3 rounded-full text-[10px] font-black uppercase transition-all", role === "admin" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
                 >
                   Admin
                 </button>
@@ -135,9 +139,9 @@ export default function ProfilePage() {
               <Button 
                 onClick={handleSignOut}
                 variant="destructive"
-                className="w-full h-14 rounded-full font-bold"
+                className="w-full h-14 rounded-full font-black text-xs uppercase tracking-widest shadow-lg shadow-destructive/20"
               >
-                <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                <LogOut className="w-4 h-4 mr-2" /> De-Initialize Session
               </Button>
             </div>
           </section>
