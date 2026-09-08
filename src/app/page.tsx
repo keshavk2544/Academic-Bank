@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { GlassCard } from "@/components/glass-card"
-import { Zap, Shield, Sparkles, LogIn } from "lucide-react"
+import { Zap, LogIn } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -81,20 +80,6 @@ export default function LoginPage() {
               <LogIn className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/10"></span></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-2 text-muted-foreground">or connect via</span></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="glass hover:bg-white/10 border-white/10 rounded-xl h-12">
-              Google
-            </Button>
-            <Button variant="outline" className="glass hover:bg-white/10 border-white/10 rounded-xl h-12">
-              Azure AD
-            </Button>
-          </div>
         </GlassCard>
 
         <p className="text-center text-xs text-muted-foreground">
