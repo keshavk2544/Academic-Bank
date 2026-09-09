@@ -8,7 +8,6 @@ import {
   Home,
   Heart,
   Flame,
-  Settings
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LoadingOverlay } from "@/components/loading-overlay"
@@ -21,8 +20,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/dashboard" },
-  { icon: Flame, label: "Vault", href: "/academics" },
-  { icon: Settings, label: "Tools", href: "/tools" },
+  { icon: Flame, label: "Repo", href: "/academics" },
   { icon: Heart, label: "Profile", href: "/profile" },
 ]
 
@@ -46,8 +44,8 @@ function NavigationContent({ children }: { children: ReactNode }) {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 h-16 flex justify-center items-end z-[100] pointer-events-none">
-        <div className="navigation relative w-[280px] h-16 bg-[#111111] rounded-t-[2rem] flex justify-center items-center px-[10px] shadow-[0_15px_35px_rgba(0,0,0,0.5)] pointer-events-auto border-t border-x border-white/5">
-          <ul className="relative flex w-[260px]">
+        <div className="navigation relative w-[240px] h-16 bg-[#111111] rounded-t-[2rem] flex justify-center items-center px-[10px] shadow-[0_15px_35px_rgba(0,0,0,0.5)] pointer-events-auto border-t border-x border-white/5">
+          <ul className="relative flex w-[210px]">
             {navItems.map((item, idx) => {
               const isActive = activeIndex === idx;
               const Icon = item.icon;
@@ -55,7 +53,7 @@ function NavigationContent({ children }: { children: ReactNode }) {
               return (
                 <li 
                   key={item.href} 
-                  className={cn("list relative list-none w-[65px] h-16 z-[2]", isActive && "active")}
+                  className={cn("list relative list-none w-[70px] h-16 z-[2]", isActive && "active")}
                 >
                   <Link href={item.href} className="relative flex justify-center items-center w-full h-full">
                     <span className={cn(
@@ -77,8 +75,8 @@ function NavigationContent({ children }: { children: ReactNode }) {
                   "after:content-[''] after:absolute after:top-[18px] after:right-[-22px] after:w-[20px] after:h-[20px] after:bg-transparent after:rounded-tl-[20px] after:[box-shadow:-4px_-8px_0_0_black]"
                 )}
                 style={{ 
-                  left: "2.5px", 
-                  transform: `translateX(${activeIndex * 65}px)`,
+                  left: "5px", 
+                  transform: `translateX(${activeIndex * 70}px)`,
                 }}
               />
             )}
