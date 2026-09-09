@@ -52,7 +52,6 @@ export default function LoginPage() {
     
     // Simulate login logic
     setTimeout(() => {
-      // In a real app, verify captcha here
       localStorage.setItem("userRole", "student")
       router.push("/dashboard")
     }, 2500)
@@ -60,8 +59,7 @@ export default function LoginPage() {
 
   const handleAdminClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    localStorage.setItem("userRole", "admin")
-    router.push("/admin")
+    router.push("/admin-login")
   }
 
   return (
