@@ -44,7 +44,7 @@ function NavigationContent({ children }: { children: ReactNode }) {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 h-16 flex justify-center items-end z-[100] pointer-events-none">
-        <div className="navigation relative w-[240px] h-16 bg-[#111111] rounded-t-[2rem] flex justify-center items-center px-[10px] shadow-[0_15px_35px_rgba(0,0,0,0.5)] pointer-events-auto border-t border-x border-white/5">
+        <div className="navigation relative w-full h-16 bg-[#111111] rounded-t-[2rem] flex justify-center items-center px-[10px] shadow-[0_15px_35px_rgba(0,0,0,0.5)] pointer-events-auto border-t border-white/5">
           <ul className="relative flex w-[210px]">
             {navItems.map((item, idx) => {
               const isActive = activeIndex === idx;
