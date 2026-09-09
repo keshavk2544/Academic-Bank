@@ -1,7 +1,7 @@
 
 "use client"
 
-import { ReactNode, Suspense } from "react"
+import { ReactNode, Suspense, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -28,6 +28,11 @@ const navItems: NavItem[] = [
 
 function NavigationContent({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const activeIndex = navItems.findIndex(item => {
     if (item.href === '/dashboard' && pathname === '/dashboard') return true;
@@ -64,7 +69,7 @@ function NavigationContent({ children }: { children: ReactNode }) {
               )
             })}
             
-            {activeIndex !== -1 && (
+            {mounted && activeIndex !== -1 && (
               <div 
                 className="indicator absolute top-[-30px] w-[60px] h-[60px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)] z-[1]"
                 style={{ 
