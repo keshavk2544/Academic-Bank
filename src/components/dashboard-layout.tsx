@@ -36,7 +36,7 @@ function NavigationContent({ children }: { children: ReactNode }) {
   
   const activeIndex = navItems.findIndex(item => {
     if (item.href === '/dashboard' && pathname === '/dashboard') return true;
-    return pathname.startsWith(item.href) && item.href !== '/dashboard';
+    return pathname?.startsWith(item.href) && item.href !== '/dashboard';
   });
 
   return (
@@ -71,7 +71,11 @@ function NavigationContent({ children }: { children: ReactNode }) {
             
             {mounted && activeIndex !== -1 && (
               <div 
-                className="indicator absolute top-[-30px] w-[60px] h-[60px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)] z-[1]"
+                className={cn(
+                  "indicator absolute top-[-30px] w-[60px] h-[60px] bg-[#111111] rounded-full border-[6px] border-black transition-transform duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)] z-[1]",
+                  "before:content-[''] before:absolute before:top-[18px] before:left-[-22px] before:w-[20px] before:h-[20px] before:bg-transparent before:rounded-tr-[20px] before:[box-shadow:4px_-8px_0_0_black]",
+                  "after:content-[''] after:absolute after:top-[18px] after:right-[-22px] after:w-[20px] after:h-[20px] after:bg-transparent after:rounded-tl-[20px] after:[box-shadow:-4px_-8px_0_0_black]"
+                )}
                 style={{ 
                   left: "2.5px", 
                   transform: `translateX(${activeIndex * 65}px)`,
@@ -81,31 +85,6 @@ function NavigationContent({ children }: { children: ReactNode }) {
           </ul>
         </div>
       </nav>
-
-      <style jsx>{`
-        .indicator::before {
-          content: '';
-          position: absolute;
-          top: 18px;
-          left: -22px;
-          width: 20px;
-          height: 20px;
-          background: transparent;
-          border-top-right-radius: 20px;
-          box-shadow: 4px -8px 0 0 black;
-        }
-        .indicator::after {
-          content: '';
-          position: absolute;
-          top: 18px;
-          right: -22px;
-          width: 20px;
-          height: 20px;
-          background: transparent;
-          border-top-left-radius: 20px;
-          box-shadow: -4px -8px 0 0 black;
-        }
-      `}</style>
     </div>
   )
 }
