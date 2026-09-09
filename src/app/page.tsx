@@ -5,26 +5,44 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LoadingOverlay } from "@/components/loading-overlay"
+import { Shield, RotateCw } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
+  const [qid, setQid] = useState("")
   const [password, setPassword] = useState("")
+  const [captchaInput, setCaptchaInput] = useState("")
+  const [captchaText, setCaptchaText] = useState("")
   const [isCoveringEyes, setIsCoveringEyes] = useState(false)
   const [isSad, setIsSad] = useState(false)
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 })
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  // Handle eye tracking for email
+  // Initialize Captcha
   useEffect(() => {
-    if (!isCoveringEyes && !isSad && email.length > 0) {
+    generateCaptcha()
+  }, [])
+
+  const generateCaptcha = () => {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let str = ''
+    for (let i = 0; i < 6; i++) {
+      str += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    setCaptchaText(str)
+  }
+
+  // Handle eye tracking for QID and Captcha
+  useEffect(() => {
+    const activeText = qid || captchaInput
+    if (!isCoveringEyes && !isSad && activeText.length > 0) {
       const maxMoveX = 12
-      const moveX = Math.min((email.length / 30) * maxMoveX * 2, maxMoveX * 2) - maxMoveX
+      const moveX = Math.min((activeText.length / 20) * maxMoveX * 2, maxMoveX * 2) - maxMoveX
       setEyeOffset({ x: moveX, y: 8 })
-    } else if (email.length === 0 && !isCoveringEyes && !isSad) {
+    } else if (activeText.length === 0 && !isCoveringEyes && !isSad) {
       setEyeOffset({ x: 0, y: 0 })
     }
-  }, [email, isCoveringEyes, isSad])
+  }, [qid, captchaInput, isCoveringEyes, isSad])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,15 +52,31 @@ export default function LoginPage() {
     
     // Simulate login logic
     setTimeout(() => {
+      // In a real app, verify captcha here
       localStorage.setItem("userRole", "student")
       router.push("/dashboard")
     }, 2500)
   }
 
+  const handleAdminClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    localStorage.setItem("userRole", "admin")
+    router.push("/admin")
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white p-4 font-sans selection:bg-primary selection:text-black">
-      {isLoggingIn && <LoadingOverlay status="Initializing Ecosystem" />}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white p-4 font-sans selection:bg-primary selection:text-black relative overflow-hidden">
+      {isLoggingIn && <LoadingOverlay status="Verifying Credentials" />}
       
+      {/* Admin Portal Button */}
+      <button 
+        onClick={handleAdminClick}
+        className="absolute top-8 right-8 w-11 h-11 bg-[#1c1c1c] border-2 border-[#2a2a2a] rounded-full flex items-center justify-center text-[#888888] transition-all hover:border-primary hover:text-primary hover:scale-105 hover:shadow-[0_0_15px_rgba(250,204,21,0.2)] z-50"
+        title="Admin Portal"
+      >
+        <Shield className="w-5 h-5" />
+      </button>
+
       {/* Branding Header */}
       <div className="text-center mb-40 z-10 animate-in fade-in slide-in-from-top-4 duration-700">
         <h1 className="text-6xl font-headline font-bold tracking-tight mb-2">PreRP</h1>
@@ -107,10 +141,10 @@ export default function LoginPage() {
             <div className="space-y-1">
               <input
                 type="text"
-                placeholder="Student ID / Email"
+                placeholder="Q_ID"
                 className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={qid}
+                onChange={(e) => setQid(e.target.value)}
                 onFocus={() => {
                   setIsSad(false)
                   setIsCoveringEyes(false)
@@ -140,16 +174,38 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-none bg-[#2a2a2a] accent-primary transition-all" />
-                <span className="group-hover:text-white transition-colors">Remember me</span>
-              </label>
-              
+            {/* Captcha Section */}
+            <div className="space-y-3">
+              <div className="flex gap-3 h-12">
+                <button 
+                  type="button" 
+                  onClick={generateCaptcha}
+                  className="bg-[#2a2a2a] border-2 border-[#2a2a2a] rounded-xl w-12 flex items-center justify-center text-[#888] transition-all hover:text-primary hover:border-primary hover:bg-[#222]"
+                >
+                  <RotateCw className="w-5 h-5" />
+                </button>
+                <div className="flex-grow rounded-xl flex items-center justify-center font-mono text-xl font-black text-[#111] tracking-[6px] relative overflow-hidden bg-gradient-to-br from-[#ff9a9e]/80 via-[#fecfef]/80 to-[#a1c4fd]/80 select-none">
+                  {captchaText}
+                  <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.05)_10px,rgba(0,0,0,0.05)_12px)] pointer-events-none" />
+                </div>
+              </div>
+              <input 
+                type="text" 
+                placeholder="Enter Captcha" 
+                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                onFocus={() => setIsCoveringEyes(false)}
+                onBlur={() => setEyeOffset({ x: 0, y: 0 })}
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-end pt-2">
               <button 
                 type="submit"
                 disabled={isLoggingIn}
-                className="bg-primary text-black h-11 px-8 rounded-full font-bold text-sm transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_20px_rgba(250,204,21,0.2)]"
+                className="bg-primary text-black h-11 px-10 rounded-full font-bold text-sm transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_20px_rgba(250,204,21,0.2)]"
               >
                 {isLoggingIn ? "Initializing..." : "Login"}
               </button>
