@@ -6,19 +6,13 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
+import { LoadingOverlay } from "@/components/loading-overlay"
 import { 
   Sparkles, 
-  BrainCircuit, 
-  FileText, 
-  CheckCircle2, 
-  Loader2, 
   BookOpen, 
-  Trophy,
   History,
-  LayoutGrid,
   ChevronLeft
 } from "lucide-react"
 import { aiQuizFlashcardGenerator, type AiQuizFlashcardGeneratorOutput } from "@/ai/flows/ai-quiz-flashcard-generator-flow"
@@ -73,6 +67,8 @@ export default function QuizPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-black text-white pb-32">
+        {isGenerating && <LoadingOverlay status="Processing Intelligence" />}
+        
         <header className="yellow-header">
            <div className="flex items-center justify-between mb-8">
             <ChevronLeft className="w-8 h-8 cursor-pointer" onClick={() => router.back()} />
@@ -150,8 +146,8 @@ export default function QuizPage() {
               disabled={isGenerating || !studyMaterial}
               className="w-full h-16 rounded-full bg-primary hover:bg-primary/90 text-black font-bold text-lg"
             >
-              {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2" />}
-              {isGenerating ? "Analyzing..." : "Generate Aids"}
+              <Sparkles className="mr-2" />
+              Generate Aids
             </Button>
           </div>
 

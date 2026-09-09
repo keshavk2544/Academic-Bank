@@ -99,13 +99,42 @@ export default {
           '10%': { opacity: '1' },
           '90%': { opacity: '1' },
           '100%': { top: '100%', opacity: '0' },
-        }
+        },
+        pulseGlow: {
+          '0%': { transform: 'translate(-50%, -50%) scale(0.8)', opacity: '0.5' },
+          '100%': { transform: 'translate(-50%, -50%) scale(1.2)', opacity: '1' },
+        },
+        morphFlip: {
+          '0%': {
+            transform: 'perspective(150px) rotateX(0deg) rotateY(0deg) scale(1)',
+            backgroundColor: '#2a2a2a',
+            borderRadius: '4px',
+          },
+          '30%, 50%': {
+            transform: 'perspective(150px) rotateX(180deg) rotateY(0deg) scale(1.3)',
+            backgroundColor: '#facc15',
+            borderRadius: '50%',
+            boxShadow: '0 0 15px rgba(250, 204, 21, 0.8)',
+          },
+          '80%, 100%': {
+            transform: 'perspective(150px) rotateX(180deg) rotateY(180deg) scale(1)',
+            backgroundColor: '#2a2a2a',
+            borderRadius: '4px',
+          },
+        },
+        blink: {
+          '0%, 80%, 100%': { opacity: '0' },
+          '40%': { opacity: '1', color: '#facc15' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'float': 'float 3s ease-in-out infinite',
         'scan': 'scan 3s ease-in-out infinite',
+        pulseGlow: 'pulseGlow 2s infinite alternate ease-in-out',
+        morphFlip: 'morphFlip 2.4s infinite ease-in-out',
+        blink: 'blink 1.4s infinite both',
       },
       backdropBlur: {
         xs: '2px',

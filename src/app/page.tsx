@@ -1,9 +1,10 @@
 
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { LoadingOverlay } from "@/components/loading-overlay"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -33,15 +34,15 @@ export default function LoginPage() {
     
     // Simulate login logic
     setTimeout(() => {
-      // For demo, we just go to dashboard. 
-      // If we wanted to show the 'sad' state, we would set isSad(true) here instead.
       localStorage.setItem("userRole", "student")
       router.push("/dashboard")
-    }, 1500)
+    }, 2500)
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white p-4 font-sans selection:bg-primary selection:text-black">
+      {isLoggingIn && <LoadingOverlay status="Initializing Ecosystem" />}
+      
       {/* Branding Header */}
       <div className="text-center mb-40 z-10 animate-in fade-in slide-in-from-top-4 duration-700">
         <h1 className="text-6xl font-headline font-bold tracking-tight mb-2">PreRP</h1>
