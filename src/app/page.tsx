@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { Shield, RotateCw } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [qid, setQid] = useState("")
   const [password, setPassword] = useState("")
   const [captchaInput, setCaptchaInput] = useState("")
@@ -44,17 +46,58 @@ export default function LoginPage() {
     }
   }, [qid, captchaInput, isCoveringEyes, isSad])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate Captcha locally before sending to backend
+    if (captchaInput.toUpperCase() !== captchaText) {
+      setIsSad(true)
+      toast({
+        variant: "destructive",
+        title: "Captcha Failed",
+        description: "The captcha code entered is incorrect.",
+      })
+      generateCaptcha()
+      setCaptchaInput("")
+      return
+    }
+
     setIsLoggingIn(true)
     setIsSad(false)
     setIsCoveringEyes(false)
     
-    // Simulate login logic
-    setTimeout(() => {
-      localStorage.setItem("userRole", "student")
-      router.push("/dashboard")
-    }, 2500)
+    try {
+      const response = await fetch('/api/auth/erp-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: qid, password: password })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        localStorage.setItem("userRole", "student")
+        router.push("/dashboard")
+      } else {
+        setIsSad(true)
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: data.message || "Invalid credentials provided.",
+        })
+        generateCaptcha()
+        setCaptchaInput("")
+        setIsLoggingIn(false)
+      }
+    } catch (err) {
+      setIsSad(true)
+      toast({
+        variant: "destructive",
+        title: "System Error",
+        description: "Unable to connect to the authentication pulse.",
+      })
+      setIsLoggingIn(false)
+    }
   }
 
   const handleAdminClick = (e: React.MouseEvent) => {
@@ -77,7 +120,7 @@ export default function LoginPage() {
 
       {/* Branding Header */}
       <div className="text-center mb-40 z-10 animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-6xl font-headline font-bold tracking-tight mb-2">PreRP</h1>
+        <h1 className="text-6xl font-headline font-bold tracking-tight mb-2 text-white">PreRP</h1>
         <p className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-bold">
           powered by <span className="text-primary">I_NAV</span>
         </p>
@@ -140,7 +183,7 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder="Q_ID"
-                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none"
+                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none text-white"
                 value={qid}
                 onChange={(e) => setQid(e.target.value)}
                 onFocus={() => {
@@ -156,7 +199,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none"
+                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none text-white"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => {
@@ -190,7 +233,7 @@ export default function LoginPage() {
               <input 
                 type="text" 
                 placeholder="Enter Captcha" 
-                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none"
+                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none text-white"
                 value={captchaInput}
                 onChange={(e) => setCaptchaInput(e.target.value)}
                 onFocus={() => setIsCoveringEyes(false)}
