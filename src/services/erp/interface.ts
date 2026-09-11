@@ -1,28 +1,31 @@
-import { StudentProfile, AttendanceRecord } from '@/types/student';
+
+import { StudentProfile } from '@/types/student';
 import { ERPAuthResponse } from '@/types/erp';
 
-/**
- * The standard interface for any ERP provider implementation.
- */
 export interface IERPProvider {
   /**
-   * Authenticates the student with the ERP.
-   * Note: Password is never stored beyond this request.
+   * Initializes a fresh QUMS session and returns the CSRF token and CAPTCHA.
    */
-  authenticate(username: string, password: string, captcha?: string): Promise<ERPAuthResponse>;
+  initializeSession(): Promise<{ sessionId: string; token: string; captchaDataUri: string }>;
 
   /**
-   * Retrieves the student's profile information.
+   * Authenticates the student with QUMS.
+   */
+  authenticate(
+    username: string,
+    password: string,
+    captcha: string,
+    token: string,
+    sessionId: string
+  ): Promise<ERPAuthResponse>;
+
+  /**
+   * Retrieves the student's authorized profile information.
    */
   getStudentProfile(sessionId: string): Promise<StudentProfile>;
 
   /**
-   * Retrieves the student's attendance data.
-   */
-  getAttendance(sessionId: string): Promise<AttendanceRecord[]>;
-
-  /**
-   * Destroys the ERP session.
+   * Invalidates the ERP session.
    */
   logout(sessionId: string): Promise<void>;
 }

@@ -1,30 +1,23 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
 
-/**
- * Secure server-side endpoint for ERP authentication.
- * Never logs or exposes the ERP password.
- */
 export async function POST(req: NextRequest) {
   try {
-    const { username, password } = await req.json();
+    const { username, password, captcha, token } = await req.json();
+    const sessionId = req.cookies.get('qums_temp_session')?.value;
 
-    if (!username || !password) {
-      return NextResponse.json({ message: 'Missing credentials' }, { status: 400 });
+    if (!sessionId || !token) {
+      return NextResponse.json({ message: 'Session expired, refresh captcha' }, { status: 400 });
     }
 
     const erp = getERPProvider();
-    const result = await erp.authenticate(username, password);
+    const result = await erp.authenticate(username, password, captcha, token, sessionId);
 
     if (result.success) {
-      // Create a secure response
-      const response = NextResponse.json({ 
-        success: true, 
-        message: 'Authentication successful' 
-      });
+      const response = NextResponse.json({ success: true });
 
-      // Set the ERP session ID as a secure, HttpOnly cookie.
-      // The browser can't read this, but it will send it back to our API.
+      // Upgrade to authenticated session cookie
       response.cookies.set('erp_session', result.sessionId!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -33,20 +26,14 @@ export async function POST(req: NextRequest) {
         path: '/',
       });
 
+      // Clear the temp session
+      response.cookies.delete('qums_temp_session');
+
       return response;
     }
 
-    return NextResponse.json(
-      { success: false, message: result.message || 'Login failed' },
-      { status: 401 }
-    );
-
+    return NextResponse.json({ success: false, message: result.message }, { status: 401 });
   } catch (error) {
-    // Redact sensitive details in logs
-    console.error('[ERP_AUTH_API] Error during authentication');
-    return NextResponse.json(
-      { success: false, message: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Login Error' }, { status: 500 });
   }
 }

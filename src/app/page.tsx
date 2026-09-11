@@ -14,27 +14,29 @@ export default function LoginPage() {
   const [qid, setQid] = useState("")
   const [password, setPassword] = useState("")
   const [captchaInput, setCaptchaInput] = useState("")
-  const [captchaText, setCaptchaText] = useState("")
+  const [captchaData, setCaptchaData] = useState<{ image: string, token: string } | null>(null)
   const [isCoveringEyes, setIsCoveringEyes] = useState(false)
   const [isSad, setIsSad] = useState(false)
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 })
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  // Initialize Captcha
+  // Initialize QUMS Captcha
   useEffect(() => {
-    generateCaptcha()
+    fetchCaptcha()
   }, [])
 
-  const generateCaptcha = () => {
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    let str = ''
-    for (let i = 0; i < 6; i++) {
-      str += chars.charAt(Math.floor(Math.random() * chars.length))
+  const fetchCaptcha = async () => {
+    try {
+      const res = await fetch('/api/auth/erp-captcha');
+      const data = await res.json();
+      if (data.success) {
+        setCaptchaData({ image: data.captcha, token: data.token });
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "ERP Offline", description: "Unable to reach QUMS server." });
     }
-    setCaptchaText(str)
   }
 
-  // Handle eye tracking for QID and Captcha
   useEffect(() => {
     const activeText = qid || captchaInput
     if (!isCoveringEyes && !isSad && activeText.length > 0) {
@@ -49,18 +51,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate Captcha locally before sending to backend
-    if (captchaInput.toUpperCase() !== captchaText) {
-      setIsSad(true)
-      toast({
-        variant: "destructive",
-        title: "Captcha Failed",
-        description: "The captcha code entered is incorrect.",
-      })
-      generateCaptcha()
-      setCaptchaInput("")
-      return
-    }
+    if (!captchaData) return;
 
     setIsLoggingIn(true)
     setIsSad(false)
@@ -70,22 +61,26 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/erp-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: qid, password: password })
+        body: JSON.stringify({ 
+          username: qid, 
+          password: password, 
+          captcha: captchaInput,
+          token: captchaData.token
+        })
       })
 
       const data = await response.json()
 
       if (data.success) {
-        localStorage.setItem("userRole", "student")
         router.push("/dashboard")
       } else {
         setIsSad(true)
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: data.message || "Invalid credentials provided.",
+          description: data.message || "Invalid credentials or CAPTCHA.",
         })
-        generateCaptcha()
+        fetchCaptcha()
         setCaptchaInput("")
         setIsLoggingIn(false)
       }
@@ -94,7 +89,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "System Error",
-        description: "Unable to connect to the authentication pulse.",
+        description: "Authentication pulse interrupted.",
       })
       setIsLoggingIn(false)
     }
@@ -107,9 +102,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white p-4 font-sans selection:bg-primary selection:text-black relative overflow-hidden">
-      {isLoggingIn && <LoadingOverlay status="Verifying Credentials" />}
+      {isLoggingIn && <LoadingOverlay status="Verifying QUMS Pulse" />}
       
-      {/* Admin Portal Button */}
       <button 
         onClick={handleAdminClick}
         className="absolute top-8 right-8 w-11 h-11 bg-[#1c1c1c] border-2 border-[#2a2a2a] rounded-full flex items-center justify-center text-[#888888] transition-all hover:border-primary hover:text-primary hover:scale-105 hover:shadow-[0_0_15px_rgba(250,204,21,0.2)] z-50"
@@ -118,7 +112,6 @@ export default function LoginPage() {
         <Shield className="w-5 h-5" />
       </button>
 
-      {/* Branding Header */}
       <div className="text-center mb-40 z-10 animate-in fade-in slide-in-from-top-4 duration-700">
         <h1 className="text-6xl font-headline font-bold tracking-tight mb-2 text-white">PreRP</h1>
         <p className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-bold">
@@ -127,19 +120,15 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-[350px]">
-        {/* Yeti Character */}
         <div className={cn(
           "absolute bottom-[calc(100%-10px)] left-1/2 -translate-x-1/2 w-[200px] h-[150px] z-0 transition-all duration-500",
           isCoveringEyes && "covering-eyes",
           isSad && "sad"
         )}>
-          {/* Head */}
           <div className="relative w-[150px] h-[140px] bg-white rounded-[50%_50%_45%_45%] mx-auto shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-10">
-            {/* Ears */}
             <div className="absolute top-5 -left-2 w-[30px] h-[30px] bg-white rounded-full -z-10" />
             <div className="absolute top-5 -right-2 w-[30px] h-[30px] bg-white rounded-full -z-10" />
             
-            {/* Eyes */}
             <div className="absolute top-[50px] left-10 w-[22px] h-[22px] bg-[#1a1a1a] rounded-full overflow-hidden">
               <div 
                 className="absolute w-1.5 h-1.5 bg-white rounded-full top-1 left-2 transition-transform duration-100 ease-out"
@@ -153,7 +142,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Mouth */}
             <div className={cn(
               "absolute top-[85px] left-1/2 -translate-x-1/2 w-[60px] h-[25px] bg-[#1a1a1a] rounded-b-[30px] overflow-hidden transition-all duration-300",
               isSad && "h-[10px] top-[95px] rounded-t-[30px] rounded-b-none"
@@ -162,21 +150,18 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Scarf */}
           <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-[170px] h-[45px] bg-primary rounded-[20px] z-20" />
 
-          {/* Arms */}
           <div className={cn(
-            "absolute bottom-[-40px] left-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]",
+            "absolute bottom-[-40px] left-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)]",
             isCoveringEyes ? "translate-y-[-95px] rotate-[35deg]" : "rotate-[-15deg]"
           )} />
           <div className={cn(
-            "absolute bottom-[-40px] right-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]",
+            "absolute bottom-[-40px] right-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500 [transition-timing-function:cubic-bezier(0.68,-0.55,0.265,1.55)]",
             isCoveringEyes ? "translate-y-[-95px] rotate-[-35deg]" : "rotate-[15deg]"
           )} />
         </div>
 
-        {/* Form Box */}
         <div className="bg-[#1c1c1c] p-8 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative z-10 border border-white/5">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-1">
@@ -215,18 +200,21 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Captcha Section */}
             <div className="space-y-3">
               <div className="flex gap-3 h-12">
                 <button 
                   type="button" 
-                  onClick={generateCaptcha}
+                  onClick={fetchCaptcha}
                   className="bg-[#2a2a2a] border-2 border-[#2a2a2a] rounded-xl w-12 flex items-center justify-center text-[#888] transition-all hover:text-primary hover:border-primary hover:bg-[#222]"
                 >
                   <RotateCw className="w-5 h-5" />
                 </button>
-                <div className="flex-grow rounded-xl flex items-center justify-center font-mono text-xl font-black text-[#111] tracking-[6px] relative overflow-hidden bg-gradient-to-br from-[#ff9a9e]/80 via-[#fecfef]/80 to-[#a1c4fd]/80 select-none">
-                  {captchaText}
+                <div className="flex-grow rounded-xl flex items-center justify-center relative overflow-hidden bg-white select-none">
+                  {captchaData ? (
+                    <img src={captchaData.image} alt="Captcha" className="h-full w-full object-contain mix-blend-multiply" />
+                  ) : (
+                    <div className="animate-pulse w-full h-full bg-muted" />
+                  )}
                   <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.05)_10px,rgba(0,0,0,0.05)_12px)] pointer-events-none" />
                 </div>
               </div>
@@ -245,10 +233,10 @@ export default function LoginPage() {
             <div className="flex items-center justify-end pt-2">
               <button 
                 type="submit"
-                disabled={isLoggingIn}
+                disabled={isLoggingIn || !captchaData}
                 className="bg-primary text-black h-11 px-10 rounded-full font-bold text-sm transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_20px_rgba(250,204,21,0.2)]"
               >
-                {isLoggingIn ? "Initializing..." : "Login"}
+                {isLoggingIn ? "Authenticating..." : "Login"}
               </button>
             </div>
           </form>
