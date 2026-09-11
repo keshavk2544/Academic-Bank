@@ -21,6 +21,26 @@
         }
       },
       "required": ["cookies", "token", "expiresAt"]
+    },
+    "ERPSession": {
+      "title": "ERP Session",
+      "description": "Server-side storage for authenticated student sessions.",
+      "type": "object",
+      "properties": {
+        "qumsCookies": {
+          "type": "string",
+          "description": "Authenticated QUMS cookie jar."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["qumsCookies", "createdAt", "expiresAt"]
     }
   },
   "auth": {
@@ -30,6 +50,10 @@
     "/loginTransactions/{transactionId}": {
       "schema": { "$ref": "#/backend/entities/LoginTransaction" },
       "description": "Temporary store for pre-authenticated QUMS sessions."
+    },
+    "/erpSessions/{sessionId}": {
+      "schema": { "$ref": "#/backend/entities/ERPSession" },
+      "description": "Secure store for active student sessions mapping opaque IDs to university cookies."
     }
   }
 }

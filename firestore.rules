@@ -1,14 +1,15 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // loginTransactions is for server-side processing.
-    // Since the server acts as an unauthenticated client using the standard Firebase SDK,
-    // we allow creation, reading, and deletion for these short-lived transactions.
+    // loginTransactions and erpSessions are for server-side processing only.
+    // We restrict all direct client-side access to protect sensitive session data.
     match /loginTransactions/{transactionId} {
-      allow create: if request.resource.data.keys().hasAll(['cookies', 'token', 'expiresAt'])
-                   && request.resource.data.cookies is string
-                   && request.resource.data.token is string;
-      allow read, delete: if true;
+      allow read, write: if false;
+    }
+    
+    match /erpSessions/{sessionId} {
+      allow read, write: if false;
     }
 
     // Allow authenticated users to read their own profiles.
