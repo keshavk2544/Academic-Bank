@@ -35,15 +35,25 @@ export async function POST(req: NextRequest) {
     await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
+      // Fetch profile once upon successful login to cache it
+      console.log(`[LOGIN] Fetching initial student profile for ${username}...`);
+      const profile = await erp.getStudentProfile(result.sessionId);
+
       // Create a random opaque application session ID
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
-      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} for ${username}`);
+      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} with cached profile.`);
 
-      // Store the authenticated QUMS cookies in the environment-aware store
+      // Store the authenticated QUMS cookies and profile in the environment-aware store
       await store.saveSession(appSessionId, {
         qumsCookies: result.sessionId,
+        student: {
+          name: profile.name,
+          qid: profile.enrollmentNo,
+          course: profile.course,
+          section: profile.section
+        },
         createdAt: new Date().toISOString(),
         expiresAt: expires.toISOString()
       });
@@ -61,8 +71,6 @@ export async function POST(req: NextRequest) {
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
-
-      console.log(`[LOGIN] Cookie 'erp_session' set for ${appSessionId.substring(0, 8)}`);
 
       return response;
     }

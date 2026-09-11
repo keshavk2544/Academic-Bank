@@ -31,6 +31,16 @@
           "type": "string",
           "description": "Authenticated QUMS cookie jar."
         },
+        "student": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "qid": { "type": "string" },
+            "course": { "type": "string" },
+            "section": { "type": "string" }
+          },
+          "required": ["name", "qid", "course", "section"]
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -40,7 +50,7 @@
           "format": "date-time"
         }
       },
-      "required": ["qumsCookies", "createdAt", "expiresAt"]
+      "required": ["qumsCookies", "student", "createdAt", "expiresAt"]
     }
   },
   "auth": {
@@ -53,7 +63,7 @@
     },
     "/erpSessions/{sessionId}": {
       "schema": { "$ref": "#/backend/entities/ERPSession" },
-      "description": "Secure store for active student sessions mapping opaque IDs to university cookies."
+      "description": "Secure store for active student sessions mapping opaque IDs to university cookies and cached profiles."
     }
   }
 }

@@ -10,6 +10,12 @@ export interface LoginTransaction {
 
 export interface ERPSession {
   qumsCookies: string;
+  student: {
+    name: string;
+    qid: string;
+    course: string;
+    section: string;
+  };
   createdAt: string;
   expiresAt: string;
 }

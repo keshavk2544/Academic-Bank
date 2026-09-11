@@ -1,13 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getERPProvider } from '@/services/erp';
 import { getSessionStore } from '@/services/session-store';
 
 export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
 
   if (!appSessionId) {
-    console.log('[SESSION] No erp_session cookie found in request.');
     return NextResponse.json({ authenticated: false, reason: 'no_cookie' }, { status: 401 });
   }
 
@@ -24,43 +22,26 @@ export async function GET(req: NextRequest) {
       }, { status: 401 });
     }
 
-    const { qumsCookies, expiresAt } = sessionData;
+    const { expiresAt, student } = sessionData;
 
-    // Check expiration
+    // Check PreRP session expiration
     if (new Date() > new Date(expiresAt)) {
-      console.log(`[SESSION] Session ${appSessionId.substring(0, 8)} expired.`);
+      console.log(`[SESSION] PreRP session ${appSessionId.substring(0, 8)} expired.`);
       await store.deleteSession(appSessionId).catch(() => {});
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { status: 401 });
     }
 
-    const erp = getERPProvider();
-    
-    try {
-      const profile = await erp.getStudentProfile(qumsCookies);
-      return NextResponse.json({
-        authenticated: true,
-        student: {
-          name: profile.name,
-          qid: profile.enrollmentNo,
-          course: profile.course,
-          section: profile.section
-        }
-      });
-    } catch (profileError: any) {
-      console.error('[SESSION] Failed to fetch student profile from QUMS:', profileError.message);
-      // If the university specifically returns a 401/Unauthorized, the session is dead
-      return NextResponse.json({ 
-        authenticated: false, 
-        message: 'University session expired.',
-        reason: 'qums_unauthorized'
-      }, { status: 401 });
-    }
+    // Return cached student identity without calling QUMS
+    return NextResponse.json({
+      authenticated: true,
+      student
+    });
 
   } catch (error: any) {
     console.error('[SESSION-ERROR]', error.message);
     return NextResponse.json({ 
       authenticated: false, 
-      message: 'Unable to reach university pulse.',
+      message: 'System error while verifying session.',
       reason: 'system_error'
     }, { status: 500 });
   }
