@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LoadingOverlay } from "@/components/loading-overlay"
-import { Shield, RotateCw } from "lucide-react"
+import { Shield, RotateCw, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
@@ -17,6 +17,8 @@ export default function LoginPage() {
   const [captchaInput, setCaptchaInput] = useState("")
   const [captchaData, setCaptchaData] = useState<{ image: string } | null>(null)
   const [transactionId, setTransactionId] = useState("")
+  const [initStatus, setInitializationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState("")
   
   const [isCoveringEyes, setIsCoveringEyes] = useState(false)
   const [isSad, setIsSad] = useState(false)
@@ -24,17 +26,29 @@ export default function LoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
   const fetchCaptcha = async () => {
+    setInitializationStatus('loading')
+    setErrorMessage("")
+    setCaptchaData(null)
+    
     try {
-      const res = await fetch('/api/auth/erp-captcha');
+      const res = await fetch('/api/auth/erp-captcha', { cache: 'no-store' });
       const data = await res.json();
-      if (data.success) {
+      
+      if (data.success && data.captcha) {
         setCaptchaData({ image: data.captcha });
         setTransactionId(data.transactionId);
+        setInitializationStatus('success');
       } else {
-        throw new Error('Failed to initialize session');
+        const error = data.message || 'Unknown initialization error';
+        setErrorMessage(error);
+        setInitializationStatus('error');
+        toast({ variant: "destructive", title: "Initialization Failed", description: error });
       }
     } catch (e) {
-      toast({ variant: "destructive", title: "ERP Unavailable", description: "Unable to reach QUMS server pulse." });
+      const error = "Network pulse interrupted.";
+      setErrorMessage(error);
+      setInitializationStatus('error');
+      toast({ variant: "destructive", title: "ERP Unavailable", description: error });
     }
   }
 
@@ -178,21 +192,37 @@ export default function LoginPage() {
             />
 
             <div className="space-y-3">
-              <div className="flex gap-3 h-12">
+              <div className="flex gap-3 h-14">
                 <button 
                   type="button" 
                   onClick={fetchCaptcha}
-                  className="bg-[#2a2a2a] border-2 border-[#2a2a2a] rounded-xl w-12 flex items-center justify-center text-[#888] transition-all hover:text-primary hover:border-primary hover:bg-[#222]"
+                  disabled={initStatus === 'loading'}
+                  className="bg-[#2a2a2a] border-2 border-[#2a2a2a] rounded-xl w-14 flex items-center justify-center text-[#888] transition-all hover:text-primary hover:border-primary hover:bg-[#222] disabled:opacity-50"
                 >
-                  <RotateCw className="w-5 h-5" />
+                  <RotateCw className={cn("w-5 h-5", initStatus === 'loading' && "animate-spin")} />
                 </button>
                 <div className="flex-grow rounded-xl flex items-center justify-center relative overflow-hidden bg-white select-none">
                   {captchaData ? (
-                    <img src={captchaData.image} alt="Captcha" className="h-full w-full object-contain mix-blend-multiply" />
+                    <img 
+                      src={captchaData.image} 
+                      alt="Captcha" 
+                      className="h-full w-full object-contain" 
+                      onError={() => {
+                        setErrorMessage("Image load failed");
+                        setInitializationStatus('error');
+                      }}
+                    />
+                  ) : initStatus === 'error' ? (
+                    <div className="flex flex-col items-center justify-center text-red-500 p-1">
+                      <AlertCircle className="w-4 h-4 mb-1" />
+                      <span className="text-[8px] font-bold text-center leading-tight uppercase">{errorMessage}</span>
+                    </div>
                   ) : (
-                    <div className="animate-pulse w-full h-full bg-muted" />
+                    <div className="animate-pulse w-full h-full bg-muted flex items-center justify-center">
+                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Pulse...</span>
+                    </div>
                   )}
-                  <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.05)_10px,rgba(0,0,0,0.05)_12px)] pointer-events-none" />
+                  {initStatus === 'success' && <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.02)_10px,rgba(0,0,0,0.02)_12px)] pointer-events-none" />}
                 </div>
               </div>
               <input 
@@ -210,7 +240,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-end pt-2">
               <button 
                 type="submit"
-                disabled={isLoggingIn || !captchaData || !transactionId}
+                disabled={isLoggingIn || initStatus !== 'success' || !transactionId}
                 className="bg-primary text-black h-11 px-10 rounded-full font-bold text-sm transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_20px_rgba(250,204,21,0.2)]"
               >
                 {isLoggingIn ? "Authenticating..." : "Login"}

@@ -13,7 +13,11 @@ export class QUMSProvider implements IERPProvider {
     try {
       console.log(`[QUMS-INIT] Fetching landing page: ${QUMS_BASE_URL}`);
       const response = await fetch(QUMS_BASE_URL, {
-        headers: { 'User-Agent': this.userAgent },
+        headers: { 
+          'User-Agent': this.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
         cache: 'no-store'
       });
       
@@ -31,20 +35,19 @@ export class QUMSProvider implements IERPProvider {
 
       // Attempt to extract CAPTCHA from the landing page HTML element #imgPhoto
       const imgPhoto = $('#imgPhoto');
-      let captchaDataUri = imgPhoto.attr('src') || '';
-      console.log(`[QUMS-INIT] #imgPhoto src present: ${!!captchaDataUri}`);
+      let captchaSrc = imgPhoto.attr('src') || '';
+      console.log(`[QUMS-INIT] #imgPhoto src found: "${captchaSrc.substring(0, 50)}..."`);
 
-      if (captchaDataUri) {
-        if (captchaDataUri.startsWith('data:')) {
+      let captchaDataUri = '';
+
+      if (captchaSrc) {
+        if (captchaSrc.startsWith('data:')) {
           console.log(`[QUMS-INIT] Found direct data-URI captcha`);
-          // Ensure it's treated as an image if it has the generic octet-stream mime
-          if (captchaDataUri.includes('application/octet-stream')) {
-            captchaDataUri = captchaDataUri.replace('application/octet-stream', 'image/png');
-          }
+          captchaDataUri = captchaSrc.replace('application/octet-stream', 'image/png');
         } else {
-          // It's a URL, we must fetch it using the SAME session cookies
-          const captchaUrl = new URL(captchaDataUri, QUMS_BASE_URL).toString();
-          console.log(`[QUMS-INIT] Fetching CAPTCHA URL: ${captchaUrl}`);
+          // Resolve relative URL
+          const captchaUrl = new URL(captchaSrc, QUMS_BASE_URL).toString();
+          console.log(`[QUMS-INIT] Fetching relative CAPTCHA URL: ${captchaUrl}`);
           
           const captchaRes = await fetch(captchaUrl, { 
             headers: { 
@@ -59,10 +62,9 @@ export class QUMSProvider implements IERPProvider {
             const buffer = await captchaRes.arrayBuffer();
             const contentType = captchaRes.headers.get('content-type') || 'image/png';
             captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
-            console.log(`[QUMS-INIT] CAPTCHA fetched successfully. Length: ${buffer.byteLength}`);
+            console.log(`[QUMS-INIT] CAPTCHA fetched successfully. Size: ${buffer.byteLength}`);
           } else {
             console.warn(`[QUMS-INIT] Failed to fetch relative CAPTCHA URL: ${captchaRes.status}`);
-            captchaDataUri = '';
           }
         }
       }
@@ -84,12 +86,12 @@ export class QUMSProvider implements IERPProvider {
           const buffer = await captchaResponse.arrayBuffer();
           const contentType = captchaResponse.headers.get('content-type') || 'image/png';
           captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
-          console.log(`[QUMS-INIT] Fallback CAPTCHA fetched. Length: ${buffer.byteLength}`);
+          console.log(`[QUMS-INIT] Fallback CAPTCHA fetched. Size: ${buffer.byteLength}`);
         }
       }
 
       if (!captchaDataUri) {
-        throw new Error('Failed to retrieve CAPTCHA image from ERP.');
+        throw new Error('ERP CAPTCHA Image Empty');
       }
 
       return { sessionId: cookies, token, captchaDataUri };
@@ -138,7 +140,7 @@ export class QUMSProvider implements IERPProvider {
     const isCaptchaError = failureHtml.includes('Captcha') || failureHtml.includes('CAPTCHA');
     const isSessionExpired = failureHtml.includes('expired') || failureHtml.includes('Verification Token');
     
-    console.warn(`[QUMS-LOGIN] Failed with status ${response.status}. Flags: invalid=${isInvalid}, captcha=${isCaptchaError}, expired=${isSessionExpired}`);
+    console.warn(`[QUMS-LOGIN] Failed status ${response.status}. flags: invalid=${isInvalid}, captcha=${isCaptchaError}, expired=${isSessionExpired}`);
 
     return { 
       success: false, 
