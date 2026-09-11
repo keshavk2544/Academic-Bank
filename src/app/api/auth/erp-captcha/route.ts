@@ -1,33 +1,35 @@
 
 import { NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
+import { initializeFirebase } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { crypto } from 'crypto';
 
 export async function GET() {
   try {
     const erp = getERPProvider();
-    const { sessionId, token, captchaDataUri } = await erp.initializeSession();
+    const { sessionId: qumsCookies, token, captchaDataUri } = await erp.initializeSession();
 
-    const response = NextResponse.json({ 
+    // Create an opaque transaction ID
+    const transactionId = Math.random().toString(36).substring(2, 15);
+    
+    // Store QUMS session state in Firestore
+    const { firestore } = initializeFirebase();
+    const transactionRef = doc(firestore, 'loginTransactions', transactionId);
+    
+    await setDoc(transactionRef, {
+      cookies: qumsCookies,
+      token: token,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 mins
+    });
+
+    return NextResponse.json({ 
       success: true, 
       captcha: captchaDataUri,
-      token: token
+      transactionId: transactionId
     });
-
-    // Store the raw QUMS session state in a secure temp cookie
-    // Path MUST be root to ensure visibility to /api/auth/erp-login
-    response.cookies.set('qums_temp_session', sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 600, // 10 mins
-      path: '/',
-    });
-
-    console.log(`[API-CAPTCHA] Session initialized successfully. Cookies captured.`);
-
-    return response;
   } catch (error) {
-    console.log('[API-CAPTCHA-ERROR]', error);
+    console.error('[API-CAPTCHA-ERROR]', error);
     return NextResponse.json({ success: false, message: 'ERP Pulse Unavailable' }, { status: 503 });
   }
 }

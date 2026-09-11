@@ -1,56 +1,60 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
+import { initializeFirebase } from '@/firebase';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, password, captcha, token } = await req.json();
-    const sessionId = req.cookies.get('qums_temp_session')?.value;
+    const { username, password, captcha, transactionId } = await req.json();
 
-    // Detailed safe diagnostics for session correlation
-    console.log(`[API-LOGIN] Correlation Check - Session Cookie present: ${!!sessionId}, CSRF Token present: ${!!token}, Username: ${!!username}`);
-
-    if (!sessionId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Authentication session not found. Please refresh CAPTCHA.' 
-      }, { status: 400 });
+    if (!transactionId) {
+      return NextResponse.json({ success: false, message: 'Invalid request signature.' }, { status: 400 });
     }
 
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Security token missing. Please refresh CAPTCHA.' 
-      }, { status: 400 });
+    // Retrieve the QUMS session from Firestore
+    const { firestore } = initializeFirebase();
+    const transactionRef = doc(firestore, 'loginTransactions', transactionId);
+    const transactionSnap = await getDoc(transactionRef);
+
+    if (!transactionSnap.exists()) {
+      return NextResponse.json({ success: false, message: 'Authentication session not found. Please refresh.' }, { status: 401 });
+    }
+
+    const { cookies: qumsCookies, token, expiresAt } = transactionSnap.data();
+
+    // Check expiration
+    if (new Date() > new Date(expiresAt)) {
+      await deleteDoc(transactionRef);
+      return NextResponse.json({ success: false, message: 'Authentication session expired.' }, { status: 401 });
     }
 
     const erp = getERPProvider();
-    const result = await erp.authenticate(username, password, captcha, token, sessionId);
+    const result = await erp.authenticate(username, password, captcha, token, qumsCookies);
+
+    // Always cleanup the transaction after attempt
+    await deleteDoc(transactionRef);
 
     if (result.success) {
       const response = NextResponse.json({ success: true });
 
-      // Establish authenticated session
       response.cookies.set('erp_session', result.sessionId!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 2, // 2 hours
+        maxAge: 60 * 60 * 2,
         path: '/',
       });
-
-      // Clear temporary session
-      response.cookies.delete('qums_temp_session');
 
       return response;
     }
 
     return NextResponse.json({ 
       success: false, 
-      message: result.message || 'Login failed. Please verify credentials and CAPTCHA.' 
+      message: result.message || 'Login failed. Verify credentials and CAPTCHA.' 
     }, { status: 401 });
   } catch (error) {
-    console.log('[API-LOGIN-ERROR]', error);
-    return NextResponse.json({ success: false, message: 'System error during authentication pulse.' }, { status: 500 });
+    console.error('[API-LOGIN-ERROR]', error);
+    return NextResponse.json({ success: false, message: 'System error during authentication.' }, { status: 500 });
   }
 }

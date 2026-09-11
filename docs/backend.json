@@ -1,0 +1,35 @@
+
+{
+  "entities": {
+    "LoginTransaction": {
+      "title": "Login Transaction",
+      "description": "Short-lived server-side storage for QUMS authentication sessions.",
+      "type": "object",
+      "properties": {
+        "cookies": {
+          "type": "string",
+          "description": "Serialized QUMS cookie jar (ASP.NET_SessionId, CSRF cookies, etc.)"
+        },
+        "token": {
+          "type": "string",
+          "description": "QUMS __RequestVerificationToken extracted from the login page."
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Expiration timestamp (usually 10 minutes after creation)."
+        }
+      },
+      "required": ["cookies", "token", "expiresAt"]
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/loginTransactions/{transactionId}": {
+      "schema": { "$ref": "#/backend/entities/LoginTransaction" },
+      "description": "Temporary store for pre-authenticated QUMS sessions."
+    }
+  }
+}

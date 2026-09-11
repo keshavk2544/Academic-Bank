@@ -15,7 +15,8 @@ export default function LoginPage() {
   const [qid, setQid] = useState("")
   const [password, setPassword] = useState("")
   const [captchaInput, setCaptchaInput] = useState("")
-  const [captchaData, setCaptchaData] = useState<{ image: string, token: string } | null>(null)
+  const [captchaData, setCaptchaData] = useState<{ image: string } | null>(null)
+  const [transactionId, setTransactionId] = useState("")
   
   const [isCoveringEyes, setIsCoveringEyes] = useState(false)
   const [isSad, setIsSad] = useState(false)
@@ -27,7 +28,8 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/erp-captcha');
       const data = await res.json();
       if (data.success) {
-        setCaptchaData({ image: data.captcha, token: data.token });
+        setCaptchaData({ image: data.captcha });
+        setTransactionId(data.transactionId);
       } else {
         throw new Error('Failed to initialize session');
       }
@@ -50,7 +52,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!captchaData) return;
+    if (!transactionId) return;
 
     setIsLoggingIn(true)
     setIsSad(false)
@@ -64,7 +66,7 @@ export default function LoginPage() {
           username: qid, 
           password: password, 
           captcha: captchaInput,
-          token: captchaData.token
+          transactionId: transactionId
         })
       })
 
@@ -113,7 +115,6 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-[350px]">
-        {/* Yeti Character */}
         <div className={cn(
           "absolute bottom-[calc(100%-10px)] left-1/2 -translate-x-1/2 w-[200px] h-[150px] z-0 transition-all duration-500",
           isCoveringEyes && "covering-eyes",
@@ -148,11 +149,10 @@ export default function LoginPage() {
           )} />
           <div className={cn(
             "absolute bottom-[-40px] right-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500",
-            isCoveringEyes ? "translate-y-[-95px] rotate-[-35deg]" : "rotate-[15deg]"
+            isCoveringEyes ? "translate-y-[-95px] rotate-[35deg]" : "rotate-[15deg]"
           )} />
         </div>
 
-        {/* Login Box */}
         <div className="bg-[#1c1c1c] p-8 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative z-10 border border-white/5">
           <form onSubmit={handleLogin} className="space-y-5">
             <input
@@ -210,7 +210,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-end pt-2">
               <button 
                 type="submit"
-                disabled={isLoggingIn || !captchaData}
+                disabled={isLoggingIn || !captchaData || !transactionId}
                 className="bg-primary text-black h-11 px-10 rounded-full font-bold text-sm transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_20px_rgba(250,204,21,0.2)]"
               >
                 {isLoggingIn ? "Authenticating..." : "Login"}
