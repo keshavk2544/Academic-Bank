@@ -50,17 +50,19 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // Opaque application session ID (HttpOnly)
-      // Secure is only set in true production to allow Studio Preview (HTTP) to work
-      const isProd = process.env.NODE_ENV === 'production' && !req.nextUrl.hostname.includes('localhost');
+      // Determine if we are in a true production environment
+      // In Studio Preview, we want secure: false to avoid issues with proxy domains
+      const isProduction = process.env.NODE_ENV === 'production' && !req.nextUrl.hostname.includes('firebase-preview');
       
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: isProd,
+        secure: isProduction,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
+
+      console.log(`[LOGIN] Cookie 'erp_session' set for ${appSessionId.substring(0, 8)}`);
 
       return response;
     }

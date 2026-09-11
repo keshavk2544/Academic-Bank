@@ -69,15 +69,12 @@ class InMemoryStore implements SessionStore {
 }
 
 // Persist the in-memory store instance across HMR in development
-const GLOBAL_IN_MEMORY_STORE_KEY = 'qums_in_memory_store';
+const GLOBAL_IN_MEMORY_STORE_KEY = 'qums_session_store_v2';
 
 function getInMemoryStoreInstance(): InMemoryStore {
-  if (process.env.NODE_ENV === 'production') {
-    return new InMemoryStore();
-  }
-  
   const globalAny = global as any;
   if (!globalAny[GLOBAL_IN_MEMORY_STORE_KEY]) {
+    console.log('[STORE] Initializing fresh Global In-Memory Store.');
     globalAny[GLOBAL_IN_MEMORY_STORE_KEY] = new InMemoryStore();
   }
   return globalAny[GLOBAL_IN_MEMORY_STORE_KEY];
@@ -129,23 +126,14 @@ class FirestoreStore implements SessionStore {
 let firestoreInstance: FirestoreStore | null = null;
 
 export function getSessionStore(): SessionStore {
-  // Check for environment variables that indicate a Google/Firebase runtime
-  const isProductionRuntime = !!process.env.FIREBASE_CONFIG || !!process.env.GOOGLE_CLOUD_PROJECT || process.env.NODE_ENV === 'production';
-  
-  // However, in Studio Preview, we often have the project ID but NO Application Default Credentials.
-  // We check for a flag or simply fall back if Firestore is unreachable.
-  if (isProductionRuntime) {
-    // Check if we are in the Studio Preview environment specifically
-    // Studio Preview URLs often contain 'firebase-preview' or are accessed via specific ports
-    const isStudioPreview = typeof window === 'undefined' && process.env.NODE_ENV !== 'production';
-    
-    if (!isStudioPreview) {
-      if (!firestoreInstance) {
-        firestoreInstance = new FirestoreStore();
-      }
-      return firestoreInstance;
+  // If we're explicitly in production and not in a preview environment, use Firestore
+  if (process.env.NODE_ENV === 'production') {
+    if (!firestoreInstance) {
+      firestoreInstance = new FirestoreStore();
     }
+    return firestoreInstance;
   }
   
+  // Otherwise, use the Global In-Memory store for stability during development
   return getInMemoryStoreInstance();
 }
