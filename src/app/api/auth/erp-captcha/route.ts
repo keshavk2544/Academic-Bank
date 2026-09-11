@@ -19,9 +19,12 @@ export async function GET() {
       adminProjectId = app.options.projectId || 'detected-via-adc';
       
       const db = getAdminFirestore();
+      // Ensure we are using the Admin Firestore instance (firebase-admin/firestore)
+      // and NOT the client SDK (firebase/firestore).
+      
       const diagRef = db.collection('_adminDiagnostics').doc('connectivity-test');
       
-      // Perform privileged write/read/delete test
+      // Perform privileged write/read/delete test to verify connectivity
       await diagRef.set({
         timestamp: new Date().toISOString(),
         env: process.env.NODE_ENV,
@@ -33,24 +36,25 @@ export async function GET() {
       
       await diagRef.delete();
       diagnosticStatus = 'SUCCESS';
-      console.log('[CAPTCHA] Firestore Admin Diagnostic: SUCCESS');
+      console.log(`[CAPTCHA] Firestore Admin Diagnostic: SUCCESS (Project: ${adminProjectId})`);
     } catch (dbError: any) {
       diagnosticStatus = 'FAILURE';
       diagnosticError = {
         code: dbError.code || 'unknown',
         message: dbError.message,
-        isCredentialError: dbError.message.includes('METADATA') || dbError.message.includes('ACCESS_TOKEN')
+        stack: process.env.NODE_ENV === 'development' ? dbError.stack : undefined,
+        isCredentialError: dbError.message.includes('METADATA') || dbError.message.includes('ACCESS_TOKEN') || dbError.message.includes('credentials')
       };
       console.error('[CAPTCHA] Firestore Admin Diagnostic: FAILURE', dbError);
     }
 
-    // Only proceed to QUMS if Firestore Admin is functional (Production Requirement)
+    // Return diagnostic info if Firestore fails
     if (diagnosticStatus !== 'SUCCESS') {
       return NextResponse.json({
         success: false,
         message: diagnosticError?.isCredentialError 
-          ? 'Environment Error: Studio Preview lacks Google Credentials. Please test in App Hosting.'
-          : 'Storage failure: Admin Firestore is not accessible.',
+          ? 'Environment Error: Google Application Default Credentials not found. This is expected in Studio Preview; please deploy to App Hosting.'
+          : `Storage failure: Admin Firestore is not accessible. Error: ${diagnosticError?.message}`,
         debug: {
           adminInit,
           projectId: adminProjectId,
@@ -68,11 +72,11 @@ export async function GET() {
       return NextResponse.json({ 
         success: false, 
         message: 'QUMS connection established but CAPTCHA source not found.' 
-        // Note: No sensitive data logged
       }, { status: 502 });
     }
 
     const { sessionId: qumsCookies, token, captchaDataUri } = sessionData;
+    // Create opaque transaction ID
     const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
     // Store QUMS session in Firestore using privileged Admin SDK
@@ -92,7 +96,10 @@ export async function GET() {
       captcha: captchaDataUri,
       transactionId: transactionId
     }, {
-      headers: { 'Cache-Control': 'no-store, max-age=0' }
+      headers: { 
+        'Cache-Control': 'no-store, max-age=0',
+        'X-Diagnostic-Status': 'SUCCESS'
+      }
     });
 
   } catch (error: any) {
