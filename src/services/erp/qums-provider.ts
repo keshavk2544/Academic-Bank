@@ -8,36 +8,53 @@ const QUMS_BASE_URL = 'https://qums.quantumuniversity.edu.in';
 
 export class QUMSProvider implements IERPProvider {
   async initializeSession() {
-    const response = await fetch(QUMS_BASE_URL);
-    const html = await response.text();
-    const cookies = this.extractCookies(response);
+    try {
+      const response = await fetch(QUMS_BASE_URL, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+      
+      if (!response.ok) throw new Error(`QUMS landing page unreachable: ${response.status}`);
+      
+      const html = await response.text();
+      const cookies = this.extractCookies(response);
 
-    const $ = cheerio.load(html);
-    const token = $('input[name="__RequestVerificationToken"]').val() as string;
+      const $ = cheerio.load(html);
+      const token = $('input[name="__RequestVerificationToken"]').val() as string;
+      
+      // Attempt to extract CAPTCHA directly from landing page HTML if present
+      let captchaDataUri = $('#imgPhoto').attr('src') || '';
 
-    const captchaResponse = await fetch(`${QUMS_BASE_URL}/Account/GetCaptcha`, {
-      headers: { 
-        'Cookie': cookies,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      if (captchaDataUri && !captchaDataUri.startsWith('data:')) {
+        const captchaUrl = new URL(captchaDataUri, QUMS_BASE_URL).toString();
+        const captchaRes = await fetch(captchaUrl, { 
+          headers: { 
+            'Cookie': cookies,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          } 
+        });
+        const buffer = await captchaRes.arrayBuffer();
+        const contentType = captchaRes.headers.get('content-type') || 'image/png';
+        captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
+      } else if (!captchaDataUri) {
+        // Fallback to explicit captcha endpoint
+        const captchaResponse = await fetch(`${QUMS_BASE_URL}/Account/GetCaptcha`, {
+          headers: { 
+            'Cookie': cookies,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        });
+        const buffer = await captchaResponse.arrayBuffer();
+        const contentType = captchaResponse.headers.get('content-type') || 'image/png';
+        captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
       }
-    });
 
-    const contentType = captchaResponse.headers.get('content-type') || '';
-    const buffer = await captchaResponse.arrayBuffer();
-    const textData = Buffer.from(buffer).toString('utf-8');
-
-    let captchaDataUri = '';
-    if (textData.startsWith('data:')) {
-      captchaDataUri = textData;
-    } else {
-      const b64 = Buffer.from(buffer).toString('base64');
-      captchaDataUri = `data:${contentType || 'image/png'};base64,${b64}`;
+      return { sessionId: cookies, token, captchaDataUri };
+    } catch (error) {
+      console.error('[QUMS-INIT-ERROR]', error);
+      throw error;
     }
-
-    // Capture updated cookies if any after captcha request
-    const finalCookies = this.mergeCookies(cookies, this.extractCookies(captchaResponse));
-
-    return { sessionId: finalCookies, token, captchaDataUri };
   }
 
   async authenticate(username: string, password: string, captcha: string, token: string, sessionId: string): Promise<ERPAuthResponse> {
@@ -66,16 +83,20 @@ export class QUMSProvider implements IERPProvider {
 
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
+    // QUMS redirects to /Student/Dashboard on success
     if (response.status === 302) {
       return { success: true, sessionId: updatedCookies };
     }
 
     const failureHtml = await response.text();
     const isInvalid = failureHtml.includes('Invalid') || failureHtml.includes('Incorrect');
+    const isCaptchaError = failureHtml.includes('Captcha') || failureHtml.includes('CAPTCHA');
     
     return { 
       success: false, 
-      message: isInvalid ? 'Invalid QID or Password.' : 'Authentication failed. Please verify CAPTCHA.' 
+      message: isInvalid ? 'Invalid QID or Password.' : 
+               isCaptchaError ? 'Invalid CAPTCHA code.' : 
+               'Authentication failed. Please verify all fields.' 
     };
   }
 
@@ -107,10 +128,14 @@ export class QUMSProvider implements IERPProvider {
   }
 
   async logout(sessionId: string): Promise<void> {
-    await fetch(`${QUMS_BASE_URL}/Account/Logout`, {
-      method: 'POST',
-      headers: { 'Cookie': sessionId }
-    });
+    try {
+      await fetch(`${QUMS_BASE_URL}/Account/Logout`, {
+        method: 'POST',
+        headers: { 'Cookie': sessionId }
+      });
+    } catch (e) {
+      // Ignore
+    }
   }
 
   private extractCookies(response: Response): string {
@@ -126,11 +151,15 @@ export class QUMSProvider implements IERPProvider {
     if (!incoming) return existing;
     const cookies = new Map();
     existing.split(';').forEach(c => {
-      const [k, v] = c.split('=').map(s => s.trim());
+      const parts = c.split('=');
+      const k = parts[0]?.trim();
+      const v = parts.slice(1).join('=')?.trim();
       if (k && v !== undefined) cookies.set(k, v);
     });
     incoming.split(';').forEach(c => {
-      const [k, v] = c.split('=').map(s => s.trim());
+      const parts = c.split('=');
+      const k = parts[0]?.trim();
+      const v = parts.slice(1).join('=')?.trim();
       if (k && v !== undefined) cookies.set(k, v);
     });
     return Array.from(cookies.entries()).map(([k, v]) => `${k}=${v}`).join('; ');

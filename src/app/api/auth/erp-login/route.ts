@@ -38,11 +38,13 @@ export async function POST(req: NextRequest) {
     if (result.success) {
       const response = NextResponse.json({ success: true });
 
+      // Opaque app session: we'll use the QUMS cookies directly in the HttpOnly cookie 
+      // as they are typically small enough (IDs), but keep them server-side only.
       response.cookies.set('erp_session', result.sessionId!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 2,
+        maxAge: 60 * 60 * 2, // 2 hours
         path: '/',
       });
 
