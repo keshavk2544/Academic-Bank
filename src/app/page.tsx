@@ -31,6 +31,7 @@ export default function LoginPage() {
     setCaptchaData(null)
     
     try {
+      // Direct call to our proxy API
       const res = await fetch('/api/auth/erp-captcha', { cache: 'no-store' });
       const data = await res.json();
       
@@ -39,16 +40,13 @@ export default function LoginPage() {
         setTransactionId(data.transactionId);
         setInitializationStatus('success');
       } else {
-        const error = data.message || 'Unknown initialization error';
+        const error = data.message || 'Initialization failed';
         setErrorMessage(error);
         setInitializationStatus('error');
-        toast({ variant: "destructive", title: "Initialization Failed", description: error });
       }
     } catch (e) {
-      const error = "Network pulse interrupted.";
-      setErrorMessage(error);
+      setErrorMessage("Network pulse interrupted");
       setInitializationStatus('error');
-      toast({ variant: "destructive", title: "ERP Unavailable", description: error });
     }
   }
 
@@ -208,7 +206,7 @@ export default function LoginPage() {
                       alt="Captcha" 
                       className="h-full w-full object-contain" 
                       onError={() => {
-                        setErrorMessage("Image load failed");
+                        setErrorMessage("Rendering failed");
                         setInitializationStatus('error');
                       }}
                     />
@@ -222,7 +220,6 @@ export default function LoginPage() {
                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Pulse...</span>
                     </div>
                   )}
-                  {initStatus === 'success' && <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.02)_10px,rgba(0,0,0,0.02)_12px)] pointer-events-none" />}
                 </div>
               </div>
               <input 

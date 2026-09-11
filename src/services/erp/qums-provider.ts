@@ -31,23 +31,22 @@ export class QUMSProvider implements IERPProvider {
       const $ = cheerio.load(html);
       
       const token = $('input[name="__RequestVerificationToken"]').val() as string;
-      console.log(`[QUMS-INIT] CSRF Token found: ${!!token}`);
-
-      // Attempt to extract CAPTCHA from the landing page HTML element #imgPhoto
+      
+      // Target the specific element identified by the reference implementation
       const imgPhoto = $('#imgPhoto');
       let captchaSrc = imgPhoto.attr('src') || '';
-      console.log(`[QUMS-INIT] #imgPhoto src found: "${captchaSrc.substring(0, 50)}..."`);
-
+      
       let captchaDataUri = '';
 
       if (captchaSrc) {
         if (captchaSrc.startsWith('data:')) {
-          console.log(`[QUMS-INIT] Found direct data-URI captcha`);
+          // Fix for QUMS specific application/octet-stream issue
           captchaDataUri = captchaSrc.replace('application/octet-stream', 'image/png');
+          console.log(`[QUMS-INIT] Resolved inline Data URI CAPTCHA. Length: ${captchaDataUri.length}`);
         } else {
-          // Resolve relative URL
+          // Resolve relative URL using the SAME session
           const captchaUrl = new URL(captchaSrc, QUMS_BASE_URL).toString();
-          console.log(`[QUMS-INIT] Fetching relative CAPTCHA URL: ${captchaUrl}`);
+          console.log(`[QUMS-INIT] Fetching session-aware relative CAPTCHA: ${captchaUrl}`);
           
           const captchaRes = await fetch(captchaUrl, { 
             headers: { 
@@ -61,15 +60,14 @@ export class QUMSProvider implements IERPProvider {
           if (captchaRes.ok) {
             const buffer = await captchaRes.arrayBuffer();
             const contentType = captchaRes.headers.get('content-type') || 'image/png';
-            captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
-            console.log(`[QUMS-INIT] CAPTCHA fetched successfully. Size: ${buffer.byteLength}`);
-          } else {
-            console.warn(`[QUMS-INIT] Failed to fetch relative CAPTCHA URL: ${captchaRes.status}`);
+            const safeType = contentType.includes('octet-stream') ? 'image/png' : contentType;
+            captchaDataUri = `data:${safeType};base64,${Buffer.from(buffer).toString('base64')}`;
+            console.log(`[QUMS-INIT] CAPTCHA binary fetched. Status: ${captchaRes.status}. Type: ${safeType}`);
           }
         }
       }
 
-      // Fallback if still no captcha
+      // Final fallback if #imgPhoto fails
       if (!captchaDataUri) {
         console.log(`[QUMS-INIT] Falling back to explicit /Account/GetCaptcha`);
         const fallbackUrl = `${QUMS_BASE_URL}/Account/GetCaptcha`;
@@ -84,14 +82,12 @@ export class QUMSProvider implements IERPProvider {
 
         if (captchaResponse.ok) {
           const buffer = await captchaResponse.arrayBuffer();
-          const contentType = captchaResponse.headers.get('content-type') || 'image/png';
-          captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
-          console.log(`[QUMS-INIT] Fallback CAPTCHA fetched. Size: ${buffer.byteLength}`);
+          captchaDataUri = `data:image/png;base64,${Buffer.from(buffer).toString('base64')}`;
         }
       }
 
       if (!captchaDataUri) {
-        throw new Error('ERP CAPTCHA Image Empty');
+        throw new Error('ERP CAPTCHA unavailable');
       }
 
       return { sessionId: cookies, token, captchaDataUri };
@@ -112,7 +108,7 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
-    console.log(`[QUMS-LOGIN] Submitting login request to root...`);
+    console.log(`[QUMS-LOGIN] Submitting credentials to root with session...`);
     const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
@@ -128,31 +124,25 @@ export class QUMSProvider implements IERPProvider {
 
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
-    // QUMS redirects (302) to /Student/Dashboard on success
+    // Success check based on redirect behavior
     if (response.status === 302 || response.status === 301) {
-      const location = response.headers.get('location');
-      console.log(`[QUMS-LOGIN] Success! Redirecting to: ${location}`);
+      console.log(`[QUMS-LOGIN] Success redirect detected.`);
       return { success: true, sessionId: updatedCookies };
     }
 
     const failureHtml = await response.text();
     const isInvalid = failureHtml.includes('Invalid') || failureHtml.includes('Incorrect');
     const isCaptchaError = failureHtml.includes('Captcha') || failureHtml.includes('CAPTCHA');
-    const isSessionExpired = failureHtml.includes('expired') || failureHtml.includes('Verification Token');
     
-    console.warn(`[QUMS-LOGIN] Failed status ${response.status}. flags: invalid=${isInvalid}, captcha=${isCaptchaError}, expired=${isSessionExpired}`);
-
     return { 
       success: false, 
       message: isInvalid ? 'Invalid QID or Password.' : 
                isCaptchaError ? 'Invalid CAPTCHA code.' : 
-               isSessionExpired ? 'Authentication session expired. Refresh CAPTCHA.' :
-               'Authentication failed. Please verify all fields.' 
+               'Authentication failed. Please verify the CAPTCHA.' 
     };
   }
 
   async getStudentProfile(sessionId: string): Promise<StudentProfile> {
-    console.log(`[QUMS-PROFILE] Fetching student detail...`);
     const response = await fetch(`${QUMS_BASE_URL}/Account/GetStudentDetail`, {
       method: 'POST',
       headers: { 
@@ -162,10 +152,7 @@ export class QUMSProvider implements IERPProvider {
       }
     });
 
-    if (!response.ok) {
-      console.error(`[QUMS-PROFILE] Failed to fetch profile: ${response.status}`);
-      throw new Error('QUMS session expired');
-    }
+    if (!response.ok) throw new Error('QUMS session expired');
 
     const data = await response.json();
     
@@ -189,9 +176,7 @@ export class QUMSProvider implements IERPProvider {
         method: 'POST',
         headers: { 'Cookie': sessionId, 'User-Agent': this.userAgent }
       });
-    } catch (e) {
-      // Ignore
-    }
+    } catch (e) {}
   }
 
   private extractCookies(response: Response): string {
