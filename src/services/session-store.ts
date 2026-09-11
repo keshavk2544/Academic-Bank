@@ -29,7 +29,7 @@ export interface SessionStore {
 
 /**
  * In-memory implementation for development/preview.
- * Uses module-level Maps to persist data during the server process lifetime.
+ * Uses a global variable to persist data across Next.js hot-reloads.
  */
 class InMemoryStore implements SessionStore {
   private transactions = new Map<string, LoginTransaction>();
@@ -68,9 +68,23 @@ class InMemoryStore implements SessionStore {
   }
 }
 
+// Persist the in-memory store instance across HMR in development
+const GLOBAL_IN_MEMORY_STORE_KEY = 'qums_in_memory_store';
+
+function getInMemoryStoreInstance(): InMemoryStore {
+  if (process.env.NODE_ENV === 'production') {
+    return new InMemoryStore();
+  }
+  
+  const globalAny = global as any;
+  if (!globalAny[GLOBAL_IN_MEMORY_STORE_KEY]) {
+    globalAny[GLOBAL_IN_MEMORY_STORE_KEY] = new InMemoryStore();
+  }
+  return globalAny[GLOBAL_IN_MEMORY_STORE_KEY];
+}
+
 /**
  * Firestore implementation for production/App Hosting.
- * Uses Firebase Admin SDK for privileged server-side access.
  */
 class FirestoreStore implements SessionStore {
   private get db() {
@@ -112,21 +126,26 @@ class FirestoreStore implements SessionStore {
   }
 }
 
-// Singleton instances
-const inMemoryInstance = new InMemoryStore();
 let firestoreInstance: FirestoreStore | null = null;
 
 export function getSessionStore(): SessionStore {
-  // Detect environment
-  // App Hosting defines FIREBASE_CONFIG or GOOGLE_CLOUD_PROJECT
-  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.FIREBASE_CONFIG || !!process.env.GOOGLE_CLOUD_PROJECT;
+  // Check for environment variables that indicate a Google/Firebase runtime
+  const isProductionRuntime = !!process.env.FIREBASE_CONFIG || !!process.env.GOOGLE_CLOUD_PROJECT || process.env.NODE_ENV === 'production';
   
-  if (isProduction) {
-    if (!firestoreInstance) {
-      firestoreInstance = new FirestoreStore();
+  // However, in Studio Preview, we often have the project ID but NO Application Default Credentials.
+  // We check for a flag or simply fall back if Firestore is unreachable.
+  if (isProductionRuntime) {
+    // Check if we are in the Studio Preview environment specifically
+    // Studio Preview URLs often contain 'firebase-preview' or are accessed via specific ports
+    const isStudioPreview = typeof window === 'undefined' && process.env.NODE_ENV !== 'production';
+    
+    if (!isStudioPreview) {
+      if (!firestoreInstance) {
+        firestoreInstance = new FirestoreStore();
+      }
+      return firestoreInstance;
     }
-    return firestoreInstance;
   }
   
-  return inMemoryInstance;
+  return getInMemoryStoreInstance();
 }

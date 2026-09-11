@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const transactionData = await store.getTransaction(transactionId);
 
     if (!transactionData) {
-      return NextResponse.json({ success: false, message: 'Authentication session not found. Please refresh.' }, { status: 401 });
+      return NextResponse.json({ success: false, message: 'Authentication session not found. Please refresh the page.' }, { status: 401 });
     }
 
     const { cookies: qumsCookies, token, expiresAt } = transactionData;
@@ -37,9 +37,11 @@ export async function POST(req: NextRequest) {
     if (result.success && result.sessionId) {
       // Create a random opaque application session ID
       const appSessionId = randomUUID();
-      const expires = new Date(Date.now() + 60 * 60 * 2 * 1000); // 2 hours
+      const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
-      // Store the authenticated QUMS cookies in the store
+      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} for ${username}`);
+
+      // Store the authenticated QUMS cookies in the environment-aware store
       await store.saveSession(appSessionId, {
         qumsCookies: result.sessionId,
         createdAt: new Date().toISOString(),
@@ -49,11 +51,14 @@ export async function POST(req: NextRequest) {
       const response = NextResponse.json({ success: true });
 
       // Opaque application session ID (HttpOnly)
+      // Secure is only set in true production to allow Studio Preview (HTTP) to work
+      const isProd = process.env.NODE_ENV === 'production' && !req.nextUrl.hostname.includes('localhost');
+      
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProd,
         sameSite: 'lax',
-        maxAge: 60 * 60 * 2, // 2 hours
+        maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
 

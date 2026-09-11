@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
 
   if (!appSessionId) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false, reason: 'no_cookie' }, { status: 401 });
   }
 
   try {
@@ -15,14 +15,20 @@ export async function GET(req: NextRequest) {
     const sessionData = await store.getSession(appSessionId);
 
     if (!sessionData) {
-      return NextResponse.json({ authenticated: false, message: 'Session not found' }, { status: 401 });
+      console.warn(`[SESSION] Session ID ${appSessionId.substring(0, 8)} not found in store.`);
+      return NextResponse.json({ 
+        authenticated: false, 
+        message: 'Your session has expired or the server was restarted.',
+        reason: 'session_not_found'
+      }, { status: 401 });
     }
 
     const { qumsCookies, expiresAt } = sessionData;
 
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
-      return NextResponse.json({ authenticated: false, message: 'Session expired' }, { status: 401 });
+      await store.deleteSession(appSessionId).catch(() => {});
+      return NextResponse.json({ authenticated: false, reason: 'expired' }, { status: 401 });
     }
 
     const erp = getERPProvider();
@@ -37,10 +43,16 @@ export async function GET(req: NextRequest) {
         section: profile.section
       }
     });
-  } catch (error) {
-    console.error('[SESSION-ERROR]', error);
-    const response = NextResponse.json({ authenticated: false, message: 'QUMS session expired or unreachable' }, { status: 401 });
-    // Don't delete cookie on transient network failure, let the user retry
-    return response;
+  } catch (error: any) {
+    console.error('[SESSION-ERROR]', error.message);
+    
+    // Check if it's a QUMS specific failure (invalid cookies)
+    const isAuthError = error.message?.includes('failed') || error.message?.includes('401');
+    
+    return NextResponse.json({ 
+      authenticated: false, 
+      message: isAuthError ? 'University session expired.' : 'Unable to reach university pulse.',
+      reason: 'qums_error'
+    }, { status: 401 });
   }
 }
