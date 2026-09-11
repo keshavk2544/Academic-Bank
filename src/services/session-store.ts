@@ -75,7 +75,7 @@ class InMemoryStore implements SessionStore {
 }
 
 // Persist the in-memory store instance across HMR in development
-const GLOBAL_IN_MEMORY_STORE_KEY = 'qums_session_store_v2';
+const GLOBAL_IN_MEMORY_STORE_KEY = 'qums_session_store_v3';
 
 function getInMemoryStoreInstance(): InMemoryStore {
   const globalAny = global as any;
@@ -132,14 +132,19 @@ class FirestoreStore implements SessionStore {
 let firestoreInstance: FirestoreStore | null = null;
 
 export function getSessionStore(): SessionStore {
-  // If we're explicitly in production and not in a preview environment, use Firestore
-  if (process.env.NODE_ENV === 'production') {
+  // Explicitly check if we are in a true production environment (not a preview)
+  // Studio Previews often set NODE_ENV=production but run in a restricted environment
+  const isStudioPreview = typeof process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'undefined' || 
+                         process.env.VERCEL === '1' || 
+                         process.env.FIREBASE_CONFIG === undefined;
+
+  // For safety, we use the in-memory store if we're in any environment that isn't clearly App Hosting production
+  if (process.env.NODE_ENV === 'production' && !isStudioPreview) {
     if (!firestoreInstance) {
       firestoreInstance = new FirestoreStore();
     }
     return firestoreInstance;
   }
   
-  // Otherwise, use the Global In-Memory store for stability during development
   return getInMemoryStoreInstance();
 }

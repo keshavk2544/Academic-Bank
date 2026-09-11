@@ -60,13 +60,14 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // Determine if we are in a true production environment
-      // In Studio Preview, we want secure: false to avoid issues with proxy domains
-      const isProduction = process.env.NODE_ENV === 'production' && !req.nextUrl.hostname.includes('firebase-preview');
+      // In development/preview environments, we disable the 'secure' flag to prevent cookie rejection
+      const isSecure = process.env.NODE_ENV === 'production' && 
+                       !req.nextUrl.hostname.includes('localhost') && 
+                       !req.nextUrl.hostname.includes('127.0.0.1');
       
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: isProduction,
+        secure: isSecure,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
