@@ -10,20 +10,22 @@ export async function GET() {
     const response = NextResponse.json({ 
       success: true, 
       captcha: captchaDataUri,
-      token: token // This is required for the login POST
+      token: token
     });
 
     // Store the initial QUMS session ID in a secure temp cookie
+    // Changed SameSite to 'lax' to ensure consistency across API routes
     response.cookies.set('qums_temp_session', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 600, // 10 mins for login flow
+      sameSite: 'lax',
+      maxAge: 600, // 10 mins
       path: '/',
     });
 
     return response;
   } catch (error) {
+    console.log('[API-CAPTCHA-ERROR]', error);
     return NextResponse.json({ success: false, message: 'ERP Unavailable' }, { status: 503 });
   }
 }

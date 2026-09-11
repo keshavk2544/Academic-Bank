@@ -8,7 +8,7 @@ const QUMS_BASE_URL = 'https://qums.quantumuniversity.edu.in';
 
 export class QUMSProvider implements IERPProvider {
   async initializeSession() {
-    // 1. Establish session and get CSRF token
+    // 1. Establish session and get CSRF token from the login page
     const response = await fetch(QUMS_BASE_URL);
     const html = await response.text();
     const setCookie = response.headers.get('set-cookie') || '';
@@ -25,22 +25,17 @@ export class QUMSProvider implements IERPProvider {
     const contentType = captchaResponse.headers.get('content-type') || '';
     const contentLength = captchaResponse.headers.get('content-length') || '0';
     
-    // Diagnostic logging (Safe fields only)
-    console.log(`QUMS CAPTCHA status: ${captchaResponse.status}`);
-    console.log(`QUMS CAPTCHA content-type: ${contentType}`);
-    console.log(`QUMS CAPTCHA response length: ${contentLength} bytes`);
+    // Safe diagnostics
+    console.log(`[QUMS-INIT] Status: ${captchaResponse.status}, Session exists: ${!!sessionId}, Token exists: ${!!token}`);
+    console.log(`[QUMS-CAPTCHA] Type: ${contentType}, Size: ${contentLength} bytes`);
 
     let captchaDataUri = '';
-    
-    // Check if the ERP returned a data URI string directly
     const buffer = await captchaResponse.arrayBuffer();
     const textData = Buffer.from(buffer).toString('utf-8');
 
     if (textData.startsWith('data:')) {
-      // ERP returned a string data URI
       captchaDataUri = textData;
     } else {
-      // ERP returned binary image data
       const b64 = Buffer.from(buffer).toString('base64');
       captchaDataUri = `data:${contentType || 'image/png'};base64,${b64}`;
     }
@@ -59,21 +54,34 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
-    const response = await fetch(`${QUMS_BASE_URL}/Account/Login`, {
+    // Real QUMS login is a POST to the root URL
+    const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': sessionId
+        'Cookie': sessionId,
+        'Referer': QUMS_BASE_URL,
+        'Origin': QUMS_BASE_URL
       },
       body: body.toString(),
       redirect: 'manual'
     });
 
+    // Safe diagnostics
+    console.log(`[QUMS-AUTH] Endpoint: /, Status: ${response.status}, Success: ${response.status === 302}`);
+
     if (response.status === 302) {
       return { success: true, sessionId };
     }
 
-    return { success: false, message: 'Invalid credentials or CAPTCHA pulse.' };
+    // In case of failure, determine if it's credentials or something else
+    const failureHtml = await response.text();
+    const isInvalid = failureHtml.includes('Invalid') || failureHtml.includes('Incorrect');
+    
+    return { 
+      success: false, 
+      message: isInvalid ? 'Invalid QID or Password.' : 'Authentication failed. Please verify CAPTCHA and try again.' 
+    };
   }
 
   async getStudentProfile(sessionId: string): Promise<StudentProfile> {
@@ -82,10 +90,14 @@ export class QUMSProvider implements IERPProvider {
       headers: { Cookie: sessionId }
     });
 
-    if (!response.ok) throw new Error('QUMS session expired');
+    if (!response.ok) {
+      console.log(`[QUMS-PROFILE] Failed with status: ${response.status}`);
+      throw new Error('QUMS session expired');
+    }
 
     const data = await response.json();
     
+    // Mapping the 4 required fields
     return {
       uid: data.RegID || '',
       studentId: data.StudentID || '',
