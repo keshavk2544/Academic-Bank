@@ -7,47 +7,89 @@ import * as cheerio from 'cheerio';
 const QUMS_BASE_URL = 'https://qums.quantumuniversity.edu.in';
 
 export class QUMSProvider implements IERPProvider {
-  private userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+  private userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
   async initializeSession() {
     try {
+      console.log(`[QUMS-INIT] Fetching landing page: ${QUMS_BASE_URL}`);
       const response = await fetch(QUMS_BASE_URL, {
-        headers: { 'User-Agent': this.userAgent }
+        headers: { 'User-Agent': this.userAgent },
+        cache: 'no-store'
       });
       
-      if (!response.ok) throw new Error(`QUMS unreachable: ${response.status}`);
+      if (!response.ok) {
+        console.error(`[QUMS-INIT] Landing page failed: ${response.status}`);
+        throw new Error(`QUMS unreachable: ${response.status}`);
+      }
       
       const html = await response.text();
       const cookies = this.extractCookies(response);
-
       const $ = cheerio.load(html);
-      const token = $('input[name="__RequestVerificationToken"]').val() as string;
       
-      // Attempt to extract CAPTCHA from the landing page HTML first (faster)
-      let captchaDataUri = $('#imgPhoto').attr('src') || '';
+      const token = $('input[name="__RequestVerificationToken"]').val() as string;
+      console.log(`[QUMS-INIT] CSRF Token found: ${!!token}`);
 
-      if (captchaDataUri && !captchaDataUri.startsWith('data:')) {
-        const captchaUrl = new URL(captchaDataUri, QUMS_BASE_URL).toString();
-        const captchaRes = await fetch(captchaUrl, { 
-          headers: { 
-            'Cookie': cookies,
-            'User-Agent': this.userAgent
-          } 
-        });
-        const buffer = await captchaRes.arrayBuffer();
-        const contentType = captchaRes.headers.get('content-type') || 'image/png';
-        captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
-      } else if (!captchaDataUri) {
-        // Fallback to explicit captcha endpoint
-        const captchaResponse = await fetch(`${QUMS_BASE_URL}/Account/GetCaptcha`, {
-          headers: { 
-            'Cookie': cookies,
-            'User-Agent': this.userAgent
+      // Attempt to extract CAPTCHA from the landing page HTML element #imgPhoto
+      const imgPhoto = $('#imgPhoto');
+      let captchaDataUri = imgPhoto.attr('src') || '';
+      console.log(`[QUMS-INIT] #imgPhoto src present: ${!!captchaDataUri}`);
+
+      if (captchaDataUri) {
+        if (captchaDataUri.startsWith('data:')) {
+          console.log(`[QUMS-INIT] Found direct data-URI captcha`);
+          // Ensure it's treated as an image if it has the generic octet-stream mime
+          if (captchaDataUri.includes('application/octet-stream')) {
+            captchaDataUri = captchaDataUri.replace('application/octet-stream', 'image/png');
           }
+        } else {
+          // It's a URL, we must fetch it using the SAME session cookies
+          const captchaUrl = new URL(captchaDataUri, QUMS_BASE_URL).toString();
+          console.log(`[QUMS-INIT] Fetching CAPTCHA URL: ${captchaUrl}`);
+          
+          const captchaRes = await fetch(captchaUrl, { 
+            headers: { 
+              'Cookie': cookies,
+              'User-Agent': this.userAgent,
+              'Referer': QUMS_BASE_URL
+            },
+            cache: 'no-store'
+          });
+
+          if (captchaRes.ok) {
+            const buffer = await captchaRes.arrayBuffer();
+            const contentType = captchaRes.headers.get('content-type') || 'image/png';
+            captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
+            console.log(`[QUMS-INIT] CAPTCHA fetched successfully. Length: ${buffer.byteLength}`);
+          } else {
+            console.warn(`[QUMS-INIT] Failed to fetch relative CAPTCHA URL: ${captchaRes.status}`);
+            captchaDataUri = '';
+          }
+        }
+      }
+
+      // Fallback if still no captcha
+      if (!captchaDataUri) {
+        console.log(`[QUMS-INIT] Falling back to explicit /Account/GetCaptcha`);
+        const fallbackUrl = `${QUMS_BASE_URL}/Account/GetCaptcha`;
+        const captchaResponse = await fetch(fallbackUrl, {
+          headers: { 
+            'Cookie': cookies,
+            'User-Agent': this.userAgent,
+            'Referer': QUMS_BASE_URL
+          },
+          cache: 'no-store'
         });
-        const buffer = await captchaResponse.arrayBuffer();
-        const contentType = captchaResponse.headers.get('content-type') || 'image/png';
-        captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
+
+        if (captchaResponse.ok) {
+          const buffer = await captchaResponse.arrayBuffer();
+          const contentType = captchaResponse.headers.get('content-type') || 'image/png';
+          captchaDataUri = `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`;
+          console.log(`[QUMS-INIT] Fallback CAPTCHA fetched. Length: ${buffer.byteLength}`);
+        }
+      }
+
+      if (!captchaDataUri) {
+        throw new Error('Failed to retrieve CAPTCHA image from ERP.');
       }
 
       return { sessionId: cookies, token, captchaDataUri };
@@ -68,7 +110,7 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
-    // POST to root URL as per real QUMS login behavior
+    console.log(`[QUMS-LOGIN] Submitting login request to root...`);
     const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
@@ -85,7 +127,9 @@ export class QUMSProvider implements IERPProvider {
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
     // QUMS redirects (302) to /Student/Dashboard on success
-    if (response.status === 302) {
+    if (response.status === 302 || response.status === 301) {
+      const location = response.headers.get('location');
+      console.log(`[QUMS-LOGIN] Success! Redirecting to: ${location}`);
       return { success: true, sessionId: updatedCookies };
     }
 
@@ -94,6 +138,8 @@ export class QUMSProvider implements IERPProvider {
     const isCaptchaError = failureHtml.includes('Captcha') || failureHtml.includes('CAPTCHA');
     const isSessionExpired = failureHtml.includes('expired') || failureHtml.includes('Verification Token');
     
+    console.warn(`[QUMS-LOGIN] Failed with status ${response.status}. Flags: invalid=${isInvalid}, captcha=${isCaptchaError}, expired=${isSessionExpired}`);
+
     return { 
       success: false, 
       message: isInvalid ? 'Invalid QID or Password.' : 
@@ -104,15 +150,20 @@ export class QUMSProvider implements IERPProvider {
   }
 
   async getStudentProfile(sessionId: string): Promise<StudentProfile> {
+    console.log(`[QUMS-PROFILE] Fetching student detail...`);
     const response = await fetch(`${QUMS_BASE_URL}/Account/GetStudentDetail`, {
       method: 'POST',
       headers: { 
         'Cookie': sessionId,
-        'User-Agent': this.userAgent
+        'User-Agent': this.userAgent,
+        'Referer': `${QUMS_BASE_URL}/Student/Dashboard`
       }
     });
 
-    if (!response.ok) throw new Error('QUMS session expired');
+    if (!response.ok) {
+      console.error(`[QUMS-PROFILE] Failed to fetch profile: ${response.status}`);
+      throw new Error('QUMS session expired');
+    }
 
     const data = await response.json();
     

@@ -22,15 +22,22 @@ export async function GET() {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString()
     });
 
-    console.log(`[ERP-INIT] Created transaction ${transactionId.substring(0, 4)}...`);
+    console.log(`[API-CAPTCHA] Created transaction ${transactionId.substring(0, 4)}... Image length: ${captchaDataUri.length}`);
 
     return NextResponse.json({ 
       success: true, 
       captcha: captchaDataUri,
       transactionId: transactionId
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0'
+      }
     });
   } catch (error) {
     console.error('[API-CAPTCHA-ERROR]', error);
-    return NextResponse.json({ success: false, message: 'ERP Pulse Unavailable' }, { status: 503 });
+    return NextResponse.json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'ERP Pulse Unavailable' 
+    }, { status: 503 });
   }
 }
