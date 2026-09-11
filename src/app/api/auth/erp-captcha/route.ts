@@ -1,10 +1,20 @@
+
 import { NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { initializeFirebase } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { getAdminFirestore, getAdminApp } from '@/lib/firebase-admin';
 
 export async function GET() {
   console.log('[CAPTCHA] Initialization started...');
+  let adminInit = 'FAILURE';
+  let adminProjectId = 'unknown';
+
+  try {
+    const app = getAdminApp();
+    adminInit = 'SUCCESS';
+    adminProjectId = app.options.projectId || 'detected';
+  } catch (e) {
+    console.error('[CAPTCHA] Admin initialization diagnostic:', e);
+  }
   
   try {
     const erp = getERPProvider();
@@ -19,47 +29,48 @@ export async function GET() {
     }
 
     const { sessionId: qumsCookies, token, captchaDataUri } = sessionData;
+    const cookieCount = qumsCookies.split(';').length;
     
     console.log(`[CAPTCHA] QUMS landing status: 200`);
-    console.log(`[CAPTCHA] Captcha found. Length: ${captchaDataUri.length}`);
+    console.log(`[CAPTCHA] Admin project ID: ${adminProjectId}`);
+    console.log(`[CAPTCHA] QUMS cookies captured: ${cookieCount}`);
+    console.log(`[CAPTCHA] CSRF token found: ${token ? 'YES' : 'NO'}`);
+    console.log(`[CAPTCHA] #imgPhoto found: YES`);
 
     // Create an opaque transaction ID for the browser
     const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
-    // Attempt Firestore write
+    // Attempt Admin Firestore write (privileged)
     try {
-      const { firestore, app } = initializeFirebase();
-      const projectId = app.options.projectId;
-      console.log(`[CAPTCHA] Firestore initializing for project: ${projectId}`);
+      const db = getAdminFirestore();
+      const transactionRef = db.collection('loginTransactions').doc(transactionId);
       
-      const transactionRef = doc(firestore, 'loginTransactions', transactionId);
-      
-      await setDoc(transactionRef, {
+      await transactionRef.set({
         cookies: qumsCookies,
         token: token,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        createdAt: new Date().toISOString()
       });
       
-      console.log(`[CAPTCHA] Firestore transaction write: SUCCESS. ID: ${transactionId.substring(0, 8)}`);
+      console.log(`[CAPTCHA] loginTransactions Admin write: SUCCESS. ID: ${transactionId.substring(0, 8)}`);
     } catch (firestoreError: any) {
-      // Safe diagnostics: Log the error code and message but no secrets
-      console.error('[CAPTCHA] Firestore transaction write: FAILURE', {
+      console.error('[CAPTCHA] loginTransactions Admin write: FAILURE', {
         code: firestoreError.code,
         message: firestoreError.message
       });
       
-      // Return the CAPTCHA anyway so the user can see it, but signal the storage failure
       return NextResponse.json({ 
         success: false, 
-        message: 'Storage failure: Firestore permissions or configuration issue.',
-        captcha: captchaDataUri,
+        message: `Storage failure: ${firestoreError.message || 'Admin Firestore write failed.'}`,
         debug: {
           code: firestoreError.code,
-          message: firestoreError.message
+          adminInit,
+          projectId: adminProjectId
         }
       }, { status: 500 });
     }
 
+    console.log('[CAPTCHA] API response: SUCCESS');
     return NextResponse.json({ 
       success: true, 
       captcha: captchaDataUri,

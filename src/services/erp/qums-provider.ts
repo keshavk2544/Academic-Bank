@@ -31,8 +31,6 @@ export class QUMSProvider implements IERPProvider {
       const $ = cheerio.load(html);
       
       const token = $('input[name="__RequestVerificationToken"]').val() as string;
-      
-      // Target the specific element identified by the reference implementation
       const imgPhoto = $('#imgPhoto');
       let captchaSrc = imgPhoto.attr('src') || '';
       
@@ -40,11 +38,9 @@ export class QUMSProvider implements IERPProvider {
 
       if (captchaSrc) {
         if (captchaSrc.startsWith('data:')) {
-          // Fix for QUMS specific application/octet-stream issue
           captchaDataUri = captchaSrc.replace('application/octet-stream', 'image/png');
           console.log(`[QUMS-INIT] Resolved inline Data URI CAPTCHA. Length: ${captchaDataUri.length}`);
         } else {
-          // Resolve relative URL using the SAME session
           const captchaUrl = new URL(captchaSrc, QUMS_BASE_URL).toString();
           console.log(`[QUMS-INIT] Fetching session-aware relative CAPTCHA: ${captchaUrl}`);
           
@@ -62,32 +58,13 @@ export class QUMSProvider implements IERPProvider {
             const contentType = captchaRes.headers.get('content-type') || 'image/png';
             const safeType = contentType.includes('octet-stream') ? 'image/png' : contentType;
             captchaDataUri = `data:${safeType};base64,${Buffer.from(buffer).toString('base64')}`;
-            console.log(`[QUMS-INIT] CAPTCHA binary fetched. Status: ${captchaRes.status}. Type: ${safeType}`);
+            console.log(`[QUMS-INIT] CAPTCHA binary fetched. Status: ${captchaRes.status}`);
           }
         }
       }
 
-      // Final fallback if #imgPhoto fails
       if (!captchaDataUri) {
-        console.log(`[QUMS-INIT] Falling back to explicit /Account/GetCaptcha`);
-        const fallbackUrl = `${QUMS_BASE_URL}/Account/GetCaptcha`;
-        const captchaResponse = await fetch(fallbackUrl, {
-          headers: { 
-            'Cookie': cookies,
-            'User-Agent': this.userAgent,
-            'Referer': QUMS_BASE_URL
-          },
-          cache: 'no-store'
-        });
-
-        if (captchaResponse.ok) {
-          const buffer = await captchaResponse.arrayBuffer();
-          captchaDataUri = `data:image/png;base64,${Buffer.from(buffer).toString('base64')}`;
-        }
-      }
-
-      if (!captchaDataUri) {
-        throw new Error('ERP CAPTCHA unavailable');
+        throw new Error('ERP CAPTCHA source #imgPhoto unavailable');
       }
 
       return { sessionId: cookies, token, captchaDataUri };
@@ -108,7 +85,7 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
-    console.log(`[QUMS-LOGIN] Submitting credentials to root with session...`);
+    console.log(`[QUMS-LOGIN] Submitting to root with session cookies...`);
     const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
@@ -124,9 +101,8 @@ export class QUMSProvider implements IERPProvider {
 
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
-    // Success check based on redirect behavior
     if (response.status === 302 || response.status === 301) {
-      console.log(`[QUMS-LOGIN] Success redirect detected.`);
+      console.log(`[QUMS-LOGIN] Success redirect (302) detected.`);
       return { success: true, sessionId: updatedCookies };
     }
 
@@ -138,7 +114,7 @@ export class QUMSProvider implements IERPProvider {
       success: false, 
       message: isInvalid ? 'Invalid QID or Password.' : 
                isCaptchaError ? 'Invalid CAPTCHA code.' : 
-               'Authentication failed. Please verify the CAPTCHA.' 
+               'Authentication failed. Please verify credentials and CAPTCHA.' 
     };
   }
 
@@ -152,7 +128,7 @@ export class QUMSProvider implements IERPProvider {
       }
     });
 
-    if (!response.ok) throw new Error('QUMS session expired');
+    if (!response.ok) throw new Error('QUMS profile fetch failed');
 
     const data = await response.json();
     
@@ -180,12 +156,19 @@ export class QUMSProvider implements IERPProvider {
   }
 
   private extractCookies(response: Response): string {
-    const setCookies = (response.headers as any).getSetCookie?.() || [];
-    if (setCookies.length > 0) {
-      return setCookies.map((c: string) => c.split(';')[0]).join('; ');
+    // Standard getSetCookie (Node 18+, Next.js built-in fetch)
+    if (typeof (response.headers as any).getSetCookie === 'function') {
+      const cookies = (response.headers as any).getSetCookie();
+      if (cookies.length > 0) {
+        return cookies.map((c: string) => c.split(';')[0].trim()).join('; ');
+      }
     }
+    
+    // Fallback for concatenated headers
     const cookieHeader = response.headers.get('set-cookie');
-    return cookieHeader ? cookieHeader.split(';')[0] : '';
+    if (!cookieHeader) return '';
+    
+    return cookieHeader.split(',').map(c => c.split(';')[0].trim()).join('; ');
   }
 
   private mergeCookies(existing: string, incoming: string): string {

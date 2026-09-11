@@ -1,8 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { initializeFirebase } from '@/firebase';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 export async function POST(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
@@ -12,20 +11,23 @@ export async function POST(req: NextRequest) {
 
   if (appSessionId) {
     try {
-      const { firestore } = initializeFirebase();
-      const sessionRef = doc(firestore, 'erpSessions', appSessionId);
-      const sessionSnap = await getDoc(sessionRef);
+      const db = getAdminFirestore();
+      const sessionRef = db.collection('erpSessions').doc(appSessionId);
+      const sessionSnap = await sessionRef.get();
 
-      if (sessionSnap.exists()) {
-        const { qumsCookies } = sessionSnap.data();
-        const erp = getERPProvider();
-        
-        // Clean up university side
-        await erp.logout(qumsCookies).catch(() => {});
-        
-        // Clean up our side
-        await deleteDoc(sessionRef).catch(() => {});
-        console.log(`[LOGOUT] Session ${appSessionId.substring(0, 4)} purged.`);
+      if (sessionSnap.exists) {
+        const sessionData = sessionSnap.data();
+        if (sessionData) {
+          const { qumsCookies } = sessionData;
+          const erp = getERPProvider();
+          
+          // Clean up university side
+          await erp.logout(qumsCookies).catch(() => {});
+          
+          // Clean up Admin Firestore store
+          await sessionRef.delete().catch(() => {});
+          console.log(`[LOGOUT] Admin session ${appSessionId.substring(0, 4)} purged.`);
+        }
       }
     } catch (e) {
       console.error('[LOGOUT-ERROR]', e);

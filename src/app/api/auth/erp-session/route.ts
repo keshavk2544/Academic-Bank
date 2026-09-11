@@ -1,8 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { initializeFirebase } from '@/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
@@ -12,16 +11,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { firestore } = initializeFirebase();
-    const sessionRef = doc(firestore, 'erpSessions', appSessionId);
-    const sessionSnap = await getDoc(sessionRef);
+    const db = getAdminFirestore();
+    const sessionRef = db.collection('erpSessions').doc(appSessionId);
+    const sessionSnap = await sessionRef.get();
 
-    if (!sessionSnap.exists()) {
-      console.warn(`[SESSION] App session ${appSessionId.substring(0, 4)} not found in store.`);
+    if (!sessionSnap.exists) {
+      console.warn(`[SESSION] App session ${appSessionId.substring(0, 4)} not found in Admin store.`);
       return NextResponse.json({ authenticated: false, message: 'Session not found' }, { status: 401 });
     }
 
-    const { qumsCookies, expiresAt } = sessionSnap.data();
+    const sessionData = sessionSnap.data();
+    if (!sessionData) return NextResponse.json({ authenticated: false }, { status: 401 });
+    
+    const { qumsCookies, expiresAt } = sessionData;
 
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
@@ -32,9 +34,9 @@ export async function GET(req: NextRequest) {
     const erp = getERPProvider();
     const profile = await erp.getStudentProfile(qumsCookies);
 
-    console.log(`[SESSION] Active session for: ${profile.name}`);
+    console.log(`[SESSION] GetStudentDetail: SUCCESS for ${profile.name}`);
 
-    // Return ONLY the 4 required fields as requested
+    // Return ONLY the 4 required fields
     return NextResponse.json({
       authenticated: true,
       student: {
