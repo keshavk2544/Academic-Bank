@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const transactionSnap = await getDoc(transactionRef);
 
     if (!transactionSnap.exists()) {
+      console.warn(`[ERP-LOGIN] Transaction ${transactionId.substring(0, 4)} not found`);
       return NextResponse.json({ success: false, message: 'Authentication session not found. Please refresh.' }, { status: 401 });
     }
 
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
 
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
+      console.warn(`[ERP-LOGIN] Transaction ${transactionId.substring(0, 4)} expired`);
       await deleteDoc(transactionRef);
       return NextResponse.json({ success: false, message: 'Authentication session expired.' }, { status: 401 });
     }
@@ -32,14 +34,14 @@ export async function POST(req: NextRequest) {
     const erp = getERPProvider();
     const result = await erp.authenticate(username, password, captcha, token, qumsCookies);
 
-    // Always cleanup the transaction after attempt
+    // Cleanup the transaction after ONE attempt (Security)
     await deleteDoc(transactionRef);
 
     if (result.success) {
+      console.log(`[ERP-LOGIN] Success for ${username}`);
       const response = NextResponse.json({ success: true });
 
-      // Opaque app session: we'll use the QUMS cookies directly in the HttpOnly cookie 
-      // as they are typically small enough (IDs), but keep them server-side only.
+      // Opaque app session (HttpOnly)
       response.cookies.set('erp_session', result.sessionId!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -51,9 +53,10 @@ export async function POST(req: NextRequest) {
       return response;
     }
 
+    console.warn(`[ERP-LOGIN] Failed: ${result.message}`);
     return NextResponse.json({ 
       success: false, 
-      message: result.message || 'Login failed. Verify credentials and CAPTCHA.' 
+      message: result.message || 'Login failed.' 
     }, { status: 401 });
   } catch (error) {
     console.error('[API-LOGIN-ERROR]', error);

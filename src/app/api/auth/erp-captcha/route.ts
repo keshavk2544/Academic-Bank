@@ -9,18 +9,20 @@ export async function GET() {
     const erp = getERPProvider();
     const { sessionId: qumsCookies, token, captchaDataUri } = await erp.initializeSession();
 
-    // Create an opaque transaction ID
-    const transactionId = Math.random().toString(36).substring(2, 15);
+    // Create an opaque transaction ID for the browser
+    const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
-    // Store QUMS session state in Firestore
+    // Store QUMS session state in Firestore (Expires in 10 mins)
     const { firestore } = initializeFirebase();
     const transactionRef = doc(firestore, 'loginTransactions', transactionId);
     
     await setDoc(transactionRef, {
       cookies: qumsCookies,
       token: token,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 mins
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString()
     });
+
+    console.log(`[ERP-INIT] Created transaction ${transactionId.substring(0, 4)}...`);
 
     return NextResponse.json({ 
       success: true, 

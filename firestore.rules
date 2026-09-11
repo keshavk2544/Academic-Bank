@@ -1,0 +1,16 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // loginTransactions is for server-side processing only.
+    // Client SDKs should have NO access.
+    match /loginTransactions/{transactionId} {
+      allow read, write: if false;
+    }
+
+    // Allow authenticated users to read their own profiles if needed later.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

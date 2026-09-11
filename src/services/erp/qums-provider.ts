@@ -7,15 +7,15 @@ import * as cheerio from 'cheerio';
 const QUMS_BASE_URL = 'https://qums.quantumuniversity.edu.in';
 
 export class QUMSProvider implements IERPProvider {
+  private userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+
   async initializeSession() {
     try {
       const response = await fetch(QUMS_BASE_URL, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        headers: { 'User-Agent': this.userAgent }
       });
       
-      if (!response.ok) throw new Error(`QUMS landing page unreachable: ${response.status}`);
+      if (!response.ok) throw new Error(`QUMS unreachable: ${response.status}`);
       
       const html = await response.text();
       const cookies = this.extractCookies(response);
@@ -23,7 +23,7 @@ export class QUMSProvider implements IERPProvider {
       const $ = cheerio.load(html);
       const token = $('input[name="__RequestVerificationToken"]').val() as string;
       
-      // Attempt to extract CAPTCHA directly from landing page HTML if present
+      // Attempt to extract CAPTCHA from the landing page HTML first (faster)
       let captchaDataUri = $('#imgPhoto').attr('src') || '';
 
       if (captchaDataUri && !captchaDataUri.startsWith('data:')) {
@@ -31,7 +31,7 @@ export class QUMSProvider implements IERPProvider {
         const captchaRes = await fetch(captchaUrl, { 
           headers: { 
             'Cookie': cookies,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': this.userAgent
           } 
         });
         const buffer = await captchaRes.arrayBuffer();
@@ -42,7 +42,7 @@ export class QUMSProvider implements IERPProvider {
         const captchaResponse = await fetch(`${QUMS_BASE_URL}/Account/GetCaptcha`, {
           headers: { 
             'Cookie': cookies,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': this.userAgent
           }
         });
         const buffer = await captchaResponse.arrayBuffer();
@@ -68,6 +68,7 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
+    // POST to root URL as per real QUMS login behavior
     const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
@@ -75,7 +76,7 @@ export class QUMSProvider implements IERPProvider {
         'Cookie': sessionId,
         'Referer': QUMS_BASE_URL,
         'Origin': QUMS_BASE_URL,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': this.userAgent
       },
       body: body.toString(),
       redirect: 'manual'
@@ -83,7 +84,7 @@ export class QUMSProvider implements IERPProvider {
 
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
-    // QUMS redirects to /Student/Dashboard on success
+    // QUMS redirects (302) to /Student/Dashboard on success
     if (response.status === 302) {
       return { success: true, sessionId: updatedCookies };
     }
@@ -91,11 +92,13 @@ export class QUMSProvider implements IERPProvider {
     const failureHtml = await response.text();
     const isInvalid = failureHtml.includes('Invalid') || failureHtml.includes('Incorrect');
     const isCaptchaError = failureHtml.includes('Captcha') || failureHtml.includes('CAPTCHA');
+    const isSessionExpired = failureHtml.includes('expired') || failureHtml.includes('Verification Token');
     
     return { 
       success: false, 
       message: isInvalid ? 'Invalid QID or Password.' : 
                isCaptchaError ? 'Invalid CAPTCHA code.' : 
+               isSessionExpired ? 'Authentication session expired. Refresh CAPTCHA.' :
                'Authentication failed. Please verify all fields.' 
     };
   }
@@ -105,7 +108,7 @@ export class QUMSProvider implements IERPProvider {
       method: 'POST',
       headers: { 
         'Cookie': sessionId,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': this.userAgent
       }
     });
 
@@ -131,7 +134,7 @@ export class QUMSProvider implements IERPProvider {
     try {
       await fetch(`${QUMS_BASE_URL}/Account/Logout`, {
         method: 'POST',
-        headers: { 'Cookie': sessionId }
+        headers: { 'Cookie': sessionId, 'User-Agent': this.userAgent }
       });
     } catch (e) {
       // Ignore
