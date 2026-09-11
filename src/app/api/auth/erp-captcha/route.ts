@@ -21,16 +21,16 @@ export async function GET() {
     const { sessionId: qumsCookies, token, captchaDataUri } = sessionData;
     
     console.log(`[CAPTCHA] QUMS landing status: 200`);
-    console.log(`[CAPTCHA] Captcha found. Type: ${captchaDataUri.startsWith('data:image') ? 'Data URI' : 'Binary/External'}`);
-    console.log(`[CAPTCHA] Captcha bytes/length: ${captchaDataUri.length}`);
+    console.log(`[CAPTCHA] Captcha found. Length: ${captchaDataUri.length}`);
 
     // Create an opaque transaction ID for the browser
     const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
     // Attempt Firestore write
     try {
-      const { firestore } = initializeFirebase();
-      console.log('[CAPTCHA] Firestore initialized. Attempting transaction write...');
+      const { firestore, app } = initializeFirebase();
+      const projectId = app.options.projectId;
+      console.log(`[CAPTCHA] Firestore initializing for project: ${projectId}`);
       
       const transactionRef = doc(firestore, 'loginTransactions', transactionId);
       
@@ -42,15 +42,21 @@ export async function GET() {
       
       console.log(`[CAPTCHA] Firestore transaction write: SUCCESS. ID: ${transactionId.substring(0, 8)}`);
     } catch (firestoreError: any) {
-      console.error('[CAPTCHA] Firestore transaction write: FAILURE', firestoreError);
+      // Safe diagnostics: Log the error code and message but no secrets
+      console.error('[CAPTCHA] Firestore transaction write: FAILURE', {
+        code: firestoreError.code,
+        message: firestoreError.message
+      });
       
-      // If Firestore fails, we still return the CAPTCHA in development so we can see it,
-      // but we warn the user that login will likely fail without session persistence.
+      // Return the CAPTCHA anyway so the user can see it, but signal the storage failure
       return NextResponse.json({ 
         success: false, 
-        message: 'Storage failure: Firestore is not enabled or accessible.',
-        captcha: captchaDataUri, // Include CAPTCHA anyway for visual debug
-        debug: firestoreError.message
+        message: 'Storage failure: Firestore permissions or configuration issue.',
+        captcha: captchaDataUri,
+        debug: {
+          code: firestoreError.code,
+          message: firestoreError.message
+        }
       }, { status: 500 });
     }
 

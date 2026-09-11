@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
 import { initializeFirebase } from '@/firebase';
@@ -13,9 +12,25 @@ export async function POST(req: NextRequest) {
     }
 
     // Retrieve the QUMS session from Firestore
-    const { firestore } = initializeFirebase();
+    const { firestore, app } = initializeFirebase();
+    const projectId = app.options.projectId;
+    console.log(`[ERP-LOGIN] Retrieving transaction from project: ${projectId}`);
+
     const transactionRef = doc(firestore, 'loginTransactions', transactionId);
-    const transactionSnap = await getDoc(transactionRef);
+    let transactionSnap;
+    
+    try {
+      transactionSnap = await getDoc(transactionRef);
+    } catch (readError: any) {
+      console.error('[ERP-LOGIN] Firestore transaction read: FAILURE', {
+        code: readError.code,
+        message: readError.message
+      });
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Storage failure: Unable to retrieve authentication session.' 
+      }, { status: 500 });
+    }
 
     if (!transactionSnap.exists()) {
       console.warn(`[ERP-LOGIN] Transaction ${transactionId.substring(0, 4)} not found`);
@@ -27,7 +42,7 @@ export async function POST(req: NextRequest) {
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
       console.warn(`[ERP-LOGIN] Transaction ${transactionId.substring(0, 4)} expired`);
-      await deleteDoc(transactionRef);
+      await deleteDoc(transactionRef).catch(() => {}); // Silent cleanup
       return NextResponse.json({ success: false, message: 'Authentication session expired.' }, { status: 401 });
     }
 
@@ -35,10 +50,10 @@ export async function POST(req: NextRequest) {
     const result = await erp.authenticate(username, password, captcha, token, qumsCookies);
 
     // Cleanup the transaction after ONE attempt (Security)
-    await deleteDoc(transactionRef);
+    await deleteDoc(transactionRef).catch(() => {});
 
     if (result.success) {
-      console.log(`[ERP-LOGIN] Success for ${username}`);
+      console.log(`[ERP-LOGIN] Success for student: ${username}`);
       const response = NextResponse.json({ success: true });
 
       // Opaque app session (HttpOnly)
