@@ -7,13 +7,20 @@ export async function POST(req: NextRequest) {
     const { username, password, captcha, token } = await req.json();
     const sessionId = req.cookies.get('qums_temp_session')?.value;
 
-    // Log the presence (not values) of required items for debugging
-    console.log(`[API-LOGIN] SessionId present: ${!!sessionId}, Token present: ${!!token}, Username present: ${!!username}`);
+    // Detailed safe diagnostics for session correlation
+    console.log(`[API-LOGIN] Correlation Check - Session Cookie present: ${!!sessionId}, CSRF Token present: ${!!token}, Username: ${!!username}`);
 
-    if (!sessionId || !token) {
+    if (!sessionId) {
       return NextResponse.json({ 
         success: false, 
-        message: 'Authentication session expired. Please refresh the CAPTCHA.' 
+        message: 'Authentication session not found. Please refresh CAPTCHA.' 
+      }, { status: 400 });
+    }
+
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Security token missing. Please refresh CAPTCHA.' 
       }, { status: 400 });
     }
 
@@ -23,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (result.success) {
       const response = NextResponse.json({ success: true });
 
-      // Upgrade to authenticated session cookie
+      // Establish authenticated session
       response.cookies.set('erp_session', result.sessionId!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -32,7 +39,7 @@ export async function POST(req: NextRequest) {
         path: '/',
       });
 
-      // Clear the temp session
+      // Clear temporary session
       response.cookies.delete('qums_temp_session');
 
       return response;
@@ -40,10 +47,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       success: false, 
-      message: result.message || 'Invalid credentials or CAPTCHA.' 
+      message: result.message || 'Login failed. Please verify credentials and CAPTCHA.' 
     }, { status: 401 });
   } catch (error) {
     console.log('[API-LOGIN-ERROR]', error);
-    return NextResponse.json({ success: false, message: 'System Error. Please try again later.' }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'System error during authentication pulse.' }, { status: 500 });
   }
 }

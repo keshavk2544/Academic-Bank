@@ -13,8 +13,8 @@ export async function GET() {
       token: token
     });
 
-    // Store the initial QUMS session ID in a secure temp cookie
-    // Changed SameSite to 'lax' to ensure consistency across API routes
+    // Store the raw QUMS session state in a secure temp cookie
+    // Path MUST be root to ensure visibility to /api/auth/erp-login
     response.cookies.set('qums_temp_session', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -23,9 +23,11 @@ export async function GET() {
       path: '/',
     });
 
+    console.log(`[API-CAPTCHA] Session initialized successfully. Cookies captured.`);
+
     return response;
   } catch (error) {
     console.log('[API-CAPTCHA-ERROR]', error);
-    return NextResponse.json({ success: false, message: 'ERP Unavailable' }, { status: 503 });
+    return NextResponse.json({ success: false, message: 'ERP Pulse Unavailable' }, { status: 503 });
   }
 }
