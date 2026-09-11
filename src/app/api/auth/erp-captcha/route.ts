@@ -12,45 +12,45 @@ export async function GET() {
   let diagnosticError = null;
 
   try {
-    const app = getAdminApp();
-    adminInit = 'SUCCESS';
-    adminProjectId = app.options.projectId || 'detected';
-    
-    // Step 1: Server-side Firestore Admin Diagnostic (Privileged)
-    const db = getAdminFirestore();
-    const diagRef = db.collection('_adminDiagnostics').doc('connectivity-test');
-    
+    // Phase 1: Admin SDK Diagnostic
     try {
-      // Test Write
+      const app = getAdminApp();
+      adminInit = 'SUCCESS';
+      adminProjectId = app.options.projectId || 'detected-via-adc';
+      
+      const db = getAdminFirestore();
+      const diagRef = db.collection('_adminDiagnostics').doc('connectivity-test');
+      
+      // Perform privileged write/read/delete test
       await diagRef.set({
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        runtime: 'app-hosting-check'
       });
       
-      // Test Read
       const snap = await diagRef.get();
-      if (!snap.exists) throw new Error('Diagnostic document not found after write.');
+      if (!snap.exists) throw new Error('Diagnostic write failed verification.');
       
-      // Test Delete
       await diagRef.delete();
-      
       diagnosticStatus = 'SUCCESS';
       console.log('[CAPTCHA] Firestore Admin Diagnostic: SUCCESS');
     } catch (dbError: any) {
       diagnosticStatus = 'FAILURE';
       diagnosticError = {
-        code: dbError.code,
+        code: dbError.code || 'unknown',
         message: dbError.message,
-        details: dbError.details || 'No extra details'
+        isCredentialError: dbError.message.includes('METADATA') || dbError.message.includes('ACCESS_TOKEN')
       };
       console.error('[CAPTCHA] Firestore Admin Diagnostic: FAILURE', dbError);
     }
 
-    // Only proceed to QUMS if Firestore Admin is functional
+    // Only proceed to QUMS if Firestore Admin is functional (Production Requirement)
     if (diagnosticStatus !== 'SUCCESS') {
       return NextResponse.json({
         success: false,
-        message: 'Storage failure: Server credentials cannot access Firestore.',
+        message: diagnosticError?.isCredentialError 
+          ? 'Environment Error: Studio Preview lacks Google Credentials. Please test in App Hosting.'
+          : 'Storage failure: Admin Firestore is not accessible.',
         debug: {
           adminInit,
           projectId: adminProjectId,
@@ -60,7 +60,7 @@ export async function GET() {
       }, { status: 500 });
     }
 
-    // Step 2: QUMS CAPTCHA Retrieval (Preserving working logic)
+    // Phase 2: QUMS CAPTCHA Retrieval
     const erp = getERPProvider();
     const sessionData = await erp.initializeSession();
 
@@ -68,18 +68,20 @@ export async function GET() {
       return NextResponse.json({ 
         success: false, 
         message: 'QUMS connection established but CAPTCHA source not found.' 
+        // Note: No sensitive data logged
       }, { status: 502 });
     }
 
     const { sessionId: qumsCookies, token, captchaDataUri } = sessionData;
     const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
-    // Step 3: Store QUMS session in Firestore using Admin SDK
+    // Store QUMS session in Firestore using privileged Admin SDK
+    const db = getAdminFirestore();
     const transactionRef = db.collection('loginTransactions').doc(transactionId);
     await transactionRef.set({
       cookies: qumsCookies,
       token: token,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 min window
       createdAt: new Date().toISOString()
     });
 
@@ -100,7 +102,6 @@ export async function GET() {
       message: 'Unable to reach QUMS server pulse.',
       debug: {
         adminInit,
-        projectId: adminProjectId,
         diagnosticStatus,
         error: error.message
       }

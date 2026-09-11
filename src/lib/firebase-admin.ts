@@ -9,14 +9,14 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 export function getAdminApp(): App {
   if (getApps().length === 0) {
     try {
-      // Automatically uses environment-provided Application Default Credentials
-      // or FIREBASE_CONFIG environment variable if present.
-      console.log('[FIREBASE-ADMIN] Attempting default initialization...');
+      // Automatically uses environment-provided Application Default Credentials (ADC)
+      // in App Hosting or Google Cloud environments.
+      console.log('[FIREBASE-ADMIN] Initializing with Application Default Credentials...');
       return initializeApp();
     } catch (e: any) {
-      console.error('[FIREBASE-ADMIN] Default initialization failed:', e.message);
+      console.error('[FIREBASE-ADMIN] ADC initialization failed:', e.message);
       
-      // Fallback: Check for project ID in environment if ADC initialization fails
+      // Fallback: Check for project ID in environment if standard initialization fails
       const projectId = process.env.GOOGLE_CLOUD_PROJECT || 
                         process.env.FIREBASE_PROJECT_ID || 
                         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -26,7 +26,7 @@ export function getAdminApp(): App {
         return initializeApp({ projectId });
       }
       
-      throw new Error(`Firebase Admin initialization failed. No credentials or Project ID found. Original error: ${e.message}`);
+      throw new Error(`Firebase Admin initialization failed. No credentials or Project ID found. This is expected in Studio Preview. Error: ${e.message}`);
     }
   }
   return getApp();

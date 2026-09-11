@@ -1,7 +1,13 @@
+
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
+  # Standard configuration for Next.js 15
   maxInstances: 1
+  minInstances: 0
+  cpu: 1
+  memoryMiB: 512
+
+# The App Hosting service account needs "Cloud Datastore User" permissions
+# for the privileged Firestore operations used in this authentication flow.
