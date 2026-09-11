@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { getAdminFirestore } from '@/lib/firebase-admin';
+import { getSessionStore } from '@/services/session-store';
 
 export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
@@ -11,15 +11,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const db = getAdminFirestore();
-    const sessionRef = db.collection('erpSessions').doc(appSessionId);
-    const sessionSnap = await sessionRef.get();
+    const store = getSessionStore();
+    const sessionData = await store.getSession(appSessionId);
 
-    if (!sessionSnap.exists) {
+    if (!sessionData) {
       return NextResponse.json({ authenticated: false, message: 'Session not found' }, { status: 401 });
     }
 
-    const sessionData = sessionSnap.data()!;
     const { qumsCookies, expiresAt } = sessionData;
 
     // Check expiration
@@ -42,7 +40,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('[SESSION-ERROR]', error);
     const response = NextResponse.json({ authenticated: false, message: 'QUMS session expired or unreachable' }, { status: 401 });
-    response.cookies.delete('erp_session');
+    // Don't delete cookie on transient network failure, let the user retry
     return response;
   }
 }

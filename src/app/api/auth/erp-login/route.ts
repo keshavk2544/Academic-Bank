@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { getAdminFirestore } from '@/lib/firebase-admin';
+import { getSessionStore } from '@/services/session-store';
 import { randomUUID } from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -12,21 +12,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid request signature.' }, { status: 400 });
     }
 
-    // Retrieve the QUMS pre-login session from Firestore using Admin SDK
-    const db = getAdminFirestore();
-    const transactionRef = db.collection('loginTransactions').doc(transactionId);
-    const transactionSnap = await transactionRef.get();
+    // Retrieve the QUMS pre-login session from the store
+    const store = getSessionStore();
+    const transactionData = await store.getTransaction(transactionId);
 
-    if (!transactionSnap.exists) {
+    if (!transactionData) {
       return NextResponse.json({ success: false, message: 'Authentication session not found. Please refresh.' }, { status: 401 });
     }
 
-    const transactionData = transactionSnap.data()!;
     const { cookies: qumsCookies, token, expiresAt } = transactionData;
 
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
-      await transactionRef.delete();
+      await store.deleteTransaction(transactionId);
       return NextResponse.json({ success: false, message: 'Authentication session expired.' }, { status: 401 });
     }
 
@@ -34,16 +32,15 @@ export async function POST(req: NextRequest) {
     const result = await erp.authenticate(username, password, captcha, token, qumsCookies);
 
     // Cleanup the pre-login transaction
-    await transactionRef.delete();
+    await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
       // Create a random opaque application session ID
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 2 * 1000); // 2 hours
       
-      // Store the authenticated QUMS cookies in Firestore using Admin SDK
-      const sessionRef = db.collection('erpSessions').doc(appSessionId);
-      await sessionRef.set({
+      // Store the authenticated QUMS cookies in the store
+      await store.saveSession(appSessionId, {
         qumsCookies: result.sessionId,
         createdAt: new Date().toISOString(),
         expiresAt: expires.toISOString()

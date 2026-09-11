@@ -1,95 +1,37 @@
 
 import { NextResponse } from 'next/server';
 import { getERPProvider } from '@/services/erp';
-import { getAdminFirestore, getAdminApp } from '@/lib/firebase-admin';
+import { getSessionStore } from '@/services/session-store';
 
 export async function GET() {
-  console.log('[CAPTCHA] Initialization pulse started...');
+  console.log('[CAPTCHA] Pulse initialized...');
   
-  let adminInit = 'IDLE';
-  let adminProjectId = 'unknown';
-  let diagnosticStatus = 'PENDING';
-  let diagnosticError = null;
-
   try {
-    // Phase 1: Admin SDK Diagnostic
-    try {
-      const app = getAdminApp();
-      adminInit = 'SUCCESS';
-      adminProjectId = app.options.projectId || 'detected-via-adc';
-      
-      const db = getAdminFirestore();
-      // Ensure we are using the Admin Firestore instance (firebase-admin/firestore)
-      // and NOT the client SDK (firebase/firestore).
-      
-      const diagRef = db.collection('_adminDiagnostics').doc('connectivity-test');
-      
-      // Perform privileged write/read/delete test to verify connectivity
-      await diagRef.set({
-        timestamp: new Date().toISOString(),
-        env: process.env.NODE_ENV,
-        runtime: 'app-hosting-check'
-      });
-      
-      const snap = await diagRef.get();
-      if (!snap.exists) throw new Error('Diagnostic write failed verification.');
-      
-      await diagRef.delete();
-      diagnosticStatus = 'SUCCESS';
-      console.log(`[CAPTCHA] Firestore Admin Diagnostic: SUCCESS (Project: ${adminProjectId})`);
-    } catch (dbError: any) {
-      diagnosticStatus = 'FAILURE';
-      diagnosticError = {
-        code: dbError.code || 'unknown',
-        message: dbError.message,
-        stack: process.env.NODE_ENV === 'development' ? dbError.stack : undefined,
-        isCredentialError: dbError.message.includes('METADATA') || dbError.message.includes('ACCESS_TOKEN') || dbError.message.includes('credentials')
-      };
-      console.error('[CAPTCHA] Firestore Admin Diagnostic: FAILURE', dbError);
-    }
-
-    // Return diagnostic info if Firestore fails
-    if (diagnosticStatus !== 'SUCCESS') {
-      return NextResponse.json({
-        success: false,
-        message: diagnosticError?.isCredentialError 
-          ? 'Environment Error: Google Application Default Credentials not found. This is expected in Studio Preview; please deploy to App Hosting.'
-          : `Storage failure: Admin Firestore is not accessible. Error: ${diagnosticError?.message}`,
-        debug: {
-          adminInit,
-          projectId: adminProjectId,
-          diagnosticStatus,
-          error: diagnosticError
-        }
-      }, { status: 500 });
-    }
-
-    // Phase 2: QUMS CAPTCHA Retrieval
     const erp = getERPProvider();
     const sessionData = await erp.initializeSession();
 
     if (!sessionData || !sessionData.captchaDataUri) {
       return NextResponse.json({ 
         success: false, 
-        message: 'QUMS connection established but CAPTCHA source not found.' 
+        message: 'QUMS reached but CAPTCHA source not found.' 
       }, { status: 502 });
     }
 
     const { sessionId: qumsCookies, token, captchaDataUri } = sessionData;
+    
     // Create opaque transaction ID
     const transactionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
-    // Store QUMS session in Firestore using privileged Admin SDK
-    const db = getAdminFirestore();
-    const transactionRef = db.collection('loginTransactions').doc(transactionId);
-    await transactionRef.set({
+    // Store QUMS session in the environment-aware store
+    const store = getSessionStore();
+    await store.saveTransaction(transactionId, {
       cookies: qumsCookies,
       token: token,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 min window
       createdAt: new Date().toISOString()
     });
 
-    console.log(`[CAPTCHA] Transaction created: ${transactionId.substring(0, 8)}`);
+    console.log(`[CAPTCHA] Transaction ${transactionId.substring(0, 8)} stored successfully.`);
 
     return NextResponse.json({ 
       success: true, 
@@ -97,8 +39,7 @@ export async function GET() {
       transactionId: transactionId
     }, {
       headers: { 
-        'Cache-Control': 'no-store, max-age=0',
-        'X-Diagnostic-Status': 'SUCCESS'
+        'Cache-Control': 'no-store, max-age=0'
       }
     });
 
@@ -108,8 +49,6 @@ export async function GET() {
       success: false, 
       message: 'Unable to reach QUMS server pulse.',
       debug: {
-        adminInit,
-        diagnosticStatus,
         error: error.message
       }
     }, { status: 503 });
