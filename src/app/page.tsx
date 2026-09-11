@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [isSad, setIsSad] = useState(false)
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 })
   const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [isCheckingSession, setIsCheckingSession] = useState(true)
 
   const fetchCaptcha = async () => {
     setInitializationStatus('loading')
@@ -51,8 +52,25 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    fetchCaptcha()
-  }, [])
+    // Check if already authenticated to skip login
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/auth/erp-session');
+        const data = await res.json();
+        if (data.authenticated) {
+          router.replace("/dashboard");
+        } else {
+          setIsCheckingSession(false);
+          fetchCaptcha();
+        }
+      } catch (e) {
+        setIsCheckingSession(false);
+        fetchCaptcha();
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   const handleInputTrack = (val: string) => {
     if (!isCoveringEyes && !isSad) {
@@ -106,6 +124,10 @@ export default function LoginPage() {
       })
       setIsLoggingIn(false)
     }
+  }
+
+  if (isCheckingSession) {
+    return <LoadingOverlay status="Verifying Session Pulse" />;
   }
 
   return (
