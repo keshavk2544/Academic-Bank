@@ -16,27 +16,20 @@ export async function GET(req: NextRequest) {
     const sessionSnap = await sessionRef.get();
 
     if (!sessionSnap.exists) {
-      console.warn(`[SESSION] App session ${appSessionId.substring(0, 4)} not found in Admin store.`);
       return NextResponse.json({ authenticated: false, message: 'Session not found' }, { status: 401 });
     }
 
-    const sessionData = sessionSnap.data();
-    if (!sessionData) return NextResponse.json({ authenticated: false }, { status: 401 });
-    
+    const sessionData = sessionSnap.data()!;
     const { qumsCookies, expiresAt } = sessionData;
 
     // Check expiration
     if (new Date() > new Date(expiresAt)) {
-      console.warn(`[SESSION] App session ${appSessionId.substring(0, 4)} expired.`);
       return NextResponse.json({ authenticated: false, message: 'Session expired' }, { status: 401 });
     }
 
     const erp = getERPProvider();
     const profile = await erp.getStudentProfile(qumsCookies);
 
-    console.log(`[SESSION] GetStudentDetail: SUCCESS for ${profile.name}`);
-
-    // Return ONLY the 4 required fields
     return NextResponse.json({
       authenticated: true,
       student: {
