@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { 
   LogOut, 
-  ChevronRight,
-  SlidersHorizontal,
   RefreshCw,
   Fingerprint,
   IdCard,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  AlertCircle
 } from "lucide-react"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
@@ -26,6 +25,7 @@ export default function ProfilePage() {
   const [student, setStudent] = useState<StudentProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setRole(localStorage.getItem("userRole") || "student")
@@ -34,7 +34,11 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch('/api/student/profile', { cache: 'no-store' })
+      const res = await fetch('/api/student/profile', { 
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store' 
+      })
       
       if (res.status === 401) {
         router.replace("/")
@@ -45,11 +49,11 @@ export default function ProfilePage() {
       if (data.success && data.student) {
         setStudent(data.student)
       } else {
-        router.replace("/")
+        setError(data.message || "Failed to load profile.")
       }
     } catch (e) {
       console.error('[PROFILE-FETCH-ERROR]', e)
-      toast({ variant: "destructive", title: "Error", description: "Failed to fetch identity pulse." })
+      setError("Network interruption during identity pulse.")
     } finally {
       setIsLoading(false)
     }
@@ -58,7 +62,10 @@ export default function ProfilePage() {
   const handleSyncERP = async () => {
     setIsSyncing(true)
     try {
-      const res = await fetch('/api/student/sync', { method: 'POST' })
+      const res = await fetch('/api/student/sync', { 
+        method: 'POST',
+        credentials: 'include'
+      })
       const data = await res.json()
       
       if (data.success && data.student) {
@@ -89,7 +96,7 @@ export default function ProfilePage() {
   }
 
   const handleSignOut = async () => {
-    await fetch('/api/auth/erp-logout', { method: 'POST' })
+    await fetch('/api/auth/erp-logout', { method: 'POST', credentials: 'include' })
     localStorage.removeItem("userRole")
     router.push("/")
   }
@@ -117,15 +124,21 @@ export default function ProfilePage() {
         
         <div className="bg-primary w-full rounded-[3.5rem] pt-16 pb-8 text-center text-black px-6 shadow-xl">
            <h1 className="text-3xl font-headline font-black tracking-tighter leading-none mb-1">{student?.name || 'Academic Identity'}</h1>
-           <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">{student?.course || role}</p>
+           <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">{student?.course || 'No course data'}</p>
         </div>
       </header>
 
       <div className="px-6 mt-16 space-y-8">
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl flex items-center gap-3 text-destructive">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-xs font-bold">{error}</p>
+          </div>
+        )}
+
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-xl font-bold font-headline tracking-tight">Academic Pulse</h2>
-            <SlidersHorizontal className="w-5 h-5 opacity-40" />
           </div>
 
           <div className="grid grid-cols-1 gap-4">
@@ -136,7 +149,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Registration ID</h3>
-                  <p className="text-sm font-bold font-headline">{student?.registrationId || 'N/A'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.registrationId || 'Not available'}</p>
                 </div>
               </div>
             </div>
@@ -148,7 +161,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Enrollment No</h3>
-                  <p className="text-sm font-bold font-headline">{student?.enrollmentNo || 'N/A'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.enrollmentNo || 'Not available'}</p>
                 </div>
               </div>
             </div>
@@ -160,7 +173,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Branch</h3>
-                  <p className="text-sm font-bold font-headline">{student?.branch || 'N/A'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.branch || 'Not available'}</p>
                 </div>
               </div>
             </div>
@@ -172,7 +185,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Semester</h3>
-                  <p className="text-sm font-bold font-headline">{student?.semester ? `${student.semester}th Semester` : 'N/A'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.semester ? `${student.semester}th Semester` : 'Not available'}</p>
                 </div>
               </div>
             </div>

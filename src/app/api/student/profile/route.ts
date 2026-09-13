@@ -2,10 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionStore } from '@/services/session-store';
 
-/**
- * Returns the cached ERP student profile from the PreRP session.
- * NEVER contacts QUMS.
- */
 export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
 
@@ -21,6 +17,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Session expired' }, { status: 401 });
     }
 
+    // Return CACHED profile only.
     return NextResponse.json({
       success: true,
       student: sessionData.student

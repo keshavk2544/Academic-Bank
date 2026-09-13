@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionStore } from '@/services/session-store';
 import { getERPProvider } from '@/services/erp';
 
-/**
- * Manually refreshes the cached ERP profile by calling QUMS.
- */
 export async function POST(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
 
@@ -24,10 +21,10 @@ export async function POST(req: NextRequest) {
     const { qumsCookies } = sessionData;
     const erp = getERPProvider();
     
-    // Explicit call to QUMS to refresh data
+    // Explicit call to QUMS using stored server-side cookies
     const profile = await erp.getStudentProfile(qumsCookies);
 
-    // Update the cache
+    // Update the server-side cache
     const updatedSession = {
       ...sessionData,
       student: profile

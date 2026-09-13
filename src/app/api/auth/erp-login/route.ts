@@ -33,30 +33,49 @@ export async function POST(req: NextRequest) {
     await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
-      // SYNC ERP DATA ONCE: Fetch the complete student profile
-      console.log(`[LOGIN] Syncing ERP profile for ${username}...`);
+      // 1. Fetch complete student profile ONCE
       const profile = await erp.getStudentProfile(result.sessionId);
+      
+      // SAFE DIAGNOSTIC LOGGING
+      console.log('[ERP PROFILE CHECK]', {
+        hasProfile: !!profile,
+        fields: Object.keys(profile || {}),
+        hasName: !!profile?.name,
+        hasEnrollmentNo: !!profile?.enrollmentNo,
+        hasSemester: !!profile?.semester,
+        hasPhoto: !!profile?.photoUrl,
+      });
 
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
-      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} with cached ERP profile.`);
-
-      // Store authenticated session with FULL profile
-      await store.saveSession(appSessionId, {
+      const sessionData = {
         qumsCookies: result.sessionId,
         student: profile,
         createdAt: new Date().toISOString(),
         expiresAt: expires.toISOString()
+      };
+
+      // 2. Store authenticated session
+      await store.saveSession(appSessionId, sessionData);
+
+      // 3. Verification check
+      const verification = await store.getSession(appSessionId);
+      console.log('[SESSION PROFILE CHECK]', {
+        exists: !!verification,
+        hasStudent: !!verification?.student,
+        fields: verification?.student ? Object.keys(verification.student) : []
       });
 
       const response = NextResponse.json({ success: true });
 
-      // Optimized cookie for desktop browser compatibility in Studio Preview
+      // Environment-aware cookie settings
+      const isProduction = process.env.NODE_ENV === 'production' && process.env.FIREBASE_CONFIG !== undefined;
+      
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: true, 
-        sameSite: 'none',
+        secure: isProduction, 
+        sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });

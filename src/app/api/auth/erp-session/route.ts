@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
 
     const { expiresAt, student } = sessionData;
 
-    // Check PreRP session expiration
     if (new Date() > new Date(expiresAt)) {
       await store.deleteSession(appSessionId).catch(() => {});
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { 
@@ -38,7 +37,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Return CACHED student identity without calling QUMS
+    // Return the cached profile. NEVER contacts QUMS.
     return NextResponse.json({
       authenticated: true,
       student
