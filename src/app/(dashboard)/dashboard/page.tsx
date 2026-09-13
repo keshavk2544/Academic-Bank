@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar } from "lucide-react"
+import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function Dashboard() {
