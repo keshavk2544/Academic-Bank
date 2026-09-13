@@ -21,16 +21,23 @@ export default function Dashboard() {
         const res = await fetch('/api/auth/erp-session', {
           headers: { 'Cache-Control': 'no-store, max-age=0' }
         });
+        
+        if (res.status === 401) {
+          router.replace("/");
+          return;
+        }
+
         const data = await res.json();
 
-        if (data.authenticated) {
+        if (data.authenticated && data.student) {
           setStudent(data.student);
         } else {
-          router.push("/");
+          router.replace("/");
         }
       } catch (e) {
+        console.error('[DASHBOARD-FETCH-ERROR]', e);
         toast({ variant: "destructive", title: "Session Error", description: "Failed to connect to student vault." });
-        router.push("/");
+        router.replace("/");
       } finally {
         setLoading(false);
       }
@@ -40,7 +47,7 @@ export default function Dashboard() {
   }, [router, toast]);
 
   const handleCopy = () => {
-    const val = student?.enrollmentNo || student?.qid;
+    const val = student?.enrollmentNo || student?.qid || student?.studentId;
     if (!val) return;
     navigator.clipboard.writeText(val);
     setCopied(true);
@@ -57,7 +64,7 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
           <p className="text-2xl text-muted-foreground font-light mb-1">
-            {student.name.split(' ')[0]}
+            {student?.name?.split(' ')[0] || 'Student'}
           </p>
           <h1 className="text-5xl font-black font-headline tracking-tighter leading-none mb-6">
             Welcome Back
@@ -81,7 +88,7 @@ export default function Dashboard() {
         </div>
 
         <div className="order-3 md:order-3 text-center md:text-right hidden md:block rotate-[-2deg]">
-          <h3 className="text-3xl text-primary font-headline italic mb-1">Student</h3>
+          <h3 className="text-3xl text-primary font-headline italic mb-1">Pulse</h3>
           <p className="text-2xl text-muted-foreground font-light leading-none">
             Today.<br />Better.<br />Tomorrow.
           </p>
@@ -106,7 +113,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Student ID</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || student.qid}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || student.qid || 'N/A'}</p>
             </div>
             <button 
               onClick={handleCopy}
@@ -123,7 +130,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course || 'N/A'}</p>
             </div>
           </div>
 
@@ -134,7 +141,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Semester</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester || 'N/A'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester ? `${student.semester}th` : 'N/A'}</p>
             </div>
           </div>
 

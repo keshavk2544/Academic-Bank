@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { 
   LogOut, 
-  Mail, 
-  Phone, 
   ChevronRight,
   SlidersHorizontal,
   RefreshCw,
@@ -36,15 +34,22 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch('/api/student/profile')
+      const res = await fetch('/api/student/profile', { cache: 'no-store' })
+      
+      if (res.status === 401) {
+        router.replace("/")
+        return
+      }
+
       const data = await res.json()
-      if (data.success) {
+      if (data.success && data.student) {
         setStudent(data.student)
       } else {
-        router.push("/")
+        router.replace("/")
       }
     } catch (e) {
-      console.error(e)
+      console.error('[PROFILE-FETCH-ERROR]', e)
+      toast({ variant: "destructive", title: "Error", description: "Failed to fetch identity pulse." })
     } finally {
       setIsLoading(false)
     }
@@ -56,7 +61,7 @@ export default function ProfilePage() {
       const res = await fetch('/api/student/sync', { method: 'POST' })
       const data = await res.json()
       
-      if (data.success) {
+      if (data.success && data.student) {
         setStudent(data.student)
         toast({ title: "Sync Successful", description: "Your academic profile has been updated from QUMS." })
       } else {
@@ -97,7 +102,7 @@ export default function ProfilePage() {
 
       <header className="px-6 pt-4 flex flex-col items-center">
         <div className="relative z-10 -mb-12">
-          <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl bg-[#111]">
+          <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl bg-[#111] flex items-center justify-center">
             {student?.photoUrl ? (
               <img 
                 src={student.photoUrl} 
@@ -105,9 +110,7 @@ export default function ProfilePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-primary/40">
-                <Fingerprint className="w-12 h-12" />
-              </div>
+              <Fingerprint className="w-12 h-12 text-primary/40" />
             )}
           </div>
         </div>
@@ -133,7 +136,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Registration ID</h3>
-                  <p className="text-sm font-bold font-headline">{student?.registrationId || 'Not available'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.registrationId || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -145,7 +148,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Enrollment No</h3>
-                  <p className="text-sm font-bold font-headline">{student?.enrollmentNo || 'Not available'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.enrollmentNo || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -157,7 +160,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Branch</h3>
-                  <p className="text-sm font-bold font-headline">{student?.branch || 'Not available'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.branch || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -169,7 +172,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Semester</h3>
-                  <p className="text-sm font-bold font-headline">{student?.semester ? `${student.semester}th Semester` : 'Not available'}</p>
+                  <p className="text-sm font-bold font-headline">{student?.semester ? `${student.semester}th Semester` : 'N/A'}</p>
                 </div>
               </div>
             </div>
