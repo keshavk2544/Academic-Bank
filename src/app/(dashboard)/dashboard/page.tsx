@@ -18,7 +18,9 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const res = await fetch('/api/auth/erp-session');
+        const res = await fetch('/api/auth/erp-session', {
+          headers: { 'Cache-Control': 'no-store, max-age=0' }
+        });
         const data = await res.json();
 
         if (data.authenticated) {
@@ -54,9 +56,11 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-12">
         {/* Left: Greeting */}
         <div className="order-2 md:order-1 text-center md:text-left">
-          <p className="text-2xl text-muted-foreground font-light mb-1">Hello,</p>
-          <h1 className="text-5xl font-black font-headline tracking-tighter leading-none mb-6">
+          <p className="text-2xl text-muted-foreground font-light mb-1">
             {student.name.split(' ')[0]}
+          </p>
+          <h1 className="text-5xl font-black font-headline tracking-tighter leading-none mb-6">
+            Welcome Back
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed italic opacity-80">
             Keep learning.<br />Keep growing.
