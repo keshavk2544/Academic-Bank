@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -62,9 +61,6 @@ export default function Dashboard() {
           <h1 className="text-5xl font-black font-headline tracking-tighter leading-none mb-6">
             Welcome Back
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed italic opacity-80">
-            Keep learning.<br />Keep growing.
-          </p>
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
         </div>
 
