@@ -60,15 +60,13 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // In development/preview environments, we disable the 'secure' flag to prevent cookie rejection
-      const isSecure = process.env.NODE_ENV === 'production' && 
-                       !req.nextUrl.hostname.includes('localhost') && 
-                       !req.nextUrl.hostname.includes('127.0.0.1');
-      
+      // Improved cookie configuration for Cross-Site Preview compatibility
+      // Desktop browsers often block cookies in previews unless SameSite=None and Secure=True
+      // Since Studio Previews run over HTTPS, we force these for stability.
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: isSecure,
-        sameSite: 'lax',
+        secure: true, // Required for SameSite=None
+        sameSite: 'none', // Allows cookie in cross-origin preview frames
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
