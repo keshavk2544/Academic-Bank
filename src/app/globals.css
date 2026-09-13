@@ -60,8 +60,8 @@
   }
 
   .nav-dock {
-    @apply fixed bottom-7 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[920px] h-20 md:h-28 rounded-full border border-white/10 flex items-center justify-between px-3 md:px-6 z-[999] shadow-2xl;
-    background: linear-gradient(135deg, rgba(14, 14, 14, 0.95), rgba(5, 5, 5, 0.95));
+    @apply fixed bottom-0 left-0 w-full h-20 md:h-28 rounded-t-[2.5rem] border-t border-white/10 flex items-center justify-between px-6 z-[999] shadow-2xl;
+    background: linear-gradient(135deg, rgba(14, 14, 14, 0.98), rgba(5, 5, 5, 0.98));
     backdrop-filter: blur(25px);
   }
 
