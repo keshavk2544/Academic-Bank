@@ -1,16 +1,17 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles } from "lucide-react"
+import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles, GraduationCap } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function Dashboard() {
   const router = useRouter();
   const { toast } = useToast();
-  const [student, setStudent] = useState<{ name: string; qid: string; course: string; section: string } | null>(null);
+  const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -39,8 +40,9 @@ export default function Dashboard() {
   }, [router, toast]);
 
   const handleCopy = () => {
-    if (!student?.qid) return;
-    navigator.clipboard.writeText(student.qid);
+    const val = student?.enrollmentNo || student?.qid;
+    if (!val) return;
+    navigator.clipboard.writeText(val);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast({ title: "Copied", description: "Student ID copied to clipboard." });
@@ -52,8 +54,7 @@ export default function Dashboard() {
   return (
     <div className="pulse-container">
       {/* Hero Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-12">
-        {/* Left: Greeting */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
           <p className="text-2xl text-muted-foreground font-light mb-1">
             {student.name.split(' ')[0]}
@@ -64,11 +65,14 @@ export default function Dashboard() {
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
         </div>
 
-        {/* Center: Profile Ring */}
         <div className="order-1 md:order-2 flex justify-center">
           <div className="profile-ring">
             <div className="profile-inner">
-              <User className="w-24 h-24 text-primary stroke-[1.2]" />
+              {student.photoUrl ? (
+                <img src={student.photoUrl} alt="Student" className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" />
+              ) : (
+                <User className="w-24 h-24 text-primary stroke-[1.2]" />
+              )}
               <div className="absolute -bottom-1 -right-1 w-16 h-16 rounded-full bg-black border-2 border-primary flex items-center justify-center shadow-lg">
                 <ShieldCheck className="w-8 h-8 text-primary" />
               </div>
@@ -76,7 +80,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right: Motto */}
         <div className="order-3 md:order-3 text-center md:text-right hidden md:block rotate-[-2deg]">
           <h3 className="text-3xl text-primary font-headline italic mb-1">Student</h3>
           <p className="text-2xl text-muted-foreground font-light leading-none">
@@ -103,7 +106,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Student ID</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.qid}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || student.qid}</p>
             </div>
             <button 
               onClick={handleCopy}
@@ -113,25 +116,25 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* Course Card */}
+          {/* Branch Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Course</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.course}</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course}</p>
             </div>
           </div>
 
-          {/* Section Card */}
+          {/* Semester Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
-              <ShieldCheck className="w-5 h-5 text-primary" />
+              <GraduationCap className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Section</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.section}</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Semester</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester || 'N/A'}</p>
             </div>
           </div>
 
@@ -156,7 +159,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <button className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
+          <button onClick={() => router.push('/timetable')} className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
             <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mr-5 group-hover:bg-primary/10 transition-colors">
               <Calendar className="w-8 h-8 text-primary" />
             </div>
@@ -167,7 +170,7 @@ export default function Dashboard() {
             <ChevronRight className="text-muted-foreground group-hover:text-primary transition-colors" />
           </button>
 
-          <button className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
+          <button onClick={() => router.push('/academics')} className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
             <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mr-5 group-hover:bg-primary/10 transition-colors">
               <LayoutGrid className="w-8 h-8 text-primary" />
             </div>

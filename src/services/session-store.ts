@@ -1,5 +1,6 @@
 
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { StudentProfile } from '@/types/student';
 
 export interface LoginTransaction {
   cookies: string;
@@ -10,12 +11,7 @@ export interface LoginTransaction {
 
 export interface ERPSession {
   qumsCookies: string;
-  student: {
-    name: string;
-    qid: string;
-    course: string;
-    section: string;
-  };
+  student: StudentProfile;
   createdAt: string;
   expiresAt: string;
 }
@@ -35,7 +31,6 @@ export interface SessionStore {
 
 /**
  * In-memory implementation for development/preview.
- * Uses a global variable to persist data across Next.js hot-reloads.
  */
 class InMemoryStore implements SessionStore {
   private transactions = new Map<string, LoginTransaction>();
@@ -132,14 +127,15 @@ class FirestoreStore implements SessionStore {
 let firestoreInstance: FirestoreStore | null = null;
 
 export function getSessionStore(): SessionStore {
-  // Explicitly check if we are in a true production environment (not a preview)
-  // Studio Previews often set NODE_ENV=production but run in a restricted environment
-  const isStudioPreview = typeof process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'undefined' || 
-                         process.env.VERCEL === '1' || 
+  // Use memory store in Studio Preview regardless of NODE_ENV
+  const isStudioPreview = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === undefined || 
                          process.env.FIREBASE_CONFIG === undefined;
 
-  // For safety, we use the in-memory store if we're in any environment that isn't clearly App Hosting production
-  if (process.env.NODE_ENV === 'production' && !isStudioPreview) {
+  if (isStudioPreview) {
+    return getInMemoryStoreInstance();
+  }
+
+  if (process.env.NODE_ENV === 'production') {
     if (!firestoreInstance) {
       firestoreInstance = new FirestoreStore();
     }

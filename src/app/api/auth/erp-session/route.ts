@@ -17,10 +17,9 @@ export async function GET(req: NextRequest) {
     const sessionData = await store.getSession(appSessionId);
 
     if (!sessionData) {
-      console.warn(`[SESSION] Session ID ${appSessionId.substring(0, 8)} not found in store.`);
       return NextResponse.json({ 
         authenticated: false, 
-        message: 'Your session has expired or the server was restarted.',
+        message: 'Your session has expired.',
         reason: 'session_not_found'
       }, { 
         status: 401,
@@ -32,7 +31,6 @@ export async function GET(req: NextRequest) {
 
     // Check PreRP session expiration
     if (new Date() > new Date(expiresAt)) {
-      console.log(`[SESSION] PreRP session ${appSessionId.substring(0, 8)} expired.`);
       await store.deleteSession(appSessionId).catch(() => {});
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { 
         status: 401,
@@ -40,7 +38,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Return cached student identity without calling QUMS
+    // Return CACHED student identity without calling QUMS
     return NextResponse.json({
       authenticated: true,
       student

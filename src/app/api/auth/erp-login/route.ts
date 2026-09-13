@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid request signature.' }, { status: 400 });
     }
 
-    // Retrieve the QUMS pre-login session from the store
     const store = getSessionStore();
     const transactionData = await store.getTransaction(transactionId);
 
@@ -22,7 +21,6 @@ export async function POST(req: NextRequest) {
 
     const { cookies: qumsCookies, token, expiresAt } = transactionData;
 
-    // Check expiration
     if (new Date() > new Date(expiresAt)) {
       await store.deleteTransaction(transactionId);
       return NextResponse.json({ success: false, message: 'Authentication session expired.' }, { status: 401 });
@@ -35,38 +33,30 @@ export async function POST(req: NextRequest) {
     await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
-      // Fetch profile once upon successful login to cache it
-      console.log(`[LOGIN] Fetching initial student profile for ${username}...`);
+      // SYNC ERP DATA ONCE: Fetch the complete student profile
+      console.log(`[LOGIN] Syncing ERP profile for ${username}...`);
       const profile = await erp.getStudentProfile(result.sessionId);
 
-      // Create a random opaque application session ID
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
-      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} with cached profile.`);
+      console.log(`[LOGIN] Creating secure session ${appSessionId.substring(0, 8)} with cached ERP profile.`);
 
-      // Store the authenticated QUMS cookies and profile in the environment-aware store
+      // Store authenticated session with FULL profile
       await store.saveSession(appSessionId, {
         qumsCookies: result.sessionId,
-        student: {
-          name: profile.name,
-          qid: profile.enrollmentNo,
-          course: profile.course,
-          section: profile.section
-        },
+        student: profile,
         createdAt: new Date().toISOString(),
         expiresAt: expires.toISOString()
       });
 
       const response = NextResponse.json({ success: true });
 
-      // Improved cookie configuration for Cross-Site Preview compatibility
-      // Desktop browsers often block cookies in previews unless SameSite=None and Secure=True
-      // Since Studio Previews run over HTTPS, we force these for stability.
+      // Optimized cookie for desktop browser compatibility in Studio Preview
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: true, // Required for SameSite=None
-        sameSite: 'none', // Allows cookie in cross-origin preview frames
+        secure: true, 
+        sameSite: 'none',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
