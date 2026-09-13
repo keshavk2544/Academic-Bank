@@ -34,21 +34,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <div className="bg-black text-white selection:bg-primary selection:text-black">
-      {/* Top Navigation Bar */}
-      <header className="max-w-[1013px] mx-auto px-6 pt-7 flex items-center justify-between">
-        <div className="w-14 h-14 rounded-full border-2 border-white/10 flex items-center justify-center text-2xl font-bold bg-gradient-to-b from-[#171717] to-[#050505] shadow-[0_0_20px_rgba(255,204,0,0.1)]">
-          P
-        </div>
-        <div className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] text-center">
-          Verified Student Pulse
-        </div>
-        <button className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center relative bg-gradient-to-br from-[#0e0e0e] to-[#050505]">
-          <Bell className="w-7 h-7 text-white/90" />
-          <span className="absolute top-3 right-3 w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(255,210,26,0.4)]" />
-        </button>
-      </header>
-
+    <div className="bg-black text-white selection:bg-primary selection:text-black min-h-screen flex flex-col">
       <main className="flex-1">
         {children}
       </main>
