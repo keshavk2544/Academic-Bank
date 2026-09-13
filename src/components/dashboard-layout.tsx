@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation"
 import { 
   Home,
   BookOpen,
-  Sparkles,
-  User,
-  Bell
+  Calendar,
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -21,7 +20,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/dashboard" },
   { icon: BookOpen, label: "Repo", href: "/academics" },
-  { icon: Sparkles, label: "Tools", href: "/tools" },
+  { icon: Calendar, label: "Timetable", href: "/timetable" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
