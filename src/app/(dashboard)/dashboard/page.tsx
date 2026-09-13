@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -87,61 +88,61 @@ export default function Dashboard() {
 
       {/* Academic Identity Grid */}
       <section className="mt-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-black font-headline tracking-tight">Academic Identity</h2>
-          <button className="px-5 py-2.5 rounded-full border border-white/10 bg-gradient-to-br from-[#0f0f0f] to-[#050505] text-muted-foreground text-sm font-bold flex items-center gap-2">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-black font-headline tracking-tight">Academic Identity</h2>
+          <button className="px-4 py-1.5 rounded-full border border-white/10 bg-gradient-to-br from-[#0f0f0f] to-[#050505] text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
             Verified
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {/* QID Card */}
-          <div className="identity-card">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-6 shrink-0 border border-primary/20">
-              <Hash className="w-8 h-8 text-primary" />
+          <div className="identity-card !h-24 !p-4 !rounded-2xl">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
+              <Hash className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Student ID / QID</p>
-              <p className="text-2xl font-bold font-headline truncate text-white/90">{student.qid}</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Student ID</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.qid}</p>
             </div>
             <button 
               onClick={handleCopy}
-              className="w-16 h-16 rounded-2xl bg-[#202020] flex items-center justify-center text-muted-foreground transition-all active:scale-90"
+              className="w-8 h-8 rounded-lg bg-[#202020] flex items-center justify-center text-muted-foreground transition-all active:scale-90"
             >
-              {copied ? <Check className="w-7 h-7 text-green-400" /> : <Copy className="w-7 h-7" />}
+              {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
 
           {/* Course Card */}
-          <div className="identity-card">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-6 shrink-0 border border-primary/20">
-              <BookOpen className="w-8 h-8 text-primary" />
+          <div className="identity-card !h-24 !p-4 !rounded-2xl">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
+              <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Course</p>
-              <p className="text-2xl font-bold font-headline truncate text-white/90">{student.course}</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Course</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.course}</p>
             </div>
           </div>
 
           {/* Section Card */}
-          <div className="identity-card">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-6 shrink-0 border border-primary/20">
-              <ShieldCheck className="w-8 h-8 text-primary" />
+          <div className="identity-card !h-24 !p-4 !rounded-2xl">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
+              <ShieldCheck className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Assigned Section</p>
-              <p className="text-2xl font-bold font-headline truncate text-white/90">Section {student.section}</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Section</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.section}</p>
             </div>
           </div>
 
           {/* Status Card (Highlighted) */}
-          <div className="identity-card border-primary/40 bg-gradient-to-br from-[#151515] to-[#111108]">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mr-6 shrink-0 border border-primary/30">
-              <Sparkles className="w-8 h-8 text-primary" />
+          <div className="identity-card !h-24 !p-4 !rounded-2xl border-primary/30 bg-gradient-to-br from-[#151515] to-[#111108]">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 shrink-0 border border-primary/30">
+              <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Enrollment Status</p>
-              <p className="text-2xl font-bold font-headline truncate text-white/90">Active</p>
+              <p className="text-[8px] font-bold text-primary uppercase tracking-widest mb-0.5">Status</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">Active</p>
             </div>
           </div>
         </div>
