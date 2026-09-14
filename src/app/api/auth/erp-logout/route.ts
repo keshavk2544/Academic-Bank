@@ -4,10 +4,10 @@ import { getERPProvider } from '@/services/erp';
 import { getSessionStore } from '@/services/session-store';
 
 export async function POST(req: NextRequest) {
-  const appSessionId = req.cookies.get('erp_session')?.value;
+  const appSessionId = req.cookies.get('erp_session_v2')?.value;
   
   const response = NextResponse.json({ success: true });
-  response.cookies.delete('erp_session');
+  response.cookies.delete('erp_session_v2');
 
   if (appSessionId) {
     try {

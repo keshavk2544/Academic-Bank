@@ -4,7 +4,7 @@ import { getSessionStore } from '@/services/session-store';
 import { getERPProvider } from '@/services/erp';
 
 export async function POST(req: NextRequest) {
-  const appSessionId = req.cookies.get('erp_session')?.value;
+  const appSessionId = req.cookies.get('erp_session_v2')?.value;
 
   if (!appSessionId) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });

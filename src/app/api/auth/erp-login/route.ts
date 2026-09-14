@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         process.env.NODE_ENV === 'production' &&
         process.env.FIREBASE_CONFIG !== undefined;
 
-      response.cookies.set('erp_session', appSessionId, {
+      response.cookies.set('erp_session_v2', appSessionId, {
         httpOnly: true,
         secure: isProduction,
         sameSite: 'lax',

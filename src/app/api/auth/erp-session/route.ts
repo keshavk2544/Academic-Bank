@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionStore } from '@/services/session-store';
 
 export async function GET(req: NextRequest) {
-  const appSessionId = req.cookies.get('erp_session')?.value;
+  const appSessionId = req.cookies.get('erp_session_v2')?.value;
 
   try {
     const store = getSessionStore();
