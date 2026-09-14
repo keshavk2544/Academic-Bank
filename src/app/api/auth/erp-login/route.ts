@@ -70,14 +70,16 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // 4. Environment-aware cookie
-      const isProduction =
-        process.env.NODE_ENV === 'production' &&
-        process.env.FIREBASE_CONFIG !== undefined;
+      // 4. Robust environment-aware cookie configuration
+      // Desktop Chrome rejects non-Secure cookies on HTTPS origins (like workstations).
+      // We must use secure: true if the protocol is https, regardless of the NODE_ENV.
+      const isHttps = req.headers.get('x-forwarded-proto') === 'https' || req.url.startsWith('https');
+      const isProduction = process.env.NODE_ENV === 'production' && process.env.FIREBASE_CONFIG !== undefined;
+      const shouldBeSecure = isHttps || isProduction;
 
       response.cookies.set('erp_session_v2', appSessionId, {
         httpOnly: true,
-        secure: isProduction,
+        secure: shouldBeSecure,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
         path: '/',
