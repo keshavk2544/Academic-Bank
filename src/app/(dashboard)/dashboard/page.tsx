@@ -48,12 +48,12 @@ export default function Dashboard() {
   }, [router, toast]);
 
   const handleCopy = () => {
-    const val = student?.enrollmentNo;
+    const val = student?.enrollmentNo || student?.registrationId || student?.studentId;
     if (!val) return;
     navigator.clipboard.writeText(val);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied", description: "Enrollment number copied." });
+    toast({ title: "Copied", description: "Identity number copied." });
   };
 
   if (loading) return <LoadingOverlay status="Accessing Vault" />;
@@ -113,7 +113,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Enrollment No</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || 'N/A'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || student.registrationId || 'N/A'}</p>
             </div>
             <button 
               onClick={handleCopy}
@@ -129,7 +129,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || 'N/A'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course || 'N/A'}</p>
             </div>
           </div>
 

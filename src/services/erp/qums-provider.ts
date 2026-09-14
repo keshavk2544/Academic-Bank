@@ -39,11 +39,8 @@ export class QUMSProvider implements IERPProvider {
       if (captchaSrc) {
         if (captchaSrc.startsWith('data:')) {
           captchaDataUri = captchaSrc.replace('application/octet-stream', 'image/png');
-          console.log(`[QUMS-INIT] Resolved inline Data URI CAPTCHA. Length: ${captchaDataUri.length}`);
         } else {
           const captchaUrl = new URL(captchaSrc, QUMS_BASE_URL).toString();
-          console.log(`[QUMS-INIT] Fetching session-aware relative CAPTCHA: ${captchaUrl}`);
-          
           const captchaRes = await fetch(captchaUrl, { 
             headers: { 
               'Cookie': cookies,
@@ -58,13 +55,12 @@ export class QUMSProvider implements IERPProvider {
             const contentType = captchaRes.headers.get('content-type') || 'image/png';
             const safeType = contentType.includes('octet-stream') ? 'image/png' : contentType;
             captchaDataUri = `data:${safeType};base64,${Buffer.from(buffer).toString('base64')}`;
-            console.log(`[QUMS-INIT] CAPTCHA binary fetched. Status: ${captchaRes.status}`);
           }
         }
       }
 
       if (!captchaDataUri) {
-        throw new Error('ERP CAPTCHA source #imgPhoto unavailable');
+        throw new Error('ERP CAPTCHA source unavailable');
       }
 
       return { sessionId: cookies, token, captchaDataUri };
@@ -85,7 +81,6 @@ export class QUMSProvider implements IERPProvider {
       captcha: captcha
     });
 
-    console.log(`[QUMS-LOGIN] Submitting to root with session cookies...`);
     const response = await fetch(QUMS_BASE_URL, {
       method: 'POST',
       headers: {
@@ -102,7 +97,6 @@ export class QUMSProvider implements IERPProvider {
     const updatedCookies = this.mergeCookies(sessionId, this.extractCookies(response));
 
     if (response.status === 302 || response.status === 301) {
-      console.log(`[QUMS-LOGIN] Success redirect (302) detected.`);
       return { success: true, sessionId: updatedCookies };
     }
 
@@ -114,7 +108,7 @@ export class QUMSProvider implements IERPProvider {
       success: false, 
       message: isInvalid ? 'Invalid QID or Password.' : 
                isCaptchaError ? 'Invalid CAPTCHA code.' : 
-               'Authentication failed. Please verify credentials and CAPTCHA.' 
+               'Authentication failed. Please verify credentials.' 
     };
   }
 
@@ -135,30 +129,40 @@ export class QUMSProvider implements IERPProvider {
       throw new Error(`QUMS profile request failed: HTTP ${response.status}`);
     }
 
-    let data: any;
+    let rawData: any;
     try {
-      data = JSON.parse(rawText);
+      rawData = JSON.parse(rawText);
     } catch {
-      console.error('[QUMS PROFILE NON-JSON]', {
-        status: response.status,
-        contentType: response.headers.get('content-type'),
-        responseLength: rawText.length,
-        startsWithHtml: rawText.trimStart().startsWith('<')
-      });
-      throw new Error('QUMS returned a non-JSON response while fetching the student profile.');
+      console.error('[QUMS PROFILE NON-JSON]', { status: response.status, responseLength: rawText.length });
+      throw new Error('QUMS returned a non-JSON response.');
     }
+
+    // Handle case where QUMS returns an array [ { ... } ] or a single object { ... }
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
+    
+    if (!data) {
+      throw new Error('QUMS profile data is empty or null.');
+    }
+
+    // Dynamic field extraction to handle potential key casing variations
+    const getVal = (keys: string[]) => {
+      for (const k of keys) {
+        if (data[k] !== undefined && data[k] !== null) return data[k];
+      }
+      return '';
+    };
     
     return {
-      uid: data.RegID || '',
-      studentId: data.StudentID || '',
-      registrationId: data.RegID || '',
-      enrollmentNo: data.EnrollmentNo || '', 
-      name: data.StudentName || '',
-      course: data.Course || '',
-      branch: data.Branch || '',
-      section: data.Section || '',
-      semester: parseInt(data.YearSem) || 0,
-      photoUrl: data.Photo || ''
+      uid: getVal(['RegID', 'RegId', 'regId', 'regID']),
+      studentId: getVal(['StudentID', 'StudentId', 'studentId', 'studentID']),
+      registrationId: getVal(['RegID', 'RegId', 'regId']),
+      enrollmentNo: getVal(['EnrollmentNo', 'Enrollmentno', 'enrollmentNo']),
+      name: getVal(['StudentName', 'Studentname', 'studentName', 'name']),
+      course: getVal(['Course', 'course']),
+      branch: getVal(['Branch', 'branch']),
+      section: getVal(['Section', 'section']),
+      semester: parseInt(getVal(['YearSem', 'yearSem', 'semester', 'Year'])) || 0,
+      photoUrl: getVal(['Photo', 'photo', 'ProfilePhoto'])
     };
   }
 
