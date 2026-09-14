@@ -1,26 +1,31 @@
+
 import { IERPProvider } from './interface';
-import { StudentProfile, AttendanceRecord } from '@/types/student';
+import { StudentProfile } from '@/types/student';
 import { ERPAuthResponse } from '@/types/erp';
 
 /**
  * Mock implementation of the ERP provider for safe development.
  */
 export class MockERPProvider implements IERPProvider {
-  async authenticate(username: string, password: string): Promise<ERPAuthResponse> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+  async initializeSession() {
+    return {
+      sessionId: 'mock_session',
+      token: 'mock_token',
+      captchaDataUri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+    };
+  }
 
-    // Simple test logic: "admin" or "test" works
+  async authenticate(username: string, password: string): Promise<ERPAuthResponse> {
+    await new Promise(resolve => setTimeout(resolve, 1500));
     if (username.toLowerCase() === 'admin' || username.toLowerCase() === 'test') {
       return { 
         success: true, 
         sessionId: 'mock_session_' + Math.random().toString(36).substring(7) 
       };
     }
-
     return { 
       success: false, 
-      message: 'Invalid credentials Pulse. Please verify your QID and Password.' 
+      message: 'Invalid credentials Pulse.' 
     };
   }
 
@@ -35,37 +40,15 @@ export class MockERPProvider implements IERPProvider {
       branch: 'Computer Science and Engineering',
       section: 'B',
       semester: 6,
-      photoUrl: 'https://picsum.photos/seed/keshav/200'
+      photoUrl: '/api/student/photo'
     };
   }
 
-  async getAttendance(sessionId: string): Promise<AttendanceRecord[]> {
-    return [
-      {
-        subjectName: 'Machine Learning',
-        subjectCode: 'CS301',
-        totalLectures: 40,
-        present: 36,
-        absent: 4,
-        leave: 0,
-        percentage: 90,
-        status: 'Excellent'
-      },
-      {
-        subjectName: 'Computer Networks',
-        subjectCode: 'CS302',
-        totalLectures: 38,
-        present: 28,
-        absent: 8,
-        leave: 2,
-        percentage: 73,
-        status: 'Warning'
-      }
-    ];
+  async getStudentPhoto(sessionId: string): Promise<Buffer | null> {
+    return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
   }
 
   async logout(sessionId: string): Promise<void> {
-    // Clean up mock session logic here
     return Promise.resolve();
   }
 }

@@ -152,21 +152,19 @@ export class QUMSProvider implements IERPProvider {
       throw new Error('QUMS profile data is empty.');
     }
 
-    // Step 1 & 2: Generate photoUrl from QUMS Photo
-    const photo = data.Photo || '';
-    const photoUrl = photo
-      ? (photo.startsWith('data:')
-          ? photo
-          : `data:image/png;base64,${photo}`)
-      : '';
-
-    // Step 3 Trace: Diagnostics for QUMS retrieval
-    console.log('[STEP-3-QUMS-RETRIEVAL]', {
+    // Step 1: Diagnostic after parsing QUMS Detail
+    console.log('[DIAGNOSTIC-1-QUMS-RAW]', {
       hasPhoto: !!data.Photo,
-      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0,
+      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0
+    });
+
+    // Instead of Base64 blob, we point the UI to our robust binary endpoint
+    const photoUrl = data.Photo ? '/api/student/photo' : '';
+
+    // Step 2: Diagnostic before returning profile
+    console.log('[DIAGNOSTIC-2-PROFILE-RETURN]', {
       hasPhotoUrl: !!photoUrl,
-      photoUrlLength: photoUrl.length,
-      photoUrlStartsWithData: photoUrl.startsWith('data:')
+      photoUrlLength: photoUrl.length
     });
     
     return {
@@ -181,6 +179,41 @@ export class QUMSProvider implements IERPProvider {
       semester: parseInt(data.YearSem) || 0,
       photoUrl: photoUrl
     };
+  }
+
+  async getStudentPhoto(sessionId: string): Promise<Buffer | null> {
+    try {
+      const response = await fetch(`${QUMS_BASE_URL}/Account/GetStudentDetail`, {
+        method: 'POST',
+        headers: { 
+          'Cookie': sessionId,
+          'User-Agent': this.userAgent,
+          'Referer': `${QUMS_BASE_URL}/Student/Dashboard`,
+          'Accept': 'application/json, text/plain, */*'
+        },
+        cache: 'no-store'
+      });
+
+      if (!response.ok) return null;
+      const rawText = await response.text();
+      const rawData = JSON.parse(rawText);
+      let data: any;
+      if (rawData && typeof rawData.state === 'string') {
+        const parsedState = JSON.parse(rawData.state);
+        data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
+      } else {
+        data = Array.isArray(rawData) ? rawData[0] : rawData;
+      }
+
+      const photo = data?.Photo;
+      if (!photo) return null;
+      
+      const base64Data = photo.includes('base64,') ? photo.split('base64,')[1] : photo;
+      return Buffer.from(base64Data, 'base64');
+    } catch (e) {
+      console.error('[QUMS-PHOTO-ERROR]', e);
+      return null;
+    }
   }
 
   async logout(sessionId: string): Promise<void> {

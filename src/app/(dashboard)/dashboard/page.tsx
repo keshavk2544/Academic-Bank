@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User, ArrowRight, Upload, BookOpen } from "lucide-react"
+import { ShieldCheck, User } from "lucide-react"
 
 export default function Dashboard() {
   const router = useRouter();
@@ -30,11 +30,10 @@ export default function Dashboard() {
         const data = await res.json();
 
         if (data.authenticated && data.student) {
-          // Step 9 Trace: Diagnostic for final UI render input
-          console.log('[STEP-9-UI-DASHBOARD-RENDER]', {
+          // Diagnostic: Dashboard React render input
+          console.log('[DIAGNOSTIC-DASHBOARD-RENDER]', {
             hasPhotoUrl: !!data.student.photoUrl,
-            photoUrlLength: data.student.photoUrl?.length || 0,
-            photoUrlStartsWithData: data.student.photoUrl?.startsWith('data:') || false
+            photoUrlLength: data.student.photoUrl?.length || 0
           });
           setStudent(data.student);
         } else {
@@ -70,7 +69,12 @@ export default function Dashboard() {
           <div className="profile-ring">
             <div className="profile-inner">
               {student.photoUrl ? (
-                <img src={student.photoUrl} alt="Student" className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" />
+                <img 
+                  src={student.photoUrl} 
+                  alt="Student" 
+                  className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" 
+                  onError={() => console.error('[DASHBOARD-IMAGE-ERROR]')}
+                />
               ) : (
                 <User className="w-24 h-24 text-primary stroke-[1.2]" />
               )}

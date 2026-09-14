@@ -12,12 +12,11 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    // Step 7 Trace: Diagnostic for profile API
+    // 4. Diagnostic: Inside /api/student/profile
     if (sessionData && sessionData.student) {
-      console.log('[STEP-7-PROFILE-API-RETRIEVAL]', {
+      console.log('[DIAGNOSTIC-4-PROFILE-API]', {
         hasPhotoUrl: !!sessionData.student.photoUrl,
-        photoUrlLength: sessionData.student.photoUrl?.length || 0,
-        photoUrlStartsWithData: sessionData.student.photoUrl?.startsWith('data:') || false
+        photoUrlLength: sessionData.student.photoUrl?.length || 0
       });
     }
 

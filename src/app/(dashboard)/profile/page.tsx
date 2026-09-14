@@ -30,6 +30,16 @@ export default function ProfilePage() {
     fetchProfile()
   }, [])
 
+  // 5. Diagnostic: In the Profile component state
+  useEffect(() => {
+    if (student) {
+      console.log('[DIAGNOSTIC-5-PROFILE-COMPONENT]', {
+        hasPhotoUrl: !!student.photoUrl,
+        photoUrlLength: student.photoUrl?.length || 0
+      });
+    }
+  }, [student]);
+
   const fetchProfile = async () => {
     try {
       const res = await fetch('/api/student/profile', { 
@@ -108,6 +118,7 @@ export default function ProfilePage() {
                 src={student.photoUrl} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
+                onError={() => console.error('[PROFILE-IMAGE-ERROR]')}
               />
             ) : (
               <Fingerprint className="w-12 h-12 text-primary/40" />
