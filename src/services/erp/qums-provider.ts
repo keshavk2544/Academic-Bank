@@ -124,31 +124,20 @@ export class QUMSProvider implements IERPProvider {
       cache: 'no-store'
     });
 
-    const rawText = await response.text();
-
-    console.log('[QUMS-PROFILE-RESPONSE]', {
-      status: response.status,
-      contentType: response.headers.get('content-type'),
-      length: rawText.length,
-      looksLikeHtml: rawText.trimStart().startsWith('<')
-    });
-
     if (!response.ok) {
       throw new Error(`QUMS profile request failed with HTTP ${response.status}`);
     }
 
+    const rawText = await response.text();
     let rawData: any;
     try {
       rawData = JSON.parse(rawText);
     } catch {
-      throw new Error(`QUMS GetStudentDetail returned non-JSON data. HTTP ${response.status}`);
+      throw new Error(`QUMS GetStudentDetail returned non-JSON data.`);
     }
 
     let data: any;
-    let format: string = 'unknown';
-
     if (rawData && typeof rawData.state === 'string') {
-      format = 'state_string';
       try {
         const parsedState = JSON.parse(rawData.state);
         data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
@@ -156,15 +145,14 @@ export class QUMSProvider implements IERPProvider {
         throw new Error('Failed to parse the "state" property in QUMS response.');
       }
     } else {
-      format = 'direct_object';
       data = Array.isArray(rawData) ? rawData[0] : rawData;
     }
 
     if (!data) {
-      throw new Error('QUMS profile data is empty or null.');
+      throw new Error('QUMS profile data is empty.');
     }
 
-    // Process Photo Base64 string into a valid Data URL
+    // Step 1 & 2: Generate photoUrl from QUMS Photo
     const photo = data.Photo || '';
     const photoUrl = photo
       ? (photo.startsWith('data:')
@@ -172,18 +160,13 @@ export class QUMSProvider implements IERPProvider {
           : `data:image/png;base64,${photo}`)
       : '';
 
-    console.log('[PROFILE TEST]', {
-      success: true,
-      responseFormat: format,
-      hasStudentName: !!data.StudentName,
-      hasStudentID: !!data.StudentID,
-      hasRegID: !!data.RegID,
-      hasCourse: !!data.Course,
-      hasBranch: !!data.Branch,
-      hasSection: !!data.Section,
-      hasYearSem: !!data.YearSem,
+    // Step 3 Trace: Diagnostics for QUMS retrieval
+    console.log('[STEP-3-QUMS-RETRIEVAL]', {
       hasPhoto: !!data.Photo,
-      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0
+      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0,
+      hasPhotoUrl: !!photoUrl,
+      photoUrlLength: photoUrl.length,
+      photoUrlStartsWithData: photoUrl.startsWith('data:')
     });
     
     return {

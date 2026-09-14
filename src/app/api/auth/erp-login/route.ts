@@ -33,18 +33,13 @@ export async function POST(req: NextRequest) {
     await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
-      // 1. Fetch complete student profile
+      // 1. Fetch complete student profile (Step 3 & 4 Trace)
       const profile = await erp.getStudentProfile(result.sessionId);
       
-      console.log('[CHECK-1-PROFILE]', {
-        exists: !!profile,
-        fields: Object.keys(profile || {}),
-        hasName: !!profile?.name,
-        hasEnrollment: !!profile?.enrollmentNo,
-        hasCourse: !!profile?.course,
-        hasBranch: !!profile?.branch,
-        hasSection: !!profile?.section,
-        hasSemester: !!profile?.semester
+      console.log('[STEP-4-LOGIN-FLOW-PROFILE]', {
+        hasPhotoUrl: !!profile.photoUrl,
+        photoUrlLength: profile.photoUrl?.length || 0,
+        photoUrlStartsWithData: profile.photoUrl?.startsWith('data:') || false
       });
 
       const appSessionId = randomUUID();
@@ -57,28 +52,26 @@ export async function POST(req: NextRequest) {
         expiresAt: expires.toISOString()
       };
 
-      // 2. Store authenticated session
+      // 2. Store authenticated session (Step 5 Trace)
       await store.saveSession(appSessionId, sessionData);
 
-      // 3. Verification diagnostics
+      // Verify immediate persistence
       const verification = await store.getSession(appSessionId);
-      console.log('[CHECK-2-SESSION]', {
-        exists: !!verification,
-        hasStudent: !!verification?.student,
-        fields: verification?.student ? Object.keys(verification.student) : []
+      console.log('[STEP-5-SESSION-PERSISTENCE]', {
+        hasSavedStudent: !!verification?.student,
+        hasSavedPhotoUrl: !!verification?.student?.photoUrl,
+        photoUrlLength: verification?.student?.photoUrl?.length || 0
       });
 
       const response = NextResponse.json({ success: true });
 
-      // 4. Robust Iframe-Compatible Cookie Configuration
-      // Firebase Studio previews run in an iframe. SameSite=None is required for desktop cookies in iframes.
-      // SameSite=None REQUIRES Secure=True. Workstations/App Hosting are always HTTPS.
+      // Robust Iframe-Compatible Cookie Configuration
       const isHttps = req.headers.get('x-forwarded-proto') === 'https' || req.url.startsWith('https');
       
       response.cookies.set('erp_session_v2', appSessionId, {
         httpOnly: true,
-        secure: isHttps, 
-        sameSite: isHttps ? 'none' : 'lax', // Use 'none' for iframe support on HTTPS
+        secure: true, 
+        sameSite: 'none',
         maxAge: 60 * 60 * 24,
         path: '/',
       });

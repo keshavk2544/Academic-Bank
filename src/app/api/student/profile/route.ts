@@ -12,11 +12,14 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    console.log('[CHECK-4-PROFILE-API]', {
-      hasCookie: !!appSessionId,
-      hasSession: !!sessionData,
-      hasStudent: !!sessionData?.student
-    });
+    // Step 7 Trace: Diagnostic for profile API
+    if (sessionData && sessionData.student) {
+      console.log('[STEP-7-PROFILE-API-RETRIEVAL]', {
+        hasPhotoUrl: !!sessionData.student.photoUrl,
+        photoUrlLength: sessionData.student.photoUrl?.length || 0,
+        photoUrlStartsWithData: sessionData.student.photoUrl?.startsWith('data:') || false
+      });
+    }
 
     if (!appSessionId || !sessionData) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { 

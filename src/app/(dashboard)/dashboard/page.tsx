@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -29,6 +30,12 @@ export default function Dashboard() {
         const data = await res.json();
 
         if (data.authenticated && data.student) {
+          // Step 9 Trace: Diagnostic for final UI render input
+          console.log('[STEP-9-UI-DASHBOARD-RENDER]', {
+            hasPhotoUrl: !!data.student.photoUrl,
+            photoUrlLength: data.student.photoUrl?.length || 0,
+            photoUrlStartsWithData: data.student.photoUrl?.startsWith('data:') || false
+          });
           setStudent(data.student);
         } else {
           router.replace("/");
@@ -120,7 +127,6 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
-
 
       <p className="mt-16 mb-12 text-center text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-black opacity-30">
         PreRP Student I_NAV Engine &copy; 2026
