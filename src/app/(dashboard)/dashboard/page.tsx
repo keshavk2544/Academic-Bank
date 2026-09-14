@@ -25,6 +25,7 @@ export default function Dashboard() {
         });
         
         if (res.status === 401) {
+          console.log('[DASHBOARD] Session unauthorized, redirecting to login.');
           router.replace("/");
           return;
         }

@@ -69,13 +69,18 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // Environment-aware cookie settings
-      const isProduction = process.env.NODE_ENV === 'production' && process.env.FIREBASE_CONFIG !== undefined;
+      // Robust environment detection for cookies
+      const isAppHosting = process.env.FIREBASE_CONFIG !== undefined;
+      const isHttps = req.url.startsWith('https') || req.headers.get('x-forwarded-proto') === 'https';
       
+      // Studio Preview requires SameSite: None to work inside the IDE frame on desktop
+      // App Hosting (Production) uses Lax for better standard security
+      const sameSite = isAppHosting ? 'lax' : 'none';
+
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: isProduction, 
-        sameSite: 'lax',
+        secure: isHttps, 
+        sameSite: sameSite,
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       });
