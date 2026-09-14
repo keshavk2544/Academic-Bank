@@ -53,7 +53,7 @@ export default function Dashboard() {
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
-          <h1 className="text-3xl font-black font-headline tracking-tighter leading-tight mb-6">
+          <h1 className="text-3xl font-black font-headline tracking-tighter leading-tight mb-6 text-white uppercase">
             {student.name || 'Academic identity'}
           </h1>
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
@@ -85,30 +85,37 @@ export default function Dashboard() {
 
       {/* Academic Identity */}
       <section className="mt-16 space-y-4">
-        <h2 className="text-xl font-bold font-headline tracking-tight px-2">Academic Identity</h2>
+        <h2 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] px-2">Academic Identity</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="identity-card">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Enrollment No</span>
-              <span className="text-sm font-bold font-headline">{student.enrollmentNo || 'N/A'}</span>
+          <div className="h-20 p-4 rounded-2xl border border-white/5 bg-neutral-900/40 flex items-center relative overflow-hidden transition-all hover:border-primary/20 group">
+            <div className="absolute top-0 left-0 h-full w-1 bg-primary/40 group-hover:bg-primary transition-colors" />
+            <div className="flex flex-col pl-2">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Enrollment No</span>
+              <span className="text-xs font-bold font-headline text-white group-hover:text-primary transition-colors truncate max-w-[140px]">{student.enrollmentNo || 'N/A'}</span>
             </div>
           </div>
-          <div className="identity-card">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Branch</span>
-              <span className="text-sm font-bold font-headline">{student.branch || 'N/A'}</span>
+          
+          <div className="h-20 p-4 rounded-2xl border border-white/5 bg-neutral-900/40 flex items-center relative overflow-hidden transition-all hover:border-primary/20 group">
+            <div className="absolute top-0 left-0 h-full w-1 bg-primary/40 group-hover:bg-primary transition-colors" />
+            <div className="flex flex-col pl-2 w-full">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</span>
+              <span className="text-[11px] font-bold font-headline text-white group-hover:text-primary transition-colors line-clamp-2 leading-tight pr-1">{student.branch || 'N/A'}</span>
             </div>
           </div>
-          <div className="identity-card">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Semester</span>
-              <span className="text-sm font-bold font-headline">{student.semester || 'N/A'}</span>
+
+          <div className="h-20 p-4 rounded-2xl border border-white/5 bg-neutral-900/40 flex items-center relative overflow-hidden transition-all hover:border-primary/20 group">
+            <div className="absolute top-0 left-0 h-full w-1 bg-primary/40 group-hover:bg-primary transition-colors" />
+            <div className="flex flex-col pl-2">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Semester</span>
+              <span className="text-xs font-bold font-headline text-white group-hover:text-primary transition-colors truncate max-w-[140px]">{student.semester ? `${student.semester}th Sem` : 'N/A'}</span>
             </div>
           </div>
-          <div className="identity-card">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Section</span>
-              <span className="text-sm font-bold font-headline">{student.section || 'N/A'}</span>
+
+          <div className="h-20 p-4 rounded-2xl border border-white/5 bg-neutral-900/40 flex items-center relative overflow-hidden transition-all hover:border-primary/20 group">
+            <div className="absolute top-0 left-0 h-full w-1 bg-primary/40 group-hover:bg-primary transition-colors" />
+            <div className="flex flex-col pl-2">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Section</span>
+              <span className="text-xs font-bold font-headline text-white group-hover:text-primary transition-colors truncate max-w-[140px]">{student.section || 'N/A'}</span>
             </div>
           </div>
         </div>
