@@ -12,11 +12,10 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    console.log('[STUDENT PROFILE API]', {
+    console.log('[CHECK-4-PROFILE-API]', {
       hasCookie: !!appSessionId,
       hasSession: !!sessionData,
-      hasStudent: !!sessionData?.student,
-      fields: sessionData?.student ? Object.keys(sessionData.student) : []
+      hasStudent: !!sessionData?.student
     });
 
     if (!appSessionId || !sessionData) {

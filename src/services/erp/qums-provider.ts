@@ -120,31 +120,36 @@ export class QUMSProvider implements IERPProvider {
         'User-Agent': this.userAgent,
         'Referer': `${QUMS_BASE_URL}/Student/Dashboard`,
         'Accept': 'application/json, text/plain, */*'
-      }
+      },
+      cache: 'no-store'
     });
 
     const rawText = await response.text();
 
+    console.log('[QUMS-PROFILE-RESPONSE]', {
+      status: response.status,
+      contentType: response.headers.get('content-type'),
+      length: rawText.length,
+      looksLikeHtml: rawText.trimStart().startsWith('<')
+    });
+
     if (!response.ok) {
-      throw new Error(`QUMS profile request failed: HTTP ${response.status}`);
+      throw new Error(`QUMS profile request failed with HTTP ${response.status}`);
     }
 
     let rawData: any;
     try {
       rawData = JSON.parse(rawText);
     } catch {
-      console.error('[QUMS PROFILE NON-JSON]', { status: response.status, responseLength: rawText.length });
-      throw new Error('QUMS returned a non-JSON response.');
+      throw new Error(`QUMS GetStudentDetail returned non-JSON data. HTTP ${response.status}`);
     }
 
-    // Handle case where QUMS returns an array [ { ... } ] or a single object { ... }
     const data = Array.isArray(rawData) ? rawData[0] : rawData;
     
     if (!data) {
       throw new Error('QUMS profile data is empty or null.');
     }
 
-    // Dynamic field extraction to handle potential key casing variations
     const getVal = (keys: string[]) => {
       for (const k of keys) {
         if (data[k] !== undefined && data[k] !== null) return data[k];

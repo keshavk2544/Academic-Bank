@@ -36,6 +36,17 @@ export async function POST(req: NextRequest) {
       // 1. Fetch complete student profile
       const profile = await erp.getStudentProfile(result.sessionId);
       
+      console.log('[CHECK-1-PROFILE]', {
+        exists: !!profile,
+        fields: Object.keys(profile || {}),
+        hasName: !!profile?.name,
+        hasEnrollment: !!profile?.enrollmentNo,
+        hasCourse: !!profile?.course,
+        hasBranch: !!profile?.branch,
+        hasSection: !!profile?.section,
+        hasSemester: !!profile?.semester
+      });
+
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
@@ -50,11 +61,11 @@ export async function POST(req: NextRequest) {
       await store.saveSession(appSessionId, sessionData);
 
       // 3. Verification diagnostics
-      const verify = await store.getSession(appSessionId);
-      console.log('[SESSION SAVE CHECK]', {
-        saved: !!verify,
-        hasStudent: !!verify?.student,
-        fields: verify?.student ? Object.keys(verify.student) : []
+      const verification = await store.getSession(appSessionId);
+      console.log('[CHECK-2-SESSION]', {
+        exists: !!verification,
+        hasStudent: !!verification?.student,
+        fields: verification?.student ? Object.keys(verification.student) : []
       });
 
       const response = NextResponse.json({ success: true });
