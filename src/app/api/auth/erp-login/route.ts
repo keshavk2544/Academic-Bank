@@ -70,17 +70,15 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // 4. Robust environment-aware cookie configuration
-      // Desktop Chrome rejects non-Secure cookies on HTTPS origins (like workstations).
-      // We must use secure: true if the protocol is https, regardless of the NODE_ENV.
+      // 4. Robust Iframe-Compatible Cookie Configuration
+      // Firebase Studio previews run in an iframe. SameSite=None is required for desktop cookies in iframes.
+      // SameSite=None REQUIRES Secure=True. Workstations/App Hosting are always HTTPS.
       const isHttps = req.headers.get('x-forwarded-proto') === 'https' || req.url.startsWith('https');
-      const isProduction = process.env.NODE_ENV === 'production' && process.env.FIREBASE_CONFIG !== undefined;
-      const shouldBeSecure = isHttps || isProduction;
-
+      
       response.cookies.set('erp_session_v2', appSessionId, {
         httpOnly: true,
-        secure: shouldBeSecure,
-        sameSite: 'lax',
+        secure: isHttps, 
+        sameSite: isHttps ? 'none' : 'lax', // Use 'none' for iframe support on HTTPS
         maxAge: 60 * 60 * 24,
         path: '/',
       });

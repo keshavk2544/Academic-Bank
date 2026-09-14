@@ -7,7 +7,16 @@ export async function POST(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session_v2')?.value;
   
   const response = NextResponse.json({ success: true });
-  response.cookies.delete('erp_session_v2');
+  
+  // Clear cookie with consistent flags
+  const isHttps = req.headers.get('x-forwarded-proto') === 'https' || req.url.startsWith('https');
+  response.cookies.set('erp_session_v2', '', {
+    httpOnly: true,
+    secure: isHttps,
+    sameSite: isHttps ? 'none' : 'lax',
+    expires: new Date(0),
+    path: '/',
+  });
 
   if (appSessionId) {
     try {
