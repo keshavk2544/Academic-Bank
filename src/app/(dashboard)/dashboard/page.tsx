@@ -5,13 +5,14 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User } from "lucide-react"
+import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles, GraduationCap } from "lucide-react"
 
 export default function Dashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
