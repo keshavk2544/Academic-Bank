@@ -54,9 +54,6 @@ export default function Dashboard() {
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
-          <p className="text-2xl text-muted-foreground font-light mb-1">
-            Welcome Back,
-          </p>
           <h1 className="text-5xl font-black font-headline tracking-tighter leading-tight mb-6">
             {student.name || 'Academic identity'}
           </h1>
