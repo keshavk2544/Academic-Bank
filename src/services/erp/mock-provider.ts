@@ -44,8 +44,11 @@ export class MockERPProvider implements IERPProvider {
     };
   }
 
-  async getStudentPhoto(sessionId: string): Promise<Buffer | null> {
-    return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+  async getStudentPhoto(sessionId: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+    return {
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'),
+      contentType: 'image/png'
+    };
   }
 
   async logout(sessionId: string): Promise<void> {

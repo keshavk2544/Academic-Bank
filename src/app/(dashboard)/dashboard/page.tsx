@@ -64,9 +64,9 @@ export default function Dashboard() {
         <div className="order-1 md:order-2 flex justify-center">
           <div className="profile-ring">
             <div className="profile-inner">
-              {student.photoUrl && !imageError ? (
+              {!imageError ? (
                 <img 
-                  src={student.photoUrl} 
+                  src="/api/student/photo" 
                   alt="Student" 
                   className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" 
                   onError={() => {

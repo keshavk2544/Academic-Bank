@@ -25,9 +25,9 @@ export interface IERPProvider {
   getStudentProfile(sessionId: string): Promise<StudentProfile>;
 
   /**
-   * Retrieves the raw student photo as a Buffer.
+   * Retrieves the raw student photo as a Buffer with its Content-Type.
    */
-  getStudentPhoto(sessionId: string): Promise<Buffer | null>;
+  getStudentPhoto(sessionId: string): Promise<{ buffer: Buffer; contentType: string } | null>;
 
   /**
    * Invalidates the ERP session.

@@ -158,8 +158,6 @@ export class QUMSProvider implements IERPProvider {
       throw new Error('Invalid student data from QUMS');
     }
 
-    const photoUrl = data.Photo ? '/api/student/photo' : '';
-    
     return {
       uid: data.RegID || '',
       studentId: data.StudentID || '',
@@ -170,11 +168,11 @@ export class QUMSProvider implements IERPProvider {
       branch: data.Branch || '',
       section: data.Section || '',
       semester: parseInt(data.YearSem) || 0,
-      photoUrl: photoUrl
+      photoUrl: '/api/student/photo'
     };
   }
 
-  async getStudentPhoto(sessionId: string): Promise<Buffer | null> {
+  async getStudentPhoto(sessionId: string): Promise<{ buffer: Buffer; contentType: string } | null> {
     try {
       const response = await fetch(`${QUMS_BASE_URL}/Account/GetStudentDetail`, {
         method: 'POST',
@@ -196,8 +194,23 @@ export class QUMSProvider implements IERPProvider {
       
       if (!photo || typeof photo !== 'string') return null;
       
-      const base64Data = photo.includes('base64,') ? photo.split('base64,')[1] : photo;
-      return Buffer.from(base64Data, 'base64');
+      let contentType = 'image/png';
+      let base64Data = photo;
+
+      if (photo.startsWith('data:')) {
+        const matches = photo.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          contentType = matches[1];
+          base64Data = matches[2];
+        }
+      } else {
+        base64Data = photo.includes('base64,') ? photo.split('base64,')[1] : photo;
+      }
+
+      return {
+        buffer: Buffer.from(base64Data, 'base64'),
+        contentType
+      };
     } catch (e) {
       return null;
     }

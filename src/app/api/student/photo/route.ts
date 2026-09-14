@@ -3,7 +3,12 @@ import { NextRequest } from 'next/server';
 import { getSessionStore } from '@/services/session-store';
 import { getERPProvider } from '@/services/erp';
 
+/**
+ * Endpoint to securely fetch the student profile photo as a binary stream.
+ * Communicates with the university ERP using the student's authenticated session.
+ */
 export async function GET(req: NextRequest) {
+  // 1. Read the existing erp_session_v2 cookie.
   const appSessionId = req.cookies.get('erp_session_v2')?.value;
 
   if (!appSessionId) {
@@ -11,6 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // 2. Retrieve the server-side session.
     const store = getSessionStore();
     const sessionData = await store.getSession(appSessionId);
 
@@ -18,22 +24,24 @@ export async function GET(req: NextRequest) {
       return new Response(null, { status: 401 });
     }
 
+    // 3. Retrieve the server-side QUMS cookies from that session and fetch the photo.
     const erp = getERPProvider();
-    const photoBuffer = await erp.getStudentPhoto(sessionData.qumsCookies);
+    const photoResult = await erp.getStudentPhoto(sessionData.qumsCookies);
 
-    if (!photoBuffer) {
+    if (!photoResult) {
       return new Response(null, { status: 404 });
     }
 
-    // Return pure binary Response to ensure browser treats it as an image
-    // Using simple Response ensures NextJS doesn't wrap this in HTML error pages
-    return new Response(photoBuffer, {
+    // 4. Return the decoded bytes as an actual HTTP image response.
+    return new Response(photoResult.buffer, {
+      status: 200,
       headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'private, max-age=3600',
+        'Content-Type': photoResult.contentType,
+        'Cache-Control': 'private, max-age=300',
       },
     });
   } catch (error) {
+    console.error('[API-STUDENT-PHOTO-ERROR]', error);
     return new Response(null, { status: 500 });
   }
 }

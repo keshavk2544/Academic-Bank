@@ -105,9 +105,9 @@ export default function ProfilePage() {
       <header className="px-6 pt-4 flex flex-col items-center">
         <div className="relative z-10 -mb-12">
           <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl bg-[#111] flex items-center justify-center">
-            {student?.photoUrl && !imageError ? (
+            {!imageError ? (
               <img 
-                src={student.photoUrl} 
+                src="/api/student/photo" 
                 alt="Profile" 
                 className="w-full h-full object-cover"
                 onError={() => setImageError(true)}
