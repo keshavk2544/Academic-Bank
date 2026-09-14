@@ -121,46 +121,9 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Quick Access */}
-      <section className="mt-16">
-        <div className="flex items-center justify-between mb-6 px-2">
-          <div>
-            <h2 className="text-2xl font-bold font-headline tracking-tight">Quick Access</h2>
-            <p className="text-xs text-muted-foreground">Less clicks. More progress.</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <a href="/upload" className="card-item group">
-            <div className="flex items-center gap-4">
-              <div className="icon-box group-hover:bg-primary group-hover:text-black transition-colors">
-                <Upload className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold">Repository</h4>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Share records</p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </a>
-
-          <a href="/academics" className="card-item group">
-            <div className="flex items-center gap-4">
-              <div className="icon-box group-hover:bg-primary group-hover:text-black transition-colors">
-                <BookOpen className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold">Academic Vault</h4>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Manage records</p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </a>
-        </div>
-      </section>
 
       <p className="mt-16 mb-12 text-center text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-black opacity-30">
-        PreRP Student Pulse Engine &copy; 2025
+        PreRP Student I_NAV Engine &copy; 2026
       </p>
     </div>
   )
