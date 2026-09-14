@@ -164,6 +164,14 @@ export class QUMSProvider implements IERPProvider {
       throw new Error('QUMS profile data is empty or null.');
     }
 
+    // Process Photo Base64 string into a valid Data URL
+    const photo = data.Photo || '';
+    const photoUrl = photo
+      ? (photo.startsWith('data:')
+          ? photo
+          : `data:image/png;base64,${photo}`)
+      : '';
+
     console.log('[PROFILE TEST]', {
       success: true,
       responseFormat: format,
@@ -174,7 +182,8 @@ export class QUMSProvider implements IERPProvider {
       hasBranch: !!data.Branch,
       hasSection: !!data.Section,
       hasYearSem: !!data.YearSem,
-      hasPhoto: !!data.Photo
+      hasPhoto: !!data.Photo,
+      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0
     });
     
     return {
@@ -187,7 +196,7 @@ export class QUMSProvider implements IERPProvider {
       branch: data.Branch || '',
       section: data.Section || '',
       semester: parseInt(data.YearSem) || 0,
-      photoUrl: data.Photo || ''
+      photoUrl: photoUrl
     };
   }
 
