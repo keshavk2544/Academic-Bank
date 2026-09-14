@@ -65,10 +65,10 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
           <p className="text-2xl text-muted-foreground font-light mb-1">
-            {student?.name?.split(' ')[0] || 'Student'}
+            Welcome Back,
           </p>
-          <h1 className="text-5xl font-black font-headline tracking-tighter leading-none mb-6">
-            Welcome Back
+          <h1 className="text-5xl font-black font-headline tracking-tighter leading-tight mb-6">
+            {student?.name || 'Academic identity'}
           </h1>
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
         </div>
