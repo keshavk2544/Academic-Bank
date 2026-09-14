@@ -53,7 +53,7 @@ export default function Dashboard() {
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
-          <h1 className="text-5xl font-black font-headline tracking-tighter leading-tight mb-6">
+          <h1 className="text-3xl font-black font-headline tracking-tighter leading-tight mb-6">
             {student.name || 'Academic identity'}
           </h1>
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
