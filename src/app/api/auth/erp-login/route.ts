@@ -36,14 +36,19 @@ export async function POST(req: NextRequest) {
       // 1. Fetch complete student profile ONCE
       const profile = await erp.getStudentProfile(result.sessionId);
       
-      // SAFE DIAGNOSTIC LOGGING
+      // STEP 1: SAFE DIAGNOSTICS
       console.log('[ERP PROFILE CHECK]', {
-        hasProfile: !!profile,
+        exists: !!profile,
         fields: Object.keys(profile || {}),
         hasName: !!profile?.name,
+        hasStudentId: !!profile?.studentId,
+        hasRegistrationId: !!profile?.registrationId,
         hasEnrollmentNo: !!profile?.enrollmentNo,
+        hasCourse: !!profile?.course,
+        hasBranch: !!profile?.branch,
+        hasSection: !!profile?.section,
         hasSemester: !!profile?.semester,
-        hasPhoto: !!profile?.photoUrl,
+        hasPhoto: !!profile?.photoUrl
       });
 
       const appSessionId = randomUUID();
@@ -59,7 +64,7 @@ export async function POST(req: NextRequest) {
       // 2. Store authenticated session
       await store.saveSession(appSessionId, sessionData);
 
-      // 3. Verification check
+      // STEP 2: IMMEDIATELY VERIFY
       const verification = await store.getSession(appSessionId);
       console.log('[SESSION PROFILE CHECK]', {
         exists: !!verification,
@@ -69,19 +74,16 @@ export async function POST(req: NextRequest) {
 
       const response = NextResponse.json({ success: true });
 
-      // Robust environment detection for cookies
-      const isAppHosting = process.env.FIREBASE_CONFIG !== undefined;
-      const isHttps = req.url.startsWith('https') || req.headers.get('x-forwarded-proto') === 'https';
-      
-      // Studio Preview requires SameSite: None to work inside the IDE frame on desktop
-      // App Hosting (Production) uses Lax for better standard security
-      const sameSite = isAppHosting ? 'lax' : 'none';
+      // STEP 3: ENVIRONMENT-AWARE COOKIE
+      const isProduction =
+        process.env.NODE_ENV === 'production' &&
+        process.env.FIREBASE_CONFIG !== undefined;
 
       response.cookies.set('erp_session', appSessionId, {
         httpOnly: true,
-        secure: isHttps, 
-        sameSite: sameSite,
-        maxAge: 60 * 60 * 24, // 24 hours
+        secure: isProduction,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24,
         path: '/',
       });
 

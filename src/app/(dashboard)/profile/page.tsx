@@ -21,14 +21,12 @@ import { StudentProfile } from "@/types/student"
 export default function ProfilePage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [role, setRole] = useState("student")
   const [student, setStudent] = useState<StudentProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setRole(localStorage.getItem("userRole") || "student")
     fetchProfile()
   }, [])
 
@@ -49,7 +47,7 @@ export default function ProfilePage() {
       if (data.success && data.student) {
         setStudent(data.student)
       } else {
-        setError(data.message || "Failed to load profile.")
+        setError(data.message || "Failed to load profile identity.")
       }
     } catch (e) {
       console.error('[PROFILE-FETCH-ERROR]', e)
@@ -64,13 +62,14 @@ export default function ProfilePage() {
     try {
       const res = await fetch('/api/student/sync', { 
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        cache: 'no-store'
       })
       const data = await res.json()
       
       if (data.success && data.student) {
         setStudent(data.student)
-        toast({ title: "Sync Successful", description: "Your academic profile has been updated from QUMS." })
+        toast({ title: "Sync Successful", description: "Your academic identity has been updated from QUMS." })
       } else {
         toast({ 
           variant: "destructive", 
@@ -87,12 +86,6 @@ export default function ProfilePage() {
     } finally {
       setIsSyncing(false)
     }
-  }
-
-  const switchRole = (newRole: string) => {
-    localStorage.setItem("userRole", newRole)
-    setRole(newRole)
-    window.location.reload()
   }
 
   const handleSignOut = async () => {
@@ -205,21 +198,6 @@ export default function ProfilePage() {
             >
               <RefreshCw className={cn("w-4 h-4 mr-2", isSyncing && "animate-spin")} /> Sync ERP Data
             </Button>
-
-            <div className="flex gap-2">
-              <button 
-                onClick={() => switchRole("student")}
-                className={cn("flex-1 py-3 rounded-full text-[10px] font-black uppercase transition-all", role === "student" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
-              >
-                Student
-              </button>
-              <button 
-                onClick={() => switchRole("admin")}
-                className={cn("flex-1 py-3 rounded-full text-[10px] font-black uppercase transition-all", role === "admin" ? "bg-primary text-black" : "bg-black text-white border border-white/10")}
-              >
-                Admin
-              </button>
-            </div>
             
             <Button 
               onClick={handleSignOut}

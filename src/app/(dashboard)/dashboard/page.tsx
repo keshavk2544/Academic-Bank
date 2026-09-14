@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
 import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles, GraduationCap } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export default function Dashboard() {
   const router = useRouter();
@@ -21,11 +20,10 @@ export default function Dashboard() {
         const res = await fetch('/api/auth/erp-session', {
           method: 'GET',
           credentials: 'include',
-          headers: { 'Cache-Control': 'no-store, max-age=0' }
+          cache: 'no-store'
         });
         
         if (res.status === 401) {
-          console.log('[DASHBOARD] Session unauthorized, redirecting to login.');
           router.replace("/");
           return;
         }
@@ -50,12 +48,12 @@ export default function Dashboard() {
   }, [router, toast]);
 
   const handleCopy = () => {
-    const val = student?.enrollmentNo || student?.qid || student?.studentId;
+    const val = student?.enrollmentNo || student?.studentId;
     if (!val) return;
     navigator.clipboard.writeText(val);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied", description: "Student ID copied to clipboard." });
+    toast({ title: "Copied", description: "Student identifier copied to clipboard." });
   };
 
   if (loading) return <LoadingOverlay status="Accessing Vault" />;
@@ -133,7 +131,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course || 'Not available'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || 'Not available'}</p>
             </div>
           </div>
 

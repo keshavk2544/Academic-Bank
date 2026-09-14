@@ -5,25 +5,23 @@ import { getSessionStore } from '@/services/session-store';
 export async function GET(req: NextRequest) {
   const appSessionId = req.cookies.get('erp_session')?.value;
 
-  if (!appSessionId) {
-    console.log('[SESSION-CHECK] No session cookie found.');
-    return NextResponse.json({ authenticated: false, reason: 'no_cookie' }, { 
-      status: 401,
-      headers: { 'Cache-Control': 'no-store, max-age=0' }
-    });
-  }
-
   try {
     const store = getSessionStore();
-    const sessionData = await store.getSession(appSessionId);
+    let sessionData = null;
+    if (appSessionId) {
+      sessionData = await store.getSession(appSessionId);
+    }
 
-    if (!sessionData) {
-      console.log('[SESSION-CHECK] Session not found in store:', appSessionId.substring(0, 8));
-      return NextResponse.json({ 
-        authenticated: false, 
-        message: 'Your session has expired.',
-        reason: 'session_not_found'
-      }, { 
+    // SAFE DIAGNOSTICS
+    console.log('[SESSION API CHECK]', {
+      hasCookie: !!appSessionId,
+      hasSession: !!sessionData,
+      hasStudent: !!sessionData?.student,
+      studentFields: sessionData?.student ? Object.keys(sessionData.student) : []
+    });
+
+    if (!appSessionId || !sessionData) {
+      return NextResponse.json({ authenticated: false, reason: 'no_session' }, { 
         status: 401,
         headers: { 'Cache-Control': 'no-store, max-age=0' }
       });
@@ -32,7 +30,6 @@ export async function GET(req: NextRequest) {
     const { expiresAt, student } = sessionData;
 
     if (new Date() > new Date(expiresAt)) {
-      console.log('[SESSION-CHECK] Session expired globally.');
       await store.deleteSession(appSessionId).catch(() => {});
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { 
         status: 401,
@@ -52,7 +49,7 @@ export async function GET(req: NextRequest) {
     console.error('[SESSION-ERROR]', error.message);
     return NextResponse.json({ 
       authenticated: false, 
-      message: 'System error while verifying session.',
+      message: 'System error',
       reason: 'system_error'
     }, { 
       status: 500,
