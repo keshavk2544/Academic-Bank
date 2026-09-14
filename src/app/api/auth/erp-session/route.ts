@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
     if (!appSessionId || !sessionData) {
       return NextResponse.json({ authenticated: false, reason: 'no_session' }, { 
         status: 401,
-        headers: { 'Cache-Control': 'no-store, max-age=0' }
+        headers: { 
+          'Cache-Control': 'no-store, max-age=0' 
+        }
       });
     }
 
@@ -31,7 +33,9 @@ export async function GET(req: NextRequest) {
       await store.deleteSession(appSessionId).catch(() => {});
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { 
         status: 401,
-        headers: { 'Cache-Control': 'no-store, max-age=0' }
+        headers: { 
+          'Cache-Control': 'no-store, max-age=0' 
+        }
       });
     }
 
@@ -39,7 +43,9 @@ export async function GET(req: NextRequest) {
       authenticated: true,
       student
     }, {
-      headers: { 'Cache-Control': 'no-store, max-age=0' }
+      headers: { 
+        'Cache-Control': 'no-store, max-age=0' 
+      }
     });
 
   } catch (error: any) {
@@ -50,7 +56,9 @@ export async function GET(req: NextRequest) {
       reason: 'system_error'
     }, { 
       status: 500,
-      headers: { 'Cache-Control': 'no-store, max-age=0' }
+      headers: { 
+        'Cache-Control': 'no-store, max-age=0' 
+      }
     });
   }
 }

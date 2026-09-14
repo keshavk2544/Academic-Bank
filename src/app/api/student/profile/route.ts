@@ -19,12 +19,17 @@ export async function GET(req: NextRequest) {
     });
 
     if (!appSessionId || !sessionData) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { 
+        status: 401,
+        headers: { 'Cache-Control': 'no-store, max-age=0' }
+      });
     }
 
     return NextResponse.json({
       success: true,
       student: sessionData.student
+    }, {
+      headers: { 'Cache-Control': 'no-store, max-age=0' }
     });
   } catch (error) {
     console.error('[PROFILE-API-ERROR]', error);

@@ -144,30 +144,51 @@ export class QUMSProvider implements IERPProvider {
       throw new Error(`QUMS GetStudentDetail returned non-JSON data. HTTP ${response.status}`);
     }
 
-    const data = Array.isArray(rawData) ? rawData[0] : rawData;
-    
+    let data: any;
+    let format: string = 'unknown';
+
+    // Handle "state" string format used in working replica
+    if (rawData && typeof rawData.state === 'string') {
+      format = 'state_string';
+      try {
+        const parsedState = JSON.parse(rawData.state);
+        data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
+      } catch {
+        throw new Error('Failed to parse the "state" property in QUMS response.');
+      }
+    } else {
+      format = 'direct_object';
+      data = Array.isArray(rawData) ? rawData[0] : rawData;
+    }
+
     if (!data) {
       throw new Error('QUMS profile data is empty or null.');
     }
 
-    const getVal = (keys: string[]) => {
-      for (const k of keys) {
-        if (data[k] !== undefined && data[k] !== null) return data[k];
-      }
-      return '';
-    };
+    console.log('[PROFILE TEST]', {
+      success: true,
+      responseFormat: format,
+      hasStudentName: !!data.StudentName,
+      hasStudentID: !!data.StudentID,
+      hasRegID: !!data.RegID,
+      hasCourse: !!data.Course,
+      hasBranch: !!data.Branch,
+      hasSection: !!data.Section,
+      hasYearSem: !!data.YearSem,
+      hasPhoto: !!data.Photo
+    });
     
     return {
-      uid: getVal(['RegID', 'RegId', 'regId', 'regID']),
-      studentId: getVal(['StudentID', 'StudentId', 'studentId', 'studentID']),
-      registrationId: getVal(['RegID', 'RegId', 'regId']),
-      enrollmentNo: getVal(['EnrollmentNo', 'Enrollmentno', 'enrollmentNo']),
-      name: getVal(['StudentName', 'Studentname', 'studentName', 'name']),
-      course: getVal(['Course', 'course']),
-      branch: getVal(['Branch', 'branch']),
-      section: getVal(['Section', 'section']),
-      semester: parseInt(getVal(['YearSem', 'yearSem', 'semester', 'Year'])) || 0,
-      photoUrl: getVal(['Photo', 'photo', 'ProfilePhoto'])
+      uid: data.RegID || '',
+      studentId: data.StudentID || '',
+      registrationId: data.RegID || '',
+      enrollmentNo: data.EnrollmentNo || data.StudentID || '',
+      name: data.StudentName || '',
+      course: data.Course || '',
+      branch: data.Branch || '',
+      section: data.Section || '',
+      semester: parseInt(data.YearSem) || 0,
+      photoUrl: data.Photo || ''
     };
   }
 
