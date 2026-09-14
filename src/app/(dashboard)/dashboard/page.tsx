@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -30,7 +31,6 @@ export default function Dashboard() {
         const data = await res.json();
 
         if (data.authenticated && data.student) {
-          // Diagnostic: Dashboard React render input
           console.log('[DIAGNOSTIC-DASHBOARD-RENDER]', {
             hasPhotoUrl: !!data.student.photoUrl,
             photoUrlLength: data.student.photoUrl?.length || 0
@@ -68,12 +68,15 @@ export default function Dashboard() {
         <div className="order-1 md:order-2 flex justify-center">
           <div className="profile-ring">
             <div className="profile-inner">
-              {student.photoUrl ? (
+              {student.photoUrl && !imageError ? (
                 <img 
                   src={student.photoUrl} 
                   alt="Student" 
                   className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" 
-                  onError={() => console.error('[DASHBOARD-IMAGE-ERROR]')}
+                  onError={() => {
+                    console.error('[DASHBOARD-IMAGE-ERROR]');
+                    setImageError(true);
+                  }}
                 />
               ) : (
                 <User className="w-24 h-24 text-primary stroke-[1.2]" />

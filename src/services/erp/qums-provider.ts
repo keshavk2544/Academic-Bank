@@ -112,6 +112,28 @@ export class QUMSProvider implements IERPProvider {
     };
   }
 
+  private parseStudentData(rawText: string): any {
+    let rawData: any;
+    try {
+      rawData = JSON.parse(rawText);
+    } catch {
+      throw new Error(`QUMS detail response returned non-JSON data.`);
+    }
+
+    let data: any;
+    if (rawData && typeof rawData.state === 'string') {
+      try {
+        const parsedState = JSON.parse(rawData.state);
+        data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
+      } catch {
+        throw new Error('Failed to parse the "state" property in QUMS response.');
+      }
+    } else {
+      data = Array.isArray(rawData) ? rawData[0] : rawData;
+    }
+    return data;
+  }
+
   async getStudentProfile(sessionId: string): Promise<StudentProfile> {
     const response = await fetch(`${QUMS_BASE_URL}/Account/GetStudentDetail`, {
       method: 'POST',
@@ -128,44 +150,20 @@ export class QUMSProvider implements IERPProvider {
       throw new Error(`QUMS profile request failed with HTTP ${response.status}`);
     }
 
-    const rawText = await response.text();
-    let rawData: any;
-    try {
-      rawData = JSON.parse(rawText);
-    } catch {
-      throw new Error(`QUMS GetStudentDetail returned non-JSON data.`);
-    }
-
-    let data: any;
-    if (rawData && typeof rawData.state === 'string') {
-      try {
-        const parsedState = JSON.parse(rawData.state);
-        data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
-      } catch {
-        throw new Error('Failed to parse the "state" property in QUMS response.');
-      }
-    } else {
-      data = Array.isArray(rawData) ? rawData[0] : rawData;
-    }
+    const data = this.parseStudentData(await response.text());
 
     if (!data) {
       throw new Error('QUMS profile data is empty.');
     }
 
-    // Step 1: Diagnostic after parsing QUMS Detail
-    console.log('[DIAGNOSTIC-1-QUMS-RAW]', {
+    // Diagnostic tracking for Step 1 & 2
+    console.log('[DIAGNOSTIC-QUMS-PROFILE]', {
       hasPhoto: !!data.Photo,
       photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0
     });
 
-    // Instead of Base64 blob, we point the UI to our robust binary endpoint
+    // We point to the robust binary endpoint if a photo exists
     const photoUrl = data.Photo ? '/api/student/photo' : '';
-
-    // Step 2: Diagnostic before returning profile
-    console.log('[DIAGNOSTIC-2-PROFILE-RETURN]', {
-      hasPhotoUrl: !!photoUrl,
-      photoUrlLength: photoUrl.length
-    });
     
     return {
       uid: data.RegID || '',
@@ -195,18 +193,11 @@ export class QUMSProvider implements IERPProvider {
       });
 
       if (!response.ok) return null;
-      const rawText = await response.text();
-      const rawData = JSON.parse(rawText);
-      let data: any;
-      if (rawData && typeof rawData.state === 'string') {
-        const parsedState = JSON.parse(rawData.state);
-        data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
-      } else {
-        data = Array.isArray(rawData) ? rawData[0] : rawData;
-      }
-
+      
+      const data = this.parseStudentData(await response.text());
       const photo = data?.Photo;
-      if (!photo) return null;
+      
+      if (!photo || typeof photo !== 'string') return null;
       
       const base64Data = photo.includes('base64,') ? photo.split('base64,')[1] : photo;
       return Buffer.from(base64Data, 'base64');
