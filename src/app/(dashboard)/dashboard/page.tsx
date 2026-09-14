@@ -1,18 +1,16 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles, GraduationCap } from "lucide-react"
+import { ShieldCheck, User } from "lucide-react"
 
 export default function Dashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -85,7 +83,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <p className="mt-32 mb-12 text-center text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-black opacity-30">
+      <p className="mt-16 mb-12 text-center text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-black opacity-30">
         PreRP Student Pulse Engine &copy; 2025
       </p>
     </div>
