@@ -1,18 +1,16 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User, Hash, BookOpen, Copy, Check, ChevronRight, LayoutGrid, Calendar, Sparkles, GraduationCap } from "lucide-react"
+import { ShieldCheck, User } from "lucide-react"
 
 export default function Dashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -47,15 +45,6 @@ export default function Dashboard() {
     fetchSession();
   }, [router, toast]);
 
-  const handleCopy = () => {
-    const val = student?.enrollmentNo || student?.registrationId || student?.studentId;
-    if (!val) return;
-    navigator.clipboard.writeText(val);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied", description: "Identity number copied." });
-  };
-
   if (loading) return <LoadingOverlay status="Accessing Vault" />;
   if (!student) return null;
 
@@ -64,9 +53,6 @@ export default function Dashboard() {
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mt-4">
         <div className="order-2 md:order-1 text-center md:text-left">
-          <p className="text-2xl text-muted-foreground font-light mb-1">
-            Welcome Back,
-          </p>
           <h1 className="text-5xl font-black font-headline tracking-tighter leading-tight mb-6">
             {student.name || 'Academic identity'}
           </h1>
@@ -94,96 +80,6 @@ export default function Dashboard() {
             Today.<br />Better.<br />Tomorrow.
           </p>
           <div className="w-20 h-1 bg-primary rounded-full mt-4 ml-auto -rotate-12 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
-        </div>
-      </section>
-
-      {/* Academic Identity Grid */}
-      <section className="mt-16">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black font-headline tracking-tight">Academic Identity</h2>
-          <button className="px-4 py-1.5 rounded-full border border-white/10 bg-gradient-to-br from-[#0f0f0f] to-[#050505] text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-            Verified
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="identity-card !h-24 !p-4 !rounded-2xl">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
-              <Hash className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Enrollment No</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || student.registrationId || 'N/A'}</p>
-            </div>
-            <button 
-              onClick={handleCopy}
-              className="w-8 h-8 rounded-lg bg-[#202020] flex items-center justify-center text-muted-foreground transition-all active:scale-90"
-            >
-              {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-
-          <div className="identity-card !h-24 !p-4 !rounded-2xl">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
-              <BookOpen className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || student.course || 'N/A'}</p>
-            </div>
-          </div>
-
-          <div className="identity-card !h-24 !p-4 !rounded-2xl">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
-              <GraduationCap className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Semester</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester ? `${student.semester}th` : 'N/A'}</p>
-            </div>
-          </div>
-
-          <div className="identity-card !h-24 !p-4 !rounded-2xl border-primary/30 bg-gradient-to-br from-[#151515] to-[#111108]">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 shrink-0 border border-primary/30">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold text-primary uppercase tracking-widest mb-0.5">Section</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.section || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Access */}
-      <section className="mt-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-black font-headline">Quick Access</h2>
-          <span className="text-muted-foreground text-sm font-medium">Less clicks. More progress.</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <button onClick={() => router.push('/timetable')} className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
-            <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mr-5 group-hover:bg-primary/10 transition-colors">
-              <Calendar className="w-8 h-8 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h4 className="text-xl font-bold mb-1">Timetable</h4>
-              <p className="text-sm text-muted-foreground">View your classes</p>
-            </div>
-            <ChevronRight className="text-muted-foreground group-hover:text-primary transition-colors" />
-          </button>
-
-          <button onClick={() => router.push('/academics')} className="h-32 p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#131313] to-[#0c0c0c] flex items-center text-left transition-all active:scale-[0.98] group hover:border-primary/20">
-            <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mr-5 group-hover:bg-primary/10 transition-colors">
-              <LayoutGrid className="w-8 h-8 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h4 className="text-xl font-bold mb-1">Vault Services</h4>
-              <p className="text-sm text-muted-foreground">Manage records</p>
-            </div>
-            <ChevronRight className="text-muted-foreground group-hover:text-primary transition-colors" />
-          </button>
         </div>
       </section>
 
