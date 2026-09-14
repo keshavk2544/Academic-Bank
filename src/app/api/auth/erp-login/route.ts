@@ -33,24 +33,9 @@ export async function POST(req: NextRequest) {
     await store.deleteTransaction(transactionId);
 
     if (result.success && result.sessionId) {
-      // 1. Fetch complete student profile ONCE
+      // 1. Fetch complete student profile
       const profile = await erp.getStudentProfile(result.sessionId);
       
-      // STEP 1: SAFE DIAGNOSTICS
-      console.log('[ERP PROFILE CHECK]', {
-        exists: !!profile,
-        fields: Object.keys(profile || {}),
-        hasName: !!profile?.name,
-        hasStudentId: !!profile?.studentId,
-        hasRegistrationId: !!profile?.registrationId,
-        hasEnrollmentNo: !!profile?.enrollmentNo,
-        hasCourse: !!profile?.course,
-        hasBranch: !!profile?.branch,
-        hasSection: !!profile?.section,
-        hasSemester: !!profile?.semester,
-        hasPhoto: !!profile?.photoUrl
-      });
-
       const appSessionId = randomUUID();
       const expires = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
       
@@ -64,17 +49,17 @@ export async function POST(req: NextRequest) {
       // 2. Store authenticated session
       await store.saveSession(appSessionId, sessionData);
 
-      // STEP 2: IMMEDIATELY VERIFY
-      const verification = await store.getSession(appSessionId);
-      console.log('[SESSION PROFILE CHECK]', {
-        exists: !!verification,
-        hasStudent: !!verification?.student,
-        fields: verification?.student ? Object.keys(verification.student) : []
+      // 3. Verification diagnostics
+      const verify = await store.getSession(appSessionId);
+      console.log('[SESSION SAVE CHECK]', {
+        saved: !!verify,
+        hasStudent: !!verify?.student,
+        fields: verify?.student ? Object.keys(verify.student) : []
       });
 
       const response = NextResponse.json({ success: true });
 
-      // STEP 3: ENVIRONMENT-AWARE COOKIE
+      // 4. Environment-aware cookie
       const isProduction =
         process.env.NODE_ENV === 'production' &&
         process.env.FIREBASE_CONFIG !== undefined;

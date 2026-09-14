@@ -12,12 +12,11 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    // SAFE DIAGNOSTICS
-    console.log('[SESSION API CHECK]', {
+    console.log('[ERP SESSION API]', {
       hasCookie: !!appSessionId,
       hasSession: !!sessionData,
       hasStudent: !!sessionData?.student,
-      studentFields: sessionData?.student ? Object.keys(sessionData.student) : []
+      fields: sessionData?.student ? Object.keys(sessionData.student) : []
     });
 
     if (!appSessionId || !sessionData) {
@@ -37,7 +36,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Return the cached profile. NEVER contacts QUMS.
     return NextResponse.json({
       authenticated: true,
       student

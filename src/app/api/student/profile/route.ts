@@ -12,19 +12,17 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    // SAFE DIAGNOSTICS
-    console.log('[PROFILE API CHECK]', {
+    console.log('[STUDENT PROFILE API]', {
       hasCookie: !!appSessionId,
       hasSession: !!sessionData,
       hasStudent: !!sessionData?.student,
-      studentFields: sessionData?.student ? Object.keys(sessionData.student) : []
+      fields: sessionData?.student ? Object.keys(sessionData.student) : []
     });
 
     if (!appSessionId || !sessionData) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Return CACHED profile only.
     return NextResponse.json({
       success: true,
       student: sessionData.student

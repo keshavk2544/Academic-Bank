@@ -69,12 +69,12 @@ export default function ProfilePage() {
       
       if (data.success && data.student) {
         setStudent(data.student)
-        toast({ title: "Sync Successful", description: "Your academic identity has been updated from QUMS." })
+        toast({ title: "Sync Successful", description: "Your academic identity has been updated." })
       } else {
         toast({ 
           variant: "destructive", 
           title: "Sync Unavailable", 
-          description: data.message || "Could not reach QUMS server pulse." 
+          description: data.message || "ERP sync unavailable. Your existing profile is still available." 
         })
       }
     } catch (e) {
@@ -153,8 +153,8 @@ export default function ProfilePage() {
                   <IdCard className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Enrollment No</h3>
-                  <p className="text-sm font-bold font-headline">{student?.enrollmentNo || 'Not available'}</p>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Student ID</h3>
+                  <p className="text-sm font-bold font-headline">{student?.studentId || 'Not available'}</p>
                 </div>
               </div>
             </div>

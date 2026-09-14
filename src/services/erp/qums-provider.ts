@@ -124,13 +124,29 @@ export class QUMSProvider implements IERPProvider {
       headers: { 
         'Cookie': sessionId,
         'User-Agent': this.userAgent,
-        'Referer': `${QUMS_BASE_URL}/Student/Dashboard`
+        'Referer': `${QUMS_BASE_URL}/Student/Dashboard`,
+        'Accept': 'application/json, text/plain, */*'
       }
     });
 
-    if (!response.ok) throw new Error('QUMS profile fetch failed');
+    const rawText = await response.text();
 
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`QUMS profile request failed: HTTP ${response.status}`);
+    }
+
+    let data: any;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      console.error('[QUMS PROFILE NON-JSON]', {
+        status: response.status,
+        contentType: response.headers.get('content-type'),
+        responseLength: rawText.length,
+        startsWithHtml: rawText.trimStart().startsWith('<')
+      });
+      throw new Error('QUMS returned a non-JSON response while fetching the student profile.');
+    }
     
     return {
       uid: data.RegID || '',
@@ -156,18 +172,14 @@ export class QUMSProvider implements IERPProvider {
   }
 
   private extractCookies(response: Response): string {
-    // Standard getSetCookie (Node 18+, Next.js built-in fetch)
     if (typeof (response.headers as any).getSetCookie === 'function') {
       const cookies = (response.headers as any).getSetCookie();
       if (cookies.length > 0) {
         return cookies.map((c: string) => c.split(';')[0].trim()).join('; ');
       }
     }
-    
-    // Fallback for concatenated headers
     const cookieHeader = response.headers.get('set-cookie');
     if (!cookieHeader) return '';
-    
     return cookieHeader.split(',').map(c => c.split(';')[0].trim()).join('; ');
   }
 

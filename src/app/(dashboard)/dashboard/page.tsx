@@ -48,12 +48,12 @@ export default function Dashboard() {
   }, [router, toast]);
 
   const handleCopy = () => {
-    const val = student?.enrollmentNo || student?.studentId;
+    const val = student?.enrollmentNo;
     if (!val) return;
     navigator.clipboard.writeText(val);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied", description: "Student identifier copied to clipboard." });
+    toast({ title: "Copied", description: "Enrollment number copied." });
   };
 
   if (loading) return <LoadingOverlay status="Accessing Vault" />;
@@ -68,7 +68,7 @@ export default function Dashboard() {
             Welcome Back,
           </p>
           <h1 className="text-5xl font-black font-headline tracking-tighter leading-tight mb-6">
-            {student?.name || 'Academic identity'}
+            {student.name || 'Academic identity'}
           </h1>
           <div className="w-24 h-1 bg-primary rounded-full mt-4 mx-auto md:mx-0 -rotate-6 shadow-[0_0_8px_rgba(255,210,26,0.3)]" />
         </div>
@@ -107,14 +107,13 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {/* Enrollment Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
               <Hash className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Enrollment No</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || 'Not available'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.enrollmentNo || 'N/A'}</p>
             </div>
             <button 
               onClick={handleCopy}
@@ -124,29 +123,26 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* Branch Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Branch</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || 'Not available'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.branch || 'N/A'}</p>
             </div>
           </div>
 
-          {/* Semester Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0 border border-primary/20">
               <GraduationCap className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Semester</p>
-              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester ? `${student.semester}th` : 'Not available'}</p>
+              <p className="text-sm font-bold font-headline truncate text-white/90">{student.semester ? `${student.semester}th` : 'N/A'}</p>
             </div>
           </div>
 
-          {/* Section Card */}
           <div className="identity-card !h-24 !p-4 !rounded-2xl border-primary/30 bg-gradient-to-br from-[#151515] to-[#111108]">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 shrink-0 border border-primary/30">
               <Sparkles className="w-5 h-5 text-primary" />
