@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ReactNode, useState, useEffect } from "react"
@@ -6,7 +7,7 @@ import { usePathname } from "next/navigation"
 import { 
   Home,
   BookOpen,
-  Calendar,
+  Upload,
   User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -20,7 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/dashboard" },
   { icon: BookOpen, label: "Repo", href: "/academics" },
-  { icon: Calendar, label: "Timetable", href: "/timetable" },
+  { icon: Upload, label: "Upload", href: "/upload" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
