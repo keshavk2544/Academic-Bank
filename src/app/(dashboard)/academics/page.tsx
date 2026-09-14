@@ -15,9 +15,17 @@ import { useRouter } from "next/navigation"
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
-export default function AcademicsPage(props: { params: Promise<any>; searchParams: Promise<any> }) {
-  use(props.params);
-  use(props.searchParams);
+export default function AcademicsPage({
+  params,
+  searchParams
+}: {
+  params: Promise<any>;
+  searchParams: Promise<any>;
+}) {
+  // Explicitly unwrap promises in Client Component using React.use()
+  use(params);
+  use(searchParams);
+  
   const router = useRouter()
 
   const [files] = useState([
