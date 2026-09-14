@@ -147,7 +147,6 @@ export class QUMSProvider implements IERPProvider {
     let data: any;
     let format: string = 'unknown';
 
-    // Handle "state" string format used in working replica
     if (rawData && typeof rawData.state === 'string') {
       format = 'state_string';
       try {
