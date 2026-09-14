@@ -117,7 +117,7 @@ export class QUMSProvider implements IERPProvider {
     try {
       rawData = JSON.parse(rawText);
     } catch {
-      throw new Error(`QUMS detail response returned non-JSON data.`);
+      return null;
     }
 
     let data: any;
@@ -126,7 +126,7 @@ export class QUMSProvider implements IERPProvider {
         const parsedState = JSON.parse(rawData.state);
         data = Array.isArray(parsedState) ? parsedState[0] : parsedState;
       } catch {
-        throw new Error('Failed to parse the "state" property in QUMS response.');
+        return null;
       }
     } else {
       data = Array.isArray(rawData) ? rawData[0] : rawData;
@@ -143,26 +143,21 @@ export class QUMSProvider implements IERPProvider {
         'Referer': `${QUMS_BASE_URL}/Student/Dashboard`,
         'Accept': 'application/json, text/plain, */*'
       },
-      cache: 'no-store'
+      cache: 'no-store',
+      redirect: 'manual'
     });
 
-    if (!response.ok) {
-      throw new Error(`QUMS profile request failed with HTTP ${response.status}`);
+    if (response.status === 302 || response.status === 301) {
+      throw new Error('QUMS session expired');
     }
 
-    const data = this.parseStudentData(await response.text());
+    const rawText = await response.text();
+    const data = this.parseStudentData(rawText);
 
     if (!data) {
-      throw new Error('QUMS profile data is empty.');
+      throw new Error('Invalid student data from QUMS');
     }
 
-    // Diagnostic tracking for Step 1 & 2
-    console.log('[DIAGNOSTIC-QUMS-PROFILE]', {
-      hasPhoto: !!data.Photo,
-      photoLength: typeof data.Photo === 'string' ? data.Photo.length : 0
-    });
-
-    // We point to the robust binary endpoint if a photo exists
     const photoUrl = data.Photo ? '/api/student/photo' : '';
     
     return {
@@ -189,12 +184,14 @@ export class QUMSProvider implements IERPProvider {
           'Referer': `${QUMS_BASE_URL}/Student/Dashboard`,
           'Accept': 'application/json, text/plain, */*'
         },
-        cache: 'no-store'
+        cache: 'no-store',
+        redirect: 'manual'
       });
 
-      if (!response.ok) return null;
+      if (response.status === 302 || response.status === 301) return null;
       
-      const data = this.parseStudentData(await response.text());
+      const rawText = await response.text();
+      const data = this.parseStudentData(rawText);
       const photo = data?.Photo;
       
       if (!photo || typeof photo !== 'string') return null;
@@ -202,7 +199,6 @@ export class QUMSProvider implements IERPProvider {
       const base64Data = photo.includes('base64,') ? photo.split('base64,')[1] : photo;
       return Buffer.from(base64Data, 'base64');
     } catch (e) {
-      console.error('[QUMS-PHOTO-ERROR]', e);
       return null;
     }
   }

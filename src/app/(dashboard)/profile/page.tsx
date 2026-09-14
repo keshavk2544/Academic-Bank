@@ -25,20 +25,11 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     fetchProfile()
   }, [])
-
-  // 5. Diagnostic: In the Profile component state
-  useEffect(() => {
-    if (student) {
-      console.log('[DIAGNOSTIC-5-PROFILE-COMPONENT]', {
-        hasPhotoUrl: !!student.photoUrl,
-        photoUrlLength: student.photoUrl?.length || 0
-      });
-    }
-  }, [student]);
 
   const fetchProfile = async () => {
     try {
@@ -79,6 +70,7 @@ export default function ProfilePage() {
       
       if (data.success && data.student) {
         setStudent(data.student)
+        setImageError(false)
         toast({ title: "Sync Successful", description: "Your academic identity has been updated." })
       } else {
         toast({ 
@@ -113,12 +105,12 @@ export default function ProfilePage() {
       <header className="px-6 pt-4 flex flex-col items-center">
         <div className="relative z-10 -mb-12">
           <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl bg-[#111] flex items-center justify-center">
-            {student?.photoUrl ? (
+            {student?.photoUrl && !imageError ? (
               <img 
                 src={student.photoUrl} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
-                onError={() => console.error('[PROFILE-IMAGE-ERROR]')}
+                onError={() => setImageError(true)}
               />
             ) : (
               <Fingerprint className="w-12 h-12 text-primary/40" />

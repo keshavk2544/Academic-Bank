@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Return pure binary Response to ensure browser treats it as an image
+    // Using simple Response ensures NextJS doesn't wrap this in HTML error pages
     return new Response(photoBuffer, {
       headers: {
         'Content-Type': 'image/png',
@@ -33,7 +34,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[PHOTO-API-ERROR]', error);
     return new Response(null, { status: 500 });
   }
 }

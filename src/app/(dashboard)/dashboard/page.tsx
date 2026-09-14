@@ -31,10 +31,6 @@ export default function Dashboard() {
         const data = await res.json();
 
         if (data.authenticated && data.student) {
-          console.log('[DIAGNOSTIC-DASHBOARD-RENDER]', {
-            hasPhotoUrl: !!data.student.photoUrl,
-            photoUrlLength: data.student.photoUrl?.length || 0
-          });
           setStudent(data.student);
         } else {
           router.replace("/");
@@ -74,7 +70,6 @@ export default function Dashboard() {
                   alt="Student" 
                   className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" 
                   onError={() => {
-                    console.error('[DASHBOARD-IMAGE-ERROR]');
                     setImageError(true);
                   }}
                 />
