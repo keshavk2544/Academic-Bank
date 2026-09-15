@@ -7,7 +7,9 @@ import {
   Download, 
   Search,
   ChevronLeft,
-  Plus
+  Calendar,
+  Code,
+  MoreVertical
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -29,9 +31,9 @@ export default function AcademicsPage({
   const router = useRouter()
 
   const [files] = useState([
-    { title: "Machine Learning Unit 2", size: "4.2 MB", date: "2 days ago", type: "Machine Learning", docType: "NOTES", contributor: "Keshav Krishan" },
-    { title: "Computer Networks Lab", size: "12.8 MB", date: "1 week ago", type: "Computer Networks", docType: "MFT", contributor: "Sarah Jenkins" },
-    { title: "Operating Systems L15", size: "1.5 MB", date: "Today", type: "Operating Systems", docType: "NOTES", contributor: "Michael Chen" },
+    { title: "Machine Learning Fundamentals", size: "4.2 MB", date: "2 hrs ago", type: "Machine Learning", docType: "NOTES", contributor: "Keshav Krishan" },
+    { title: "Computer Networks End-Term", size: "12.8 MB", date: "Yesterday", type: "Computer Networks", docType: "MFT", contributor: "Sarah Jenkins" },
+    { title: "Operating Systems Mid-Term", size: "1.5 MB", date: "Oct 12, 2024", type: "Operating Systems", docType: "NOTES", contributor: "Michael Chen" },
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,36 +48,60 @@ export default function AcademicsPage({
     });
   }, [files, searchTerm, selectedType]);
 
-  return (
-    <div className="min-h-screen bg-black text-white pb-32">
-      <header className="yellow-header">
-         <div className="flex items-center justify-between mb-8">
-          <ChevronLeft className="w-8 h-8 cursor-pointer" onClick={() => router.back()} />
-          <h2 className="text-xl font-headline font-bold">Repository</h2>
-          <Plus className="w-8 h-8 cursor-pointer" /> 
-        </div>
-        
-        <div className="mb-6">
-          <h1 className="text-3xl font-headline font-bold">Academic Vault</h1>
-          <p className="text-black/60 text-sm">Access curated study materials.</p>
-        </div>
+  const getIcon = (docType: string) => {
+    switch (docType) {
+      case 'NOTES': return <FileText className="w-5 h-5 text-amber-400" />;
+      case 'MFT': return <Calendar className="w-5 h-5 text-emerald-400" />;
+      case 'IMP TOPIC': return <Code className="w-5 h-5 text-blue-400" />;
+      default: return <FileText className="w-5 h-5 text-amber-400" />;
+    }
+  };
 
-        <div className="relative">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 w-5 h-5" />
+  return (
+    <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-hidden">
+      {/* Premium Top Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-[#1a1a24] to-transparent opacity-50 pointer-events-none" />
+
+      <div className="max-w-[720px] mx-auto px-6 pt-12 space-y-10 relative z-10">
+        
+        {/* Header */}
+        <header className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-2 group cursor-pointer" onClick={() => router.back()}>
+              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Back</span>
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-tighter bg-gradient-to-br from-amber-400 to-amber-600 bg-clip-text text-transparent">
+              Academic Vault
+            </h1>
+            <p className="text-sm font-medium text-muted-foreground">Quantum University Resource Archive</p>
+          </div>
+          <div className="w-20 h-12 rounded-2xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center text-xs font-black tracking-tighter shadow-2xl hover:border-primary/40 transition-all hover:scale-105 hover:rotate-3">
+            I_NAV
+          </div>
+        </header>
+
+        {/* Search */}
+        <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 fill-mode-forwards opacity-0">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 transition-colors group-focus-within:text-primary" />
           <Input 
-            placeholder="Search files..." 
-            className="pill-input pl-14 placeholder:text-white/30"
+            placeholder="Search resources, topics, or subjects..." 
+            className="h-14 bg-white/[0.03] border-white/[0.08] backdrop-blur-xl pl-14 rounded-2xl placeholder:text-muted-foreground/40 text-base focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-xl"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      </header>
 
-      <div className="px-6 mt-8 space-y-6">
-        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+        {/* Filters */}
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-forwards opacity-0">
           <button 
             onClick={() => setSelectedType("all")}
-            className={cn("px-6 py-2 rounded-full text-[10px] font-bold uppercase border shrink-0 transition-all", selectedType === "all" ? "bg-primary border-primary text-black" : "bg-card border-white/10 text-muted-foreground")}
+            className={cn(
+              "px-6 py-2.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
+              selectedType === "all" 
+                ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/20 translate-y-[-2px]" 
+                : "bg-white/[0.03] border-white/[0.08] text-muted-foreground hover:bg-white/[0.06] hover:text-white"
+            )}
           >
             All
           </button>
@@ -83,34 +109,65 @@ export default function AcademicsPage({
             <button 
               key={type}
               onClick={() => setSelectedType(type)}
-              className={cn("px-6 py-2 rounded-full text-[10px] font-bold uppercase border shrink-0 transition-all", selectedType === type ? "bg-primary border-primary text-black" : "bg-card border-white/10 text-muted-foreground")}
+              className={cn(
+                "px-6 py-2.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
+                selectedType === type 
+                  ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/20 translate-y-[-2px]" 
+                  : "bg-white/[0.03] border-white/[0.08] text-muted-foreground hover:bg-white/[0.06] hover:text-white"
+              )}
             >
               {type}
             </button>
           ))}
         </div>
 
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold font-headline">Recent Uploads</h2>
-            <span className="text-[10px] font-black opacity-40">{filteredFiles.length} Files</span>
+        {/* File Section */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards opacity-0">
+            <h2 className="text-xl font-bold tracking-tight">Recent Uploads</h2>
+            <span className="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 rounded-full uppercase">
+              {filteredFiles.length} Files
+            </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid gap-4">
             {filteredFiles.map((file, idx) => (
-              <div key={idx} className="card-item">
-                <div className="flex items-center gap-4">
-                  <div className="icon-box">
-                    <FileText className="w-6 h-6" />
+              <div 
+                key={idx} 
+                className="group flex items-center justify-between p-4 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-2xl transition-all duration-500 hover:translate-y-[-5px] hover:scale-[1.01] hover:border-white/20 hover:shadow-2xl animate-in fade-in slide-in-from-bottom-4 fill-mode-forwards opacity-0"
+                style={{ animationDelay: `${400 + idx * 100}ms` }}
+              >
+                <div className="flex items-center gap-5 min-w-0">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
+                    <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
+                    <div className="relative z-10">
+                      {getIcon(file.docType)}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold truncate max-w-[150px]">{file.title}</h4>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{file.docType} • {file.size}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-bold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
+                      {file.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-md border border-white/[0.05]">
+                        {file.docType}
+                      </span>
+                      <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">{file.size}</span>
+                      <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                      <span className="text-[10px] font-bold text-zinc-500 hidden sm:block uppercase tracking-tighter">{file.date}</span>
+                    </div>
                   </div>
                 </div>
-                <button className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-primary transition-all active:scale-95">
-                  <Download className="w-5 h-5" />
-                </button>
+
+                <div className="flex items-center gap-3 pl-4">
+                  <button className="w-11 h-11 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-amber-400 hover:to-amber-600 hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/30 active:scale-95 group/btn">
+                    <Download className="w-5 h-5" />
+                  </button>
+                  <button className="w-11 h-11 rounded-full bg-white/[0.03] text-muted-foreground border border-transparent flex items-center justify-center transition-all hover:bg-white/[0.1] hover:text-white hover:scale-110 hidden sm:flex">
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
