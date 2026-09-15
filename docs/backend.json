@@ -51,6 +51,25 @@
         }
       },
       "required": ["qumsCookies", "student", "createdAt", "expiresAt"]
+    },
+    "Resource": {
+      "title": "Academic Resource",
+      "description": "An academic material uploaded by a student.",
+      "type": "object",
+      "properties": {
+        "uploaderName": { "type": "string" },
+        "qid": { "type": "string" },
+        "fileName": { "type": "string" },
+        "resourceType": { "type": "string", "enum": ["pyq", "notes", "imp", "mft"] },
+        "course": { "type": "string" },
+        "subject": { "type": "string" },
+        "year": { "type": "number" },
+        "faculty": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["approved", "pending", "rejected"] },
+        "size": { "type": "string" }
+      },
+      "required": ["uploaderName", "qid", "fileName", "resourceType", "course", "subject", "createdAt", "status"]
     }
   },
   "auth": {
@@ -64,6 +83,10 @@
     "/erpSessions/{sessionId}": {
       "schema": { "$ref": "#/backend/entities/ERPSession" },
       "description": "Secure store for active student sessions mapping opaque IDs to university cookies and cached profiles."
+    },
+    "/resources/{resourceId}": {
+      "schema": { "$ref": "#/backend/entities/Resource" },
+      "description": "Collection of academic materials contributed by students."
     }
   }
 }

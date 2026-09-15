@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -7,33 +8,51 @@ import {
   Calendar,
   Code,
   MoreVertical,
+  History
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useFirestore, useCollection } from "@/firebase"
+import { collection, query, orderBy } from "firebase/firestore"
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
 export default function AcademicsPage() {
-  const [files] = useState([
-    { title: "Machine Learning Fundamentals", size: "4.2 MB", date: "2 hrs ago", type: "Machine Learning", docType: "NOTES" },
-    { title: "Computer Networks End-Term", size: "12.8 MB", date: "Yesterday", type: "Computer Networks", docType: "MFT" },
-    { title: "Operating Systems Mid-Term", size: "1.5 MB", date: "Oct 12, 2024", type: "Operating Systems", docType: "NOTES" },
-  ]);
-
+  const db = useFirestore()
   const [selectedType, setSelectedType] = useState("ALL");
 
+  const resourcesQuery = useMemo(() => query(
+    collection(db, 'resources'),
+    orderBy('createdAt', 'desc')
+  ), [db])
+
+  const { data: fetchedResources, loading } = useCollection(resourcesQuery)
+
   const filteredFiles = useMemo(() => {
-    return files.filter(file => {
-      const matchesType = selectedType === "ALL" || file.docType === selectedType;
+    if (!fetchedResources) return [];
+    return fetchedResources.filter(file => {
+      const typeKey = (file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase();
+      const matchesType = selectedType === "ALL" || typeKey === selectedType;
       return matchesType;
     });
-  }, [files, selectedType]);
+  }, [fetchedResources, selectedType]);
 
   const getIcon = (docType: string) => {
-    switch (docType) {
+    switch (docType.toUpperCase()) {
       case 'NOTES': return <FileText className="w-[22px] h-[22px] text-[#fbbf24]" strokeWidth={2.5} />;
       case 'MFT': return <Calendar className="w-[22px] h-[22px] text-[#34d399]" strokeWidth={2.5} />;
+      case 'IMP': 
       case 'IMP TOPIC': return <Code className="w-[22px] h-[22px] text-[#60a5fa]" strokeWidth={2.5} />;
+      case 'PYQ': return <History className="w-[22px] h-[22px] text-[#f87171]" strokeWidth={2.5} />;
       default: return <FileText className="w-[22px] h-[22px] text-[#fbbf24]" strokeWidth={2.5} />;
+    }
+  };
+
+  const formatDate = (isoString: string) => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return 'Recent';
     }
   };
 
@@ -85,48 +104,62 @@ export default function AcademicsPage() {
 
         {/* File Section */}
         <section>
-          <div className="flex flex-col gap-4">
-            {filteredFiles.map((file, idx) => (
-              <div 
-                key={idx} 
-                className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)]"
-              >
-                <div className="flex items-center gap-5 min-w-0">
-                  {/* 3D Icon Box */}
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
-                    <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
-                    <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                      {getIcon(file.docType)}
-                    </div>
-                  </div>
-                  
-                  <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
-                      {file.title}
-                    </h3>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[0.75rem] font-bold text-[#a1a1aa] tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-md">
-                        {file.docType}
-                      </span>
-                      <div className="w-1 h-1 rounded-full bg-[#52525b]" />
-                      <span className="text-[0.75rem] font-semibold text-[#52525b] uppercase tracking-tighter">{file.size}</span>
-                      <div className="w-1 h-1 rounded-full bg-[#52525b] hidden sm:block" />
-                      <span className="text-[0.75rem] font-semibold text-[#52525b] hidden sm:block uppercase tracking-tighter">{file.date}</span>
-                    </div>
-                  </div>
+          {loading ? (
+            <div className="flex flex-col gap-4 animate-pulse">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-24 bg-white/5 rounded-[1.25rem] border border-white/5" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {filteredFiles.length === 0 ? (
+                <div className="text-center py-20 bg-white/[0.02] rounded-[2rem] border border-dashed border-white/10">
+                  <p className="text-[#a1a1aa] font-medium">No resources found in this vault sector.</p>
                 </div>
+              ) : (
+                filteredFiles.map((file: any) => (
+                  <div 
+                    key={file.id} 
+                    className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)]"
+                  >
+                    <div className="flex items-center gap-5 min-w-0">
+                      {/* 3D Icon Box */}
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
+                        <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
+                        <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                          {getIcon(file.resourceType)}
+                        </div>
+                      </div>
+                      
+                      <div className="min-w-0">
+                        <h3 className="text-base font-semibold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
+                          {file.fileName || file.title}
+                        </h3>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-[0.75rem] font-bold text-[#a1a1aa] tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-md">
+                            {(file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase()}
+                          </span>
+                          <div className="w-1 h-1 rounded-full bg-[#52525b]" />
+                          <span className="text-[0.75rem] font-semibold text-[#52525b] uppercase tracking-tighter">{file.size || '0.0 MB'}</span>
+                          <div className="w-1 h-1 rounded-full bg-[#52525b] hidden sm:block" />
+                          <span className="text-[0.75rem] font-semibold text-[#52525b] hidden sm:block uppercase tracking-tighter">{formatDate(file.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="flex items-center gap-3 pl-4">
-                  <button className="w-11 h-11 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95">
-                    <Download className="w-[18px] h-[18px]" strokeWidth={2.5} />
-                  </button>
-                  <button className="w-11 h-11 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex">
-                    <MoreVertical className="w-[18px] h-[18px]" strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="flex items-center gap-3 pl-4">
+                      <button className="w-11 h-11 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95">
+                        <Download className="w-[18px] h-[18px]" strokeWidth={2.5} />
+                      </button>
+                      <button className="w-11 h-11 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex">
+                        <MoreVertical className="w-[18px] h-[18px]" strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

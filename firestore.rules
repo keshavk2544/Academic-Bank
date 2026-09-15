@@ -3,7 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // loginTransactions and erpSessions are for server-side processing only.
-    // We restrict all direct client-side access to protect sensitive session data.
     match /loginTransactions/{transactionId} {
       allow read, write: if false;
     }
@@ -15,6 +14,13 @@ service cloud.firestore {
     // Allow authenticated users to read their own profiles.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Resources are publicly readable but only creatable by anyone for MVP purposes
+    // In production, you'd restrict this to authenticated users.
+    match /resources/{resourceId} {
+      allow read: if true;
+      allow create: if true;
     }
   }
 }
