@@ -175,7 +175,6 @@ export default function UploadPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  // Course selector state
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState<'dept' | 'course'>('dept')
   const [tempDept, setTempDept] = useState<string | null>(null)
@@ -248,7 +247,6 @@ export default function UploadPage() {
     const file = e.target.files?.[0]
     if (file) {
       setSelectedFile(file)
-      // Auto-fill file name if empty
       if (!formData.fileName) {
         setFormData(prev => ({ ...prev, fileName: file.name }))
       }
@@ -335,36 +333,35 @@ export default function UploadPage() {
   if (isLoading) return <LoadingOverlay status="Verifying Identity" />;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 pb-24 relative overflow-hidden selection:bg-amber-500 selection:text-black font-body">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 pb-20 relative overflow-hidden selection:bg-amber-500 selection:text-black font-body">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle at 50% 0%,#1a1a24 0%,#050505 60%)] pointer-events-none -z-10" />
 
-      <div className="w-full max-w-[600px] animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.5rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-[400px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] p-5 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           
-          <div className="text-center mb-6">
-            <h1 className="text-[1.75rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-1 font-headline">
+          <div className="text-center mb-5">
+            <h1 className="text-[1.25rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-0.5 font-headline">
               Upload Resource
             </h1>
-            <p className="text-[0.85rem] font-medium text-[#a1a1aa]">Add materials to the Quantum University Vault</p>
+            <p className="text-[0.7rem] font-medium text-[#a1a1aa]">Add materials to the Vault</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* Reduced height File Selection Zone */}
-            <div className="space-y-2">
-              <Label className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Selection</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
               <div 
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
                 onClick={() => !selectedFile && fileInputRef.current?.click()}
                 className={cn(
-                  "relative group cursor-pointer h-28 rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden",
+                  "relative group cursor-pointer h-20 rounded-xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-1.5 overflow-hidden",
                   selectedFile 
                     ? "border-amber-500/50 bg-amber-500/5" 
                     : isDragging 
-                      ? "border-amber-500 bg-amber-500/10 scale-[1.02]" 
+                      ? "border-amber-500 bg-amber-500/10 scale-[1.01]" 
                       : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-white/[0.02]"
                 )}
               >
@@ -376,219 +373,166 @@ export default function UploadPage() {
                 />
                 
                 {selectedFile ? (
-                  <div className="flex flex-col items-center gap-1.5 animate-in fade-in zoom-in-95 duration-300">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
-                      <FileText className="w-5 h-5" />
+                  <div className="flex flex-col items-center gap-1 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
+                      <FileText className="w-4 h-4" />
                     </div>
                     <div className="text-center px-4">
-                      <p className="text-xs font-bold text-white truncate max-w-[200px]">{selectedFile.name}</p>
-                      <p className="text-[9px] font-bold text-amber-500/70 uppercase tracking-widest">
+                      <p className="text-[10px] font-bold text-white truncate max-w-[150px]">{selectedFile.name}</p>
+                      <p className="text-[8px] font-bold text-amber-500/70 uppercase tracking-widest">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
                     </div>
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(); }}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
-                    <div className="mt-0.5 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[8px] font-bold uppercase tracking-widest">
-                      <Check className="w-2.5 h-2.5" /> Ready
-                    </div>
                   </div>
                 ) : (
                   <>
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
-                      <FileUp className="w-5 h-5 text-zinc-500 group-hover:text-amber-500 transition-colors" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs font-bold text-zinc-400 group-hover:text-white transition-colors">Drag & Drop Document</p>
-                      <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-0.5">or click to browse filesystem</p>
-                    </div>
+                    <FileUp className="w-4 h-4 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                    <p className="text-[9px] font-bold text-zinc-400">Drag or Click to Upload</p>
                   </>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="uploaderName" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Uploader Name</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="uploaderName" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Name</Label>
                 <Input 
                   id="uploaderName" 
                   value={formData.uploaderName} 
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
+                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" 
                   required 
                   readOnly
                 />
               </div>
               
-              <div className="space-y-1.5">
-                <Label htmlFor="qid" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">QID</Label>
+              <div className="space-y-1">
+                <Label htmlFor="qid" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">QID</Label>
                 <Input 
                   id="qid" 
-                  placeholder="e.g. QID12345" 
                   value={formData.qid}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
+                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" 
                   required 
                   readOnly
                 />
               </div>
 
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="fileName" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
+              <div className="space-y-1 col-span-2">
+                <Label htmlFor="fileName" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
                 <Input 
                   id="fileName" 
                   placeholder="e.g. End_Term_Networking.pdf" 
                   value={formData.fileName}
                   onChange={handleInputChange}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
+                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
                   required 
                 />
               </div>
 
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="resourceType" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Resource Type</Label>
+              <div className="space-y-1 col-span-2">
+                <Label htmlFor="resourceType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Type</Label>
                 <Select onValueChange={handleSelectChange} value={formData.resourceType}>
-                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50">
-                    <SelectValue placeholder="Select what you are uploading..." />
+                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
+                    <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
-                    <SelectItem value="pyq">Previous Year Question (PYQ)</SelectItem>
-                    <SelectItem value="notes">Class Notes</SelectItem>
-                    <SelectItem value="imp">Important Topics (IMP)</SelectItem>
-                    <SelectItem value="mft">Mid/Final Term (MFT)</SelectItem>
+                    <SelectItem value="pyq">PYQ</SelectItem>
+                    <SelectItem value="notes">Notes</SelectItem>
+                    <SelectItem value="imp">IMP Topics</SelectItem>
+                    <SelectItem value="mft">MFT</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {isTypeSelected && (
-              <div className="pt-4 mt-4 border-t border-dashed border-white/[0.08] space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="grid grid-cols-1 gap-4">
-                  
-                  <div className="space-y-1.5">
-                    <Label className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course Name</Label>
-                    <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
-                      <DialogTrigger asChild>
-                        <button 
-                          type="button"
-                          className="w-full bg-black/40 border border-white/[0.08] rounded-xl h-11 px-4 flex items-center justify-between text-sm transition-all focus:ring-1 focus:ring-amber-500/50 hover:bg-white/[0.05]"
-                        >
-                          <span className={formData.course ? "text-white font-medium" : "text-zinc-500"}>
-                            {formData.course || "Select your course..."}
-                          </span>
-                          <ChevronRight className="w-4 h-4 text-zinc-500" />
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[500px] p-0 overflow-hidden shadow-2xl">
-                        <DialogHeader className="p-6 border-b border-white/[0.05] bg-white/[0.02]">
-                          <DialogTitle className="text-xl font-bold flex items-center gap-3">
-                            {currentStep === 'course' && (
-                              <button 
-                                onClick={() => setCurrentStep('dept')}
-                                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
-                              >
-                                <ChevronLeft className="w-5 h-5 text-amber-500" />
-                              </button>
-                            )}
-                            <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-xs uppercase tracking-[0.2em] text-amber-500/80 font-black">Drill-Down Vault</span>
-                              <span>{currentStep === 'dept' ? "Select Department" : tempDept}</span>
-                            </div>
-                          </DialogTitle>
-                        </DialogHeader>
-                        
-                        <div className="p-2 max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
-                          {currentStep === 'dept' ? (
-                            <div className="grid grid-cols-1 gap-1">
-                              {DEPARTMENTS.map(dept => (
-                                <button
-                                  key={dept.name}
-                                  type="button"
-                                  onClick={() => handleSelectDept(dept.name)}
-                                  className="w-full p-4 text-left rounded-xl hover:bg-white/[0.05] transition-all flex items-center justify-between group"
-                                >
-                                  <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/5 transition-all">
-                                      <GraduationCap className="w-5 h-5 text-zinc-500 group-hover:text-amber-500" />
-                                    </div>
-                                    <span className="font-semibold text-zinc-300 group-hover:text-white">{dept.name}</span>
-                                  </div>
-                                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
-                                </button>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 gap-1 p-2">
-                              {DEPARTMENTS.find(d => d.name === tempDept)?.courses.map(course => (
-                                <button
-                                  key={course}
-                                  type="button"
-                                  onClick={() => handleSelectCourse(course)}
-                                  className="w-full p-4 text-left rounded-xl hover:bg-white/[0.05] transition-all group relative overflow-hidden"
-                                >
-                                  <div className="absolute left-0 top-0 h-full w-1 bg-amber-500 opacity-0 group-hover:opacity-100 transition-all" />
-                                  <p className="text-sm font-medium text-zinc-400 group-hover:text-white">{course}</p>
-                                </button>
-                              ))}
-                            </div>
+              <div className="pt-3 mt-3 border-t border-dashed border-white/[0.08] space-y-3 animate-in fade-in duration-300">
+                <div className="space-y-1">
+                  <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course</Label>
+                  <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
+                    <DialogTrigger asChild>
+                      <button 
+                        type="button"
+                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg h-9 px-3 flex items-center justify-between text-[11px] hover:bg-white/[0.05]"
+                      >
+                        <span className={formData.course ? "text-white truncate" : "text-zinc-500"}>
+                          {formData.course || "Select course..."}
+                        </span>
+                        <ChevronRight className="w-3 h-3 text-zinc-500" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[400px] p-0 shadow-2xl">
+                      <DialogHeader className="p-4 border-b border-white/[0.05]">
+                        <DialogTitle className="text-base font-bold flex items-center gap-2">
+                          {currentStep === 'course' && (
+                            <ChevronLeft className="w-4 h-4 text-amber-500 cursor-pointer" onClick={() => setCurrentStep('dept')} />
                           )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="subject" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Subject</Label>
-                    <Input 
-                      id="subject" 
-                      placeholder="e.g. Data Structures" 
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
-                      required 
-                    />
-                  </div>
-
-                  {isPYQ && (
-                    <div className="space-y-1.5 animate-in fade-in duration-300">
-                      <Label htmlFor="year" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Year of Examination</Label>
-                      <Input 
-                        id="year" 
-                        type="number" 
-                        placeholder="e.g. 2023" 
-                        value={formData.year}
-                        onChange={handleInputChange}
-                        className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
-                        required 
-                      />
-                    </div>
-                  )}
-
-                  {isNotesOrIMP && (
-                    <div className="space-y-1.5 animate-in fade-in duration-300">
-                      <Label htmlFor="faculty" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty / Professor Name</Label>
-                      <Input 
-                        id="faculty" 
-                        placeholder="e.g. Dr. A. Sharma" 
-                        value={formData.faculty}
-                        onChange={handleInputChange}
-                        className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
-                        required 
-                      />
-                    </div>
-                  )}
+                          <span>{currentStep === 'dept' ? "Departments" : tempDept}</span>
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="p-1 max-h-[350px] overflow-y-auto">
+                        {currentStep === 'dept' ? (
+                          DEPARTMENTS.map(dept => (
+                            <button
+                              key={dept.name}
+                              type="button"
+                              onClick={() => handleSelectDept(dept.name)}
+                              className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] transition-all flex items-center justify-between text-[12px]"
+                            >
+                              <span className="font-semibold text-zinc-300">{dept.name}</span>
+                              <ChevronRight className="w-3 h-3 text-zinc-600" />
+                            </button>
+                          ))
+                        ) : (
+                          DEPARTMENTS.find(d => d.name === tempDept)?.courses.map(course => (
+                            <button
+                              key={course}
+                              type="button"
+                              onClick={() => handleSelectCourse(course)}
+                              className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] text-[11px] text-zinc-400 hover:text-white"
+                            >
+                              {course}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="subject" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Subject</Label>
+                  <Input id="subject" value={formData.subject} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
+                </div>
+
+                {isPYQ && (
+                  <div className="space-y-1">
+                    <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Exam Year</Label>
+                    <Input id="year" type="number" value={formData.year} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
+                  </div>
+                )}
+
+                {isNotesOrIMP && (
+                  <div className="space-y-1">
+                    <Label htmlFor="faculty" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty</Label>
+                    <Input id="faculty" value={formData.faculty} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
+                  </div>
+                )}
               </div>
             )}
 
             <Button 
               type="submit" 
               disabled={isSubmitting || !formData.course || !selectedFile}
-              className="w-full h-12 mt-6 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-sm rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
             >
-              <Upload className="w-4 h-4 mr-2" strokeWidth={2.5} />
+              <Upload className="w-3.5 h-3.5 mr-2" strokeWidth={2.5} />
               {isSubmitting ? "Uploading..." : "Upload to Vault"}
             </Button>
           </form>
@@ -596,10 +540,10 @@ export default function UploadPage() {
 
         <button 
           onClick={() => router.back()}
-          className="mt-6 mx-auto flex items-center gap-2 text-[#a1a1aa] hover:text-white transition-colors text-[10px] font-semibold uppercase tracking-widest"
+          className="mt-5 mx-auto flex items-center gap-1.5 text-[#a1a1aa] hover:text-white transition-colors text-[9px] font-semibold uppercase tracking-widest"
         >
-          <ChevronLeft className="w-3.5 h-3.5" />
-          Return to Vault
+          <ChevronLeft className="w-3 h-3" />
+          Back to Vault
         </button>
       </div>
     </div>
