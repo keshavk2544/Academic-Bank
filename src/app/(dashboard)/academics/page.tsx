@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo, use } from "react"
+import { useState, useMemo } from "react"
 import { 
   FileText, 
   Download, 
@@ -17,17 +16,7 @@ import { useRouter } from "next/navigation"
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
-export default function AcademicsPage({
-  params,
-  searchParams
-}: {
-  params: Promise<any>;
-  searchParams: Promise<any>;
-}) {
-  // Explicitly unwrap promises in Client Component using React.use()
-  use(params);
-  use(searchParams);
-  
+export default function AcademicsPage() {
   const router = useRouter()
 
   const [files] = useState([
@@ -54,15 +43,6 @@ export default function AcademicsPage({
       case 'MFT': return <Calendar className="w-5 h-5 text-emerald-400" />;
       case 'IMP TOPIC': return <Code className="w-5 h-5 text-blue-400" />;
       default: return <FileText className="w-5 h-5 text-amber-400" />;
-    }
-  };
-
-  const getIconClass = (docType: string) => {
-    switch (docType) {
-      case 'NOTES': return "text-amber-400";
-      case 'MFT': return "text-emerald-400";
-      case 'IMP TOPIC': return "text-blue-400";
-      default: return "text-amber-400";
     }
   };
 
@@ -170,7 +150,7 @@ export default function AcademicsPage({
                 </div>
 
                 <div className="flex items-center gap-3 pl-4">
-                  <button className="w-11 h-11 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-amber-400 hover:to-amber-600 hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95 group/btn animate-pulseGlow">
+                  <button className="w-11 h-11 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-amber-400 hover:to-amber-600 hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95 group/btn">
                     <Download className="w-5 h-5" />
                   </button>
                   <button className="w-11 h-11 rounded-full bg-white/[0.03] text-muted-foreground border border-transparent flex items-center justify-center transition-all hover:bg-white/[0.1] hover:text-white hover:scale-110 hidden sm:flex">
@@ -182,14 +162,6 @@ export default function AcademicsPage({
           </div>
         </section>
       </div>
-      
-      <style jsx global>{`
-        @keyframes pulseGlow {
-          0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
-          70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
-        }
-      `}</style>
     </div>
   )
 }

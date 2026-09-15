@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -8,16 +7,11 @@ export const metadata: Metadata = {
   description: 'AI-powered campus communication and academic management.',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<any>;
 }) {
-  // Unwrap async params for Next.js 15 Server Component
-  await params;
-
   return (
     <html lang="en" className="dark">
       <head>
