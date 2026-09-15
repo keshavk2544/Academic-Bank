@@ -186,7 +186,7 @@ export default function ProfilePage() {
 
           <div className="space-y-3">
             {loadingResources ? (
-              <div className="h-20 bg-white/5 rounded-[2rem] animate-pulse border border-white/5" />
+              <div className="h-16 bg-white/5 rounded-[2rem] animate-pulse border border-white/5" />
             ) : myResources && myResources.length > 0 ? (
               myResources.map((res: any) => {
                 const uploadTime = new Date(res.createdAt).getTime();
@@ -195,13 +195,13 @@ export default function ProfilePage() {
                 const canDelete = hoursPassed < 24;
 
                 return (
-                  <div key={res.id} className="bg-card p-4 rounded-[2rem] border border-white/5 flex items-center justify-between group transition-all hover:bg-white/[0.08]">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                        <FileText className="w-5 h-5" />
+                  <div key={res.id} className="bg-card p-3 rounded-[2rem] border border-white/5 flex items-center justify-between group transition-all hover:bg-white/[0.08]">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                        <FileText className="w-4.5 h-4.5" />
                       </div>
                       <div className="min-w-0 pr-2">
-                        <h4 className="text-sm font-bold text-zinc-100 truncate">{res.subject}</h4>
+                        <h4 className="text-[0.9rem] font-bold text-zinc-100 truncate">{res.subject}</h4>
                         <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
                           {res.resourceType.toUpperCase()} • {res.year}
                         </p>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => handleDeleteResource(res.id)}
-                        className="w-10 h-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
+                        className="w-9 h-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
