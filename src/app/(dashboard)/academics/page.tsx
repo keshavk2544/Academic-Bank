@@ -313,15 +313,37 @@ export default function AcademicsPage() {
       description: `Accessing ${file.fileName} from Secure Vault...`
     });
 
-    // If actual file data exists, download it
+    // If actual file data exists, download it using Blob for maximum device compatibility
     if (file.fileDataURI) {
-      const a = document.createElement('a');
-      a.href = file.fileDataURI;
-      a.download = file.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      return;
+      try {
+        const parts = file.fileDataURI.split(';base64,');
+        const contentType = parts[0].split(':')[1];
+        const raw = window.atob(parts[1]);
+        const rawLength = raw.length;
+        const uInt8Array = new Uint8Array(new ArrayBuffer(rawLength));
+
+        for (let i = 0; i < rawLength; ++i) {
+          uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        const blob = new Blob([uInt8Array], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      } catch (error) {
+        console.error('[DOWNLOAD-ERROR]', error);
+        toast({
+          variant: "destructive",
+          title: "Download Interrupted",
+          description: "Could not process the secure file stream."
+        });
+      }
     }
 
     // Fallback for metadata-only resources (legacy or oversized)
@@ -335,7 +357,7 @@ export default function AcademicsPage() {
       `Uploader: ${file.uploaderName}\n` +
       `Retrieved At: ${new Date().toLocaleString()}\n` +
       `------------------------------------------\n\n` +
-      `Note: Actual document content was not stored for this record (likely legacy or exceeded size limit).`;
+      `Note: This is a vault metadata record. The original binary content was either too large for prototype storage or uploaded as a legacy entry.`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);

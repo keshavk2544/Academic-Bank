@@ -152,7 +152,8 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
-const MAX_FILE_SIZE_BYTES = 750 * 1024; // 750KB limit for Base64 storage in Firestore prototype
+// 500KB safe limit for Base64 strings in Firestore prototype documents
+const MAX_FILE_SIZE_BYTES = 500 * 1024; 
 
 export default function UploadPage() {
   const router = useRouter()
@@ -251,8 +252,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "File too large",
-          description: "Documents must be under 750KB for prototype storage."
+          title: "Vault Limit Exceeded",
+          description: "Prototypes are limited to 500KB to ensure shared access."
         });
         return;
       }
@@ -281,8 +282,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "File too large",
-          description: "Documents must be under 750KB for prototype storage."
+          title: "Vault Limit Exceeded",
+          description: "Prototypes are limited to 500KB to ensure shared access."
         });
         return;
       }
@@ -337,7 +338,15 @@ export default function UploadPage() {
       const resourcesRef = collection(db, 'resources')
       
       addDoc(resourcesRef, resourcePayload)
+        .then(() => {
+          toast({
+            title: "Vault Synchronized",
+            description: "Your academic contribution is now available to all students.",
+          })
+          router.push("/academics")
+        })
         .catch(async (error) => {
+          setIsSubmitting(false)
           const permissionError = new FirestorePermissionError({
             path: 'resources',
             operation: 'create',
@@ -346,22 +355,13 @@ export default function UploadPage() {
           errorEmitter.emit('permission-error', permissionError)
         })
 
-      toast({
-        title: "Vault Synchronized",
-        description: "Your academic contribution is now available in the REPO.",
-      })
-      
-      setTimeout(() => {
-        setIsSubmitting(false)
-        router.push("/academics")
-      }, 800)
     } catch (error) {
       console.error('[UPLOAD-ERROR]', error);
       setIsSubmitting(false);
       toast({
         variant: "destructive",
         title: "Process Failed",
-        description: "Could not read the document content."
+        description: "Could not read or store the document content."
       });
     }
   }
@@ -393,7 +393,7 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> Max 750KB
+                  <AlertTriangle className="w-2 h-2" /> Max 500KB
                 </div>
               </div>
               <div 
@@ -426,7 +426,7 @@ export default function UploadPage() {
                     <div className="text-center px-4">
                       <p className="text-[10px] font-bold text-white truncate max-w-[150px]">{selectedFile.name}</p>
                       <p className="text-[8px] font-bold text-amber-500/70 uppercase tracking-widest">
-                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                        {(selectedFile.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
                     <button 
