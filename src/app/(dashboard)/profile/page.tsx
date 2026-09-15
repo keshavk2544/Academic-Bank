@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -11,21 +11,46 @@ import {
   IdCard,
   GraduationCap,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  FileText,
+  Trash2
 } from "lucide-react"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
 import { StudentProfile } from "@/types/student"
+import { useFirestore, useCollection } from "@/firebase"
+import { collection, query, where, deleteDoc, doc } from "firebase/firestore"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function ProfilePage() {
   const router = useRouter()
   const { toast } = useToast()
+  const db = useFirestore()
   const [student, setStudent] = useState<StudentProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
   const [mountTime] = useState(Date.now());
+
+  const userResourcesQuery = useMemo(() => {
+    const qid = student?.studentId || student?.enrollmentNo;
+    if (!qid) return null;
+    return query(
+      collection(db, 'resources'),
+      where('qid', '==', qid)
+    );
+  }, [db, student]);
+
+  const { data: rawMyResources, loading: loadingResources } = useCollection(userResourcesQuery);
+  
+  const myResources = useMemo(() => {
+    if (!rawMyResources) return [];
+    return [...rawMyResources].sort((a: any, b: any) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [rawMyResources]);
 
   useEffect(() => {
     fetchProfile()
@@ -90,6 +115,24 @@ export default function ProfilePage() {
     }
   }
 
+  const handleDeleteResource = (resourceId: string) => {
+    if (!confirm("Are you sure you want to remove this document from the vault?")) return;
+    
+    const resourceRef = doc(db, 'resources', resourceId);
+    deleteDoc(resourceRef).catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: `resources/${resourceId}`,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    });
+    
+    toast({
+      title: "Document Removed",
+      description: "The resource has been purged from the vault."
+    });
+  }
+
   const handleSignOut = async () => {
     await fetch('/api/auth/erp-logout', { method: 'POST', credentials: 'include' })
     localStorage.removeItem("userRole")
@@ -132,6 +175,60 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* My Contributions Section */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xl font-bold font-headline tracking-tight">My Contributions</h2>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+              {myResources?.length || 0} Docs
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {loadingResources ? (
+              <div className="h-20 bg-white/5 rounded-[2rem] animate-pulse border border-white/5" />
+            ) : myResources && myResources.length > 0 ? (
+              myResources.map((res: any) => {
+                const uploadTime = new Date(res.createdAt).getTime();
+                const now = new Date().getTime();
+                const hoursPassed = (now - uploadTime) / (1000 * 60 * 60);
+                const canDelete = hoursPassed < 24;
+
+                return (
+                  <div key={res.id} className="bg-card p-4 rounded-[2rem] border border-white/5 flex items-center justify-between group transition-all hover:bg-white/[0.08]">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 pr-2">
+                        <h4 className="text-sm font-bold text-zinc-100 truncate">{res.subject}</h4>
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                          {res.resourceType.toUpperCase()} • {res.year}
+                        </p>
+                      </div>
+                    </div>
+
+                    {canDelete && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleDeleteResource(res.id)}
+                        className="w-10 h-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-10 rounded-[2.5rem] border border-dashed border-white/10 bg-white/[0.02]">
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">No contributions yet in the vault</p>
+              </div>
+            )}
+          </div>
+        </section>
+
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-xl font-bold font-headline tracking-tight">Academic Pulse</h2>
@@ -140,7 +237,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 gap-4">
             <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
               <div className="pl-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                   <IdCard className="w-6 h-6" />
                 </div>
                 <div>
@@ -152,7 +249,7 @@ export default function ProfilePage() {
 
             <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
               <div className="pl-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <div>
@@ -164,7 +261,7 @@ export default function ProfilePage() {
 
             <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
               <div className="pl-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
