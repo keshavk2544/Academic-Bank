@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { 
   FileText, 
   Download, 
@@ -16,11 +16,11 @@ import {
   Database,
   FileCheck,
   File,
-  X
+  ChevronLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
-import { collection, query, orderBy, setDoc, deleteDoc, doc, Timestamp, serverTimestamp } from "firebase/firestore"
+import { collection, query, orderBy, setDoc, deleteDoc, doc } from "firebase/firestore"
 import {
   Dialog,
   DialogContent,
@@ -46,11 +46,6 @@ export default function AcademicsPage() {
   const [viewResource, setViewResource] = useState<any>(null);
   const [student, setStudent] = useState<any>(null);
   
-  // Reaction states
-  const [activePickerId, setActivePickerId] = useState<string | null>(null);
-  const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-
   // Fetch session to get user identity
   useEffect(() => {
     fetch('/api/auth/erp-session', { credentials: 'include' })
@@ -127,32 +122,6 @@ export default function AcademicsPage() {
         updatedAt: new Date().toISOString()
       }, { merge: true });
     }
-    
-    setActivePickerId(null);
-  };
-
-  const openPicker = (fileId: string, target: HTMLElement) => {
-    const rect = target.getBoundingClientRect();
-    setPickerPos({
-      x: Math.min(window.innerWidth - 200, Math.max(20, rect.left + rect.width / 2 - 100)),
-      y: rect.top - 60
-    });
-    setActivePickerId(fileId);
-  };
-
-  // Interaction handlers
-  const handleTouchStart = (fileId: string, e: any) => {
-    const target = e.currentTarget;
-    longPressTimer.current = setTimeout(() => {
-      openPicker(fileId, target);
-    }, 600);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
   };
 
   const getDocReactions = (fileId: string) => {
@@ -166,7 +135,7 @@ export default function AcademicsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-x-hidden selection:bg-amber-500 selection:text-black font-sans antialiased" onClick={() => setActivePickerId(null)}>
+    <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-x-hidden selection:bg-amber-500 selection:text-black font-sans antialiased">
       {/* Premium Top Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_50%_0%,#1a1a24_0%,transparent_60%)] pointer-events-none -z-10" />
 
@@ -232,10 +201,6 @@ export default function AcademicsPage() {
                   return (
                     <div 
                       key={file.id} 
-                      onContextMenu={(e) => { e.preventDefault(); openPicker(file.id, e.currentTarget); }}
-                      onPointerDown={(e) => handleTouchStart(file.id, e)}
-                      onPointerUp={handleTouchEnd}
-                      onPointerLeave={handleTouchEnd}
                       onClick={() => setViewResource(file)}
                       className="group flex items-center justify-between p-3.5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer relative"
                     >
@@ -277,24 +242,29 @@ export default function AcademicsPage() {
                       </div>
 
                       <div className="flex items-center gap-2 pl-3">
-                        {/* Reaction Display Corner */}
-                        <div className="flex items-center gap-1.5 mr-1 hidden sm:flex">
-                          {REACTION_TYPES.map(r => (
-                            summary[r.id] ? (
-                              <div 
+                        {/* Inline Reaction Bar */}
+                        <div className="hidden sm:flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-full p-1 mr-1">
+                          {REACTION_TYPES.map(r => {
+                            const count = summary[r.id] || 0;
+                            const isActive = userReaction === r.id;
+                            return (
+                              <button
                                 key={r.id}
+                                onClick={(e) => { e.stopPropagation(); handleReaction(file.id, r.id); }}
+                                aria-label={r.label}
+                                title={r.label}
                                 className={cn(
-                                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold transition-all",
-                                  userReaction === r.id 
-                                    ? "bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.2)]" 
-                                    : "bg-white/[0.03] border-white/10 text-zinc-500"
+                                  "flex items-center gap-1 px-1.5 py-1 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
+                                  isActive 
+                                    ? "bg-amber-500/10 border border-amber-500/30 opacity-100 blur-0 shadow-[0_0_8px_rgba(245,158,11,0.2)]" 
+                                    : "opacity-35 blur-[0.4px] hover:opacity-100 hover:blur-0"
                                 )}
                               >
-                                <span>{r.emoji}</span>
-                                <span>{summary[r.id]}</span>
-                              </div>
-                            ) : null
-                          ))}
+                                <span className="text-sm">{r.emoji}</span>
+                                {count > 0 && <span className={cn("text-[9px] font-black", isActive ? "text-amber-500" : "text-zinc-500")}>{count}</span>}
+                              </button>
+                            );
+                          })}
                         </div>
 
                         <button 
@@ -304,35 +274,12 @@ export default function AcademicsPage() {
                           <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); openPicker(file.id, e.currentTarget); }}
+                          onClick={(e) => { e.stopPropagation(); setViewResource(file); }}
                           className="w-9 h-9 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex"
                         >
                           <MoreVertical className="w-[16px] h-[16px]" strokeWidth={2.5} />
                         </button>
                       </div>
-
-                      {/* Floating Picker */}
-                      {activePickerId === file.id && (
-                        <div 
-                          className="fixed z-[1000] bg-zinc-900/90 border border-amber-500/30 backdrop-blur-xl rounded-full p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.6)] flex gap-2 animate-in zoom-in-90 fade-in duration-200"
-                          style={{ top: pickerPos.y, left: pickerPos.x }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {REACTION_TYPES.map((r) => (
-                            <button
-                              key={r.id}
-                              onClick={() => handleReaction(file.id, r.id)}
-                              aria-label={r.label}
-                              className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all hover:scale-125 active:scale-90",
-                                userReaction === r.id ? "bg-amber-500/20 shadow-inner" : "hover:bg-white/5"
-                              )}
-                            >
-                              {r.emoji}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   )
                 })
