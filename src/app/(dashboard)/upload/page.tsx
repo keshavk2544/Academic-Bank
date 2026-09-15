@@ -335,32 +335,32 @@ export default function UploadPage() {
   if (isLoading) return <LoadingOverlay status="Verifying Identity" />;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 pb-24 relative overflow-hidden selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 pb-24 relative overflow-hidden selection:bg-amber-500 selection:text-black font-body">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle at 50% 0%,#1a1a24 0%,#050505 60%)] pointer-events-none -z-10" />
 
       <div className="w-full max-w-[600px] animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.5rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           
-          <div className="text-center mb-8">
-            <h1 className="text-[2rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-1">
+          <div className="text-center mb-6">
+            <h1 className="text-[1.75rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-1 font-headline">
               Upload Resource
             </h1>
-            <p className="text-[0.9rem] font-medium text-[#a1a1aa]">Add materials to the Quantum University Vault</p>
+            <p className="text-[0.85rem] font-medium text-[#a1a1aa]">Add materials to the Quantum University Vault</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* File Selection Zone */}
+            {/* Reduced height File Selection Zone */}
             <div className="space-y-2">
-              <Label className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Selection</Label>
+              <Label className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Selection</Label>
               <div 
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
                 onClick={() => !selectedFile && fileInputRef.current?.click()}
                 className={cn(
-                  "relative group cursor-pointer h-40 rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-3 overflow-hidden",
+                  "relative group cursor-pointer h-28 rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden",
                   selectedFile 
                     ? "border-amber-500/50 bg-amber-500/5" 
                     : isDragging 
@@ -376,81 +376,81 @@ export default function UploadPage() {
                 />
                 
                 {selectedFile ? (
-                  <div className="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
-                      <FileText className="w-6 h-6" />
+                  <div className="flex flex-col items-center gap-1.5 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                      <FileText className="w-5 h-5" />
                     </div>
                     <div className="text-center px-4">
-                      <p className="text-sm font-bold text-white truncate max-w-[200px]">{selectedFile.name}</p>
-                      <p className="text-[10px] font-bold text-amber-500/70 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-white truncate max-w-[200px]">{selectedFile.name}</p>
+                      <p className="text-[9px] font-bold text-amber-500/70 uppercase tracking-widest">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
                     </div>
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(); }}
-                      className="absolute top-2 right-2 p-2 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3 h-3" />
                     </button>
-                    <div className="mt-1 flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[9px] font-bold uppercase tracking-widest">
-                      <Check className="w-3 h-3" /> Ready
+                    <div className="mt-0.5 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[8px] font-bold uppercase tracking-widest">
+                      <Check className="w-2.5 h-2.5" /> Ready
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
-                      <FileUp className="w-7 h-7 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
+                      <FileUp className="w-5 h-5 text-zinc-500 group-hover:text-amber-500 transition-colors" />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-bold text-zinc-400 group-hover:text-white transition-colors">Drag & Drop Document</p>
-                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-1">or click to browse filesystem</p>
+                      <p className="text-xs font-bold text-zinc-400 group-hover:text-white transition-colors">Drag & Drop Document</p>
+                      <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-0.5">or click to browse filesystem</p>
                     </div>
                   </>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="uploaderName" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Uploader Name</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="uploaderName" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Uploader Name</Label>
                 <Input 
                   id="uploaderName" 
                   value={formData.uploaderName} 
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
+                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
                   readOnly
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="qid" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">QID</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="qid" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">QID</Label>
                 <Input 
                   id="qid" 
                   placeholder="e.g. QID12345" 
                   value={formData.qid}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
+                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
                   readOnly
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="fileName" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="fileName" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
                 <Input 
                   id="fileName" 
                   placeholder="e.g. End_Term_Networking.pdf" 
                   value={formData.fileName}
                   onChange={handleInputChange}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                  className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
                   required 
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="resourceType" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Resource Type</Label>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="resourceType" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Resource Type</Label>
                 <Select onValueChange={handleSelectChange} value={formData.resourceType}>
-                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50">
+                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50">
                     <SelectValue placeholder="Select what you are uploading..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
@@ -464,16 +464,16 @@ export default function UploadPage() {
             </div>
 
             {isTypeSelected && (
-              <div className="pt-6 mt-6 border-t border-dashed border-white/[0.08] space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="grid grid-cols-1 gap-5">
+              <div className="pt-4 mt-4 border-t border-dashed border-white/[0.08] space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="grid grid-cols-1 gap-4">
                   
-                  <div className="space-y-2">
-                    <Label className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course Name</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course Name</Label>
                     <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
                       <DialogTrigger asChild>
                         <button 
                           type="button"
-                          className="w-full bg-black/40 border border-white/[0.08] rounded-xl h-12 px-4 flex items-center justify-between text-sm transition-all focus:ring-1 focus:ring-amber-500/50 hover:bg-white/[0.05]"
+                          className="w-full bg-black/40 border border-white/[0.08] rounded-xl h-11 px-4 flex items-center justify-between text-sm transition-all focus:ring-1 focus:ring-amber-500/50 hover:bg-white/[0.05]"
                         >
                           <span className={formData.course ? "text-white font-medium" : "text-zinc-500"}>
                             {formData.course || "Select your course..."}
@@ -539,42 +539,42 @@ export default function UploadPage() {
                     </Dialog>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Subject</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="subject" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Subject</Label>
                     <Input 
                       id="subject" 
                       placeholder="e.g. Data Structures" 
                       value={formData.subject}
                       onChange={handleInputChange}
-                      className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                      className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
                       required 
                     />
                   </div>
 
                   {isPYQ && (
-                    <div className="space-y-2 animate-in fade-in duration-300">
-                      <Label htmlFor="year" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Year of Examination</Label>
+                    <div className="space-y-1.5 animate-in fade-in duration-300">
+                      <Label htmlFor="year" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Year of Examination</Label>
                       <Input 
                         id="year" 
                         type="number" 
                         placeholder="e.g. 2023" 
                         value={formData.year}
                         onChange={handleInputChange}
-                        className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                        className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
                         required 
                       />
                     </div>
                   )}
 
                   {isNotesOrIMP && (
-                    <div className="space-y-2 animate-in fade-in duration-300">
-                      <Label htmlFor="faculty" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty / Professor Name</Label>
+                    <div className="space-y-1.5 animate-in fade-in duration-300">
+                      <Label htmlFor="faculty" className="text-[0.7rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty / Professor Name</Label>
                       <Input 
                         id="faculty" 
                         placeholder="e.g. Dr. A. Sharma" 
                         value={formData.faculty}
                         onChange={handleInputChange}
-                        className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                        className="bg-black/40 border-white/[0.08] rounded-xl h-11 text-sm focus:ring-1 focus:ring-amber-500/50" 
                         required 
                       />
                     </div>
@@ -586,9 +586,9 @@ export default function UploadPage() {
             <Button 
               type="submit" 
               disabled={isSubmitting || !formData.course || !selectedFile}
-              className="w-full h-14 mt-8 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-base rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full h-12 mt-6 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-sm rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Upload className="w-5 h-5 mr-2" strokeWidth={2.5} />
+              <Upload className="w-4 h-4 mr-2" strokeWidth={2.5} />
               {isSubmitting ? "Uploading..." : "Upload to Vault"}
             </Button>
           </form>
@@ -596,9 +596,9 @@ export default function UploadPage() {
 
         <button 
           onClick={() => router.back()}
-          className="mt-8 mx-auto flex items-center gap-2 text-[#a1a1aa] hover:text-white transition-colors text-sm font-semibold uppercase tracking-widest"
+          className="mt-6 mx-auto flex items-center gap-2 text-[#a1a1aa] hover:text-white transition-colors text-[10px] font-semibold uppercase tracking-widest"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5" />
           Return to Vault
         </button>
       </div>
