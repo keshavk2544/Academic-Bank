@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import { FirebaseClientProvider } from "@/firebase/client-provider"
 
 export const metadata: Metadata = {
   title: 'PreRP | Futuristic Campus Ecosystem',
@@ -25,7 +26,9 @@ export default function RootLayout({
         <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="fixed top-[40%] right-[10%] w-[20%] h-[20%] bg-purple-500/10 rounded-full blur-[80px] -z-10" />
         
-        {children}
+        <FirebaseClientProvider>
+          {children}
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>
