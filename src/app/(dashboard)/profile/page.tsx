@@ -22,6 +22,16 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, query, where, deleteDoc, doc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -33,6 +43,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
   const [mountTime] = useState(Date.now());
+  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfile()
@@ -116,15 +127,15 @@ export default function ProfilePage() {
     }
   }
 
-  const handleDeleteResource = (resourceId: string) => {
-    if (!resourceId || !db) return;
+  const confirmDelete = () => {
+    if (!resourceToDelete || !db) return;
     
-    const resourceRef = doc(db, 'resources', resourceId);
+    const resourceRef = doc(db, 'resources', resourceToDelete);
     
     deleteDoc(resourceRef)
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
-          path: `resources/${resourceId}`,
+          path: `resources/${resourceToDelete}`,
           operation: 'delete',
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
@@ -140,6 +151,7 @@ export default function ProfilePage() {
       title: "Document Removed",
       description: "The resource has been purged from the vault."
     });
+    setResourceToDelete(null);
   }
 
   const handleSignOut = async () => {
@@ -223,7 +235,7 @@ export default function ProfilePage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleDeleteResource(res.id);
+                          setResourceToDelete(res.id);
                         }}
                         className="w-9 h-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
                       >
@@ -309,6 +321,26 @@ export default function ProfilePage() {
           </div>
         </section>
       </div>
+
+      <AlertDialog open={!!resourceToDelete} onOpenChange={(open) => !open && setResourceToDelete(null)}>
+        <AlertDialogContent className="bg-[#0b0b0b] border border-white/10 text-white rounded-[2rem]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-headline font-bold">Purge Resource?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              This will permanently remove the document from the Academic Vault. This action cannot be undone once synchronized.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
+            >
+              Purge Document
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
