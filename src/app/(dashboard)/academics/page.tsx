@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -56,9 +57,6 @@ export default function AcademicsPage() {
               Academic Vault
             </h1>
             <p className="text-[0.95rem] font-medium text-[#a1a1aa]">Quantum University Resource Archive</p>
-          </div>
-          <div className="w-12 h-12 sm:w-20 sm:h-12 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.08] backdrop-blur-md flex items-center justify-center text-sm font-bold shadow-2xl hover:border-amber-500/40 transition-all hover:scale-105 hover:rotate-3 cursor-default">
-            KK
           </div>
         </header>
 
