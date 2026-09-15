@@ -1,24 +1,18 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
 import { 
   FileText, 
   Download, 
-  ChevronLeft,
   Calendar,
   Code,
   MoreVertical,
-  Search
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
 export default function AcademicsPage() {
-  const router = useRouter()
-
   const [files] = useState([
     { title: "Machine Learning Fundamentals", size: "4.2 MB", date: "2 hrs ago", type: "Machine Learning", docType: "NOTES" },
     { title: "Computer Networks End-Term", size: "12.8 MB", date: "Yesterday", type: "Computer Networks", docType: "MFT" },
@@ -91,13 +85,6 @@ export default function AcademicsPage() {
 
         {/* File Section */}
         <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[1.25rem] font-bold tracking-tight">Recent Uploads</h2>
-            <span className="text-[0.75rem] font-bold text-[#fbbf24] bg-[#fbbf24]/10 border border-[#fbbf24]/20 px-3 py-1 rounded-full">
-              {filteredFiles.length} Files
-            </span>
-          </div>
-
           <div className="flex flex-col gap-4">
             {filteredFiles.map((file, idx) => (
               <div 
