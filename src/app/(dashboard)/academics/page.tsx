@@ -202,48 +202,30 @@ export default function AcademicsPage() {
                     <div 
                       key={file.id} 
                       onClick={() => setViewResource(file)}
-                      className="group flex items-center justify-between p-3.5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer relative"
+                      className="group flex flex-col gap-3 p-3.5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer relative"
                     >
-                      <div className="flex items-center gap-4 min-w-0">
-                        {/* 3D Icon Box */}
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
-                          <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
-                          <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                            {getIcon(file.resourceType)}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                          {/* 3D Icon Box */}
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 transition-all duration-500">
+                            <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
+                            <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                              {getIcon(file.resourceType)}
+                            </div>
                           </div>
-                        </div>
-                        
-                        <div className="min-w-0">
-                          <h3 className="text-[0.95rem] font-bold text-zinc-100 mb-0 group-hover:text-[#fbbf24] transition-colors truncate">
-                            {file.subject}
-                          </h3>
-                          <div className="flex flex-col gap-0">
+                          
+                          <div className="min-w-0">
+                            <h3 className="text-[0.95rem] font-bold text-zinc-100 mb-0 group-hover:text-[#fbbf24] transition-colors truncate">
+                              {file.subject}
+                            </h3>
                             <p className="text-[0.7rem] font-medium text-zinc-400 line-clamp-1">
                               {file.course}
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[0.6rem] font-black text-black bg-[#fbbf24] px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                                {(() => {
-                                  let type = (file.resourceType === 'imp' ? 'IMP' : file.resourceType).toUpperCase();
-                                  if (file.resourceType === 'pyq' && file.examType) {
-                                    type = `${type} ${file.examType === 'MID SEM' ? 'MID' : 'END'}`;
-                                  }
-                                  return type;
-                                })()}
-                              </span>
-                              <span className="text-[0.65rem] font-bold text-[#52525b] uppercase tracking-widest">{file.year}</span>
-                              <div className="w-1 h-1 rounded-full bg-[#3f3f46]" />
-                              <span className="text-[0.65rem] font-bold text-[#52525b] uppercase tracking-widest">{file.size || '0.0 MB'}</span>
-                              <div className="w-1 h-1 rounded-full bg-[#3f3f46] hidden sm:block" />
-                              <span className="text-[0.65rem] font-bold text-[#52525b] hidden sm:block uppercase tracking-widest">{formatDate(file.createdAt)}</span>
-                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 pl-3">
-                        {/* Inline Reaction Bar */}
-                        <div className="hidden sm:flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-full p-1 mr-1">
+                        {/* Permanently Visible Reaction Bar */}
+                        <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-full p-1 shrink-0">
                           {REACTION_TYPES.map(r => {
                             const count = summary[r.id] || 0;
                             const isActive = userReaction === r.id;
@@ -254,31 +236,52 @@ export default function AcademicsPage() {
                                 aria-label={r.label}
                                 title={r.label}
                                 className={cn(
-                                  "flex items-center gap-1 px-1.5 py-1 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
+                                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
                                   isActive 
-                                    ? "bg-amber-500/10 border border-amber-500/30 opacity-100 blur-0 shadow-[0_0_8px_rgba(245,158,11,0.2)]" 
-                                    : "opacity-35 blur-[0.4px] hover:opacity-100 hover:blur-0"
+                                    ? "bg-amber-500/15 border border-amber-500/30 opacity-100 blur-0 shadow-[0_0_8px_rgba(245,158,11,0.2)]" 
+                                    : "opacity-35 blur-[0.5px] hover:opacity-100 hover:blur-0"
                                 )}
                               >
-                                <span className="text-sm">{r.emoji}</span>
+                                <span className="text-base">{r.emoji}</span>
                                 {count > 0 && <span className={cn("text-[9px] font-black", isActive ? "text-amber-500" : "text-zinc-500")}>{count}</span>}
                               </button>
                             );
                           })}
                         </div>
+                      </div>
 
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); /* Logic for actual download */ }}
-                          className="w-9 h-9 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95"
-                        >
-                          <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setViewResource(file); }}
-                          className="w-9 h-9 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex"
-                        >
-                          <MoreVertical className="w-[16px] h-[16px]" strokeWidth={2.5} />
-                        </button>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[0.6rem] font-black text-black bg-[#fbbf24] px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                            {(() => {
+                              let type = (file.resourceType === 'imp' ? 'IMP' : file.resourceType).toUpperCase();
+                              if (file.resourceType === 'pyq' && file.examType) {
+                                type = `${type} ${file.examType === 'MID SEM' ? 'MID' : 'END'}`;
+                              }
+                              return type;
+                            })()}
+                          </span>
+                          <span className="text-[0.65rem] font-bold text-[#52525b] uppercase tracking-widest">{file.year}</span>
+                          <div className="w-1 h-1 rounded-full bg-[#3f3f46]" />
+                          <span className="text-[0.65rem] font-bold text-[#52525b] uppercase tracking-widest">{file.size || '0.0 MB'}</span>
+                          <div className="w-1 h-1 rounded-full bg-[#3f3f46] hidden sm:block" />
+                          <span className="text-[0.65rem] font-bold text-[#52525b] hidden sm:block uppercase tracking-widest">{formatDate(file.createdAt)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); /* Logic for actual download */ }}
+                            className="w-9 h-9 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 active:scale-95"
+                          >
+                            <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setViewResource(file); }}
+                            className="w-9 h-9 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110"
+                          >
+                            <MoreVertical className="w-[16px] h-[16px]" strokeWidth={2.5} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )
