@@ -1,14 +1,18 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { 
   Upload, 
   ChevronLeft, 
   ChevronRight,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  FileUp,
+  X,
+  FileText,
+  Check
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +37,7 @@ import { useFirestore } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { cn } from "@/lib/utils"
 
 const DEPARTMENTS = [
   {
@@ -152,6 +157,7 @@ export default function UploadPage() {
   const router = useRouter()
   const { toast } = useToast()
   const db = useFirestore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [formData, setFormData] = useState({
     uploaderName: "",
@@ -164,6 +170,8 @@ export default function UploadPage() {
     faculty: ""
   })
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -236,8 +244,57 @@ export default function UploadPage() {
     }, 300)
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      // Auto-fill file name if empty
+      if (!formData.fileName) {
+        setFormData(prev => ({ ...prev, fileName: file.name }))
+      }
+    }
+  }
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      if (!formData.fileName) {
+        setFormData(prev => ({ ...prev, fileName: file.name }))
+      }
+    }
+  }
+
+  const removeFile = () => {
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!selectedFile) {
+      toast({
+        variant: "destructive",
+        title: "No file selected",
+        description: "Please choose a document to upload to the vault.",
+      })
+      return
+    }
+
     setIsSubmitting(true)
     
     const resourcePayload = {
@@ -245,7 +302,7 @@ export default function UploadPage() {
       year: formData.year ? parseInt(formData.year) : null,
       createdAt: new Date().toISOString(),
       status: "approved",
-      size: (Math.random() * 10 + 1).toFixed(1) + " MB"
+      size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB"
     }
 
     const resourcesRef = collection(db, 'resources')
@@ -260,7 +317,6 @@ export default function UploadPage() {
         errorEmitter.emit('permission-error', permissionError)
       })
 
-    // Proceed immediately for premium optimistic experience
     toast({
       title: "Vault Synchronized",
       description: "Your academic contribution is now available in the REPO.",
@@ -279,7 +335,7 @@ export default function UploadPage() {
   if (isLoading) return <LoadingOverlay status="Verifying Identity" />;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 pb-24 relative overflow-hidden selection:bg-amber-500 selection:text-black">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle at 50% 0%,#1a1a24 0%,#050505 60%)] pointer-events-none -z-10" />
 
       <div className="w-full max-w-[600px] animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -294,6 +350,67 @@ export default function UploadPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* File Selection Zone */}
+            <div className="space-y-2">
+              <Label className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Selection</Label>
+              <div 
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                onClick={() => !selectedFile && fileInputRef.current?.click()}
+                className={cn(
+                  "relative group cursor-pointer h-40 rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-3 overflow-hidden",
+                  selectedFile 
+                    ? "border-amber-500/50 bg-amber-500/5" 
+                    : isDragging 
+                      ? "border-amber-500 bg-amber-500/10 scale-[1.02]" 
+                      : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-white/[0.02]"
+                )}
+              >
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                
+                {selectedFile ? (
+                  <div className="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <div className="text-center px-4">
+                      <p className="text-sm font-bold text-white truncate max-w-[200px]">{selectedFile.name}</p>
+                      <p className="text-[10px] font-bold text-amber-500/70 uppercase tracking-widest">
+                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeFile(); }}
+                      className="absolute top-2 right-2 p-2 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="mt-1 flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[9px] font-bold uppercase tracking-widest">
+                      <Check className="w-3 h-3" /> Ready
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
+                      <FileUp className="w-7 h-7 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-bold text-zinc-400 group-hover:text-white transition-colors">Drag & Drop Document</p>
+                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-1">or click to browse filesystem</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="uploaderName" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Uploader Name</Label>
@@ -319,7 +436,7 @@ export default function UploadPage() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="fileName" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Name</Label>
+                <Label htmlFor="fileName" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
                 <Input 
                   id="fileName" 
                   placeholder="e.g. End_Term_Networking.pdf" 
@@ -468,8 +585,8 @@ export default function UploadPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.course}
-              className="w-full h-14 mt-8 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-base rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95"
+              disabled={isSubmitting || !formData.course || !selectedFile}
+              className="w-full h-14 mt-8 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-base rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             >
               <Upload className="w-5 h-5 mr-2" strokeWidth={2.5} />
               {isSubmitting ? "Uploading..." : "Upload to Vault"}
