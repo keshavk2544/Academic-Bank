@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation"
 import { 
   Upload, 
   ChevronLeft, 
+  ChevronRight,
+  BookOpen,
+  GraduationCap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,8 +20,129 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
+
+const DEPARTMENTS = [
+  {
+    name: "Engineering & Technology",
+    courses: [
+      "B.Tech Computer Science & Engineering (Core)",
+      "B.Tech CSE (AI & Machine Learning)",
+      "B.Tech CSE (Cyber Security)",
+      "B.Tech CSE (Cloud Computing & DevOps)",
+      "B.Tech CSE (Full Stack Web Development)",
+      "B.Tech CSE (Data Science)",
+      "B.Tech Mechanical Engineering",
+      "B.Tech Civil Engineering",
+      "B.Tech Mechatronics Engineering",
+      "BCA (General)",
+      "BCA (Cyber Security)",
+      "BCA (Data Science)",
+      "BCA (Artificial Intelligence & Machine Learning)",
+      "MCA (Master of Computer Applications)",
+      "M.Tech Computer Science & Engineering",
+      "M.Tech Thermal Engineering",
+      "M.Tech Structural Engineering",
+      "Diploma in Computer Science & Engineering",
+      "Diploma in Mechanical Engineering",
+      "Diploma in Civil Engineering",
+      "Diploma in Electrical Engineering"
+    ]
+  },
+  {
+    name: "Business & Management",
+    courses: [
+      "BBA (General Management)",
+      "BBA (Digital Marketing)",
+      "BBA (Banking & Insurance)",
+      "BBA (Business Analytics)",
+      "BBA (Family Business & Entrepreneurship)",
+      "B.Com (Hons)",
+      "B.Com (Banking & Insurance)",
+      "B.Com (International Finance & Accounting)",
+      "MBA (Dual Specialization: Marketing & HR)",
+      "MBA (Dual Specialization: Marketing & Finance)",
+      "MBA (Dual Specialization: Finance & HR)",
+      "MBA (Dual Specialization: Operations & Supply Chain)",
+      "MBA (Dual Specialization: International Business)",
+      "MBA (Business Analytics)",
+      "MBA (Logistics & Supply Chain Management)",
+      "M.Com"
+    ]
+  },
+  {
+    name: "Health Sciences & Pharmacy",
+    courses: [
+      "B.Pharm (Bachelor of Pharmacy)",
+      "D.Pharm (Diploma in Pharmacy)",
+      "B.Sc. Medical Laboratory Technology (BMLT)",
+      "B.Sc. Medical Radiology & Imaging Technology (BMRIT)",
+      "B.Sc. Nutrition & Dietetics",
+      "M.Sc. Nutrition & Dietetics"
+    ]
+  },
+  {
+    name: "Agricultural Studies",
+    courses: [
+      "B.Sc. (Hons) Agriculture",
+      "M.Sc. Agriculture (Agronomy)",
+      "M.Sc. Agriculture (Horticulture)",
+      "M.Sc. Agriculture (Genetics & Plant Breeding)"
+    ]
+  },
+  {
+    name: "Media, Design & Animation",
+    courses: [
+      "BA (Hons) Journalism & Mass Communication (BJMC)",
+      "MA Journalism & Mass Communication",
+      "B.Des Graphic Design",
+      "B.Des UI/UX Design",
+      "B.Des Interior Design",
+      "B.Sc. Animation & VFX",
+      "Diploma in Animation & Graphic Design"
+    ]
+  },
+  {
+    name: "Law",
+    courses: [
+      "BA LLB (Hons) - 5-Year Integrated",
+      "BBA LLB (Hons) - 5-Year Integrated",
+      "LLM (Corporate Law)",
+      "LLM (Criminal Law)"
+    ]
+  },
+  {
+    name: "Hospitality & Tourism",
+    courses: [
+      "BHM (Bachelor of Hotel Management)",
+      "Diploma in Hotel Management (DHM)"
+    ]
+  },
+  {
+    name: "Sciences & Humanities",
+    courses: [
+      "B.Sc. (Hons) Physics",
+      "B.Sc. (Hons) Chemistry",
+      "B.Sc. (Hons) Mathematics",
+      "M.Sc. Physics",
+      "M.Sc. Chemistry",
+      "M.Sc. Mathematics",
+      "BA (Hons) English",
+      "BA (Hons) Psychology",
+      "BA (Hons) Economics",
+      "MA English",
+      "MA Economics"
+    ]
+  }
+];
 
 export default function UploadPage() {
   const router = useRouter()
@@ -37,6 +161,11 @@ export default function UploadPage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Course selector state
+  const [selectorOpen, setSelectorOpen] = useState(false)
+  const [currentStep, setCurrentStep] = useState<'dept' | 'course'>('dept')
+  const [tempDept, setTempDept] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -58,7 +187,6 @@ export default function UploadPage() {
           setFormData(prev => ({
             ...prev,
             uploaderName: data.student.name || "",
-            // Use studentId or enrollmentNo as the QID fallback
             qid: data.student.studentId || data.student.enrollmentNo || ""
           }));
         } else {
@@ -89,6 +217,21 @@ export default function UploadPage() {
     setFormData(prev => ({ ...prev, resourceType: value }))
   }
 
+  const handleSelectDept = (dept: string) => {
+    setTempDept(dept)
+    setCurrentStep('course')
+  }
+
+  const handleSelectCourse = (course: string) => {
+    setFormData(prev => ({ ...prev, course }))
+    setSelectorOpen(false)
+    // Reset drill-down after closing
+    setTimeout(() => {
+      setCurrentStep('dept')
+      setTempDept(null)
+    }, 300)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -111,12 +254,10 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500 selection:text-black">
-      {/* Premium Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_0%,#1a1a24_0%,#050505_60%)] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle at 50% 0%,#1a1a24 0%,#050505 60%)] pointer-events-none -z-10" />
 
       <div className="w-full max-w-[600px] animate-in fade-in slide-in-from-bottom-8 duration-700">
         <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden">
-          {/* Top subtle glow */}
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           
           <div className="text-center mb-8">
@@ -133,7 +274,6 @@ export default function UploadPage() {
                 <Input 
                   id="uploaderName" 
                   value={formData.uploaderName} 
-                  onChange={handleInputChange}
                   className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
                   readOnly
@@ -146,7 +286,6 @@ export default function UploadPage() {
                   id="qid" 
                   placeholder="e.g. QID12345" 
                   value={formData.qid}
-                  onChange={handleInputChange}
                   className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
                   readOnly
@@ -181,20 +320,81 @@ export default function UploadPage() {
               </div>
             </div>
 
-            {/* Dynamic Section */}
             {isTypeSelected && (
               <div className="pt-6 mt-6 border-t border-dashed border-white/[0.08] space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="grid grid-cols-1 gap-5">
+                  
+                  {/* Premium Course Selector */}
                   <div className="space-y-2">
-                    <Label htmlFor="course" className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course Name</Label>
-                    <Input 
-                      id="course" 
-                      placeholder="e.g. B.Tech Computer Science" 
-                      value={formData.course}
-                      onChange={handleInputChange}
-                      className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
-                      required 
-                    />
+                    <Label className="text-[0.75rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course Name</Label>
+                    <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
+                      <DialogTrigger asChild>
+                        <button 
+                          type="button"
+                          className="w-full bg-black/40 border border-white/[0.08] rounded-xl h-12 px-4 flex items-center justify-between text-sm transition-all focus:ring-1 focus:ring-amber-500/50 hover:bg-white/[0.05]"
+                        >
+                          <span className={formData.course ? "text-white font-medium" : "text-zinc-500"}>
+                            {formData.course || "Select your course..."}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-zinc-500" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[500px] p-0 overflow-hidden shadow-2xl">
+                        <DialogHeader className="p-6 border-b border-white/[0.05] bg-white/[0.02]">
+                          <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                            {currentStep === 'course' && (
+                              <button 
+                                onClick={() => setCurrentStep('dept')}
+                                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                              >
+                                <ChevronLeft className="w-5 h-5 text-amber-500" />
+                              </button>
+                            )}
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="text-xs uppercase tracking-[0.2em] text-amber-500/80 font-black">Drill-Down Vault</span>
+                              <span>{currentStep === 'dept' ? "Select Department" : tempDept}</span>
+                            </div>
+                          </DialogTitle>
+                        </DialogHeader>
+                        
+                        <div className="p-2 max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+                          {currentStep === 'dept' ? (
+                            <div className="grid grid-cols-1 gap-1">
+                              {DEPARTMENTS.map(dept => (
+                                <button
+                                  key={dept.name}
+                                  type="button"
+                                  onClick={() => handleSelectDept(dept.name)}
+                                  className="w-full p-4 text-left rounded-xl hover:bg-white/[0.05] transition-all flex items-center justify-between group"
+                                >
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/5 transition-all">
+                                      <GraduationCap className="w-5 h-5 text-zinc-500 group-hover:text-amber-500" />
+                                    </div>
+                                    <span className="font-semibold text-zinc-300 group-hover:text-white">{dept.name}</span>
+                                  </div>
+                                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 gap-1 p-2">
+                              {DEPARTMENTS.find(d => d.name === tempDept)?.courses.map(course => (
+                                <button
+                                  key={course}
+                                  type="button"
+                                  onClick={() => handleSelectCourse(course)}
+                                  className="w-full p-4 text-left rounded-xl hover:bg-white/[0.05] transition-all group relative overflow-hidden"
+                                >
+                                  <div className="absolute left-0 top-0 h-full w-1 bg-amber-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                  <p className="text-sm font-medium text-zinc-400 group-hover:text-white">{course}</p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   <div className="space-y-2">
@@ -243,7 +443,7 @@ export default function UploadPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.course}
               className="w-full h-14 mt-8 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-base rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95"
             >
               <Upload className="w-5 h-5 mr-2" strokeWidth={2.5} />
@@ -252,7 +452,6 @@ export default function UploadPage() {
           </form>
         </div>
 
-        {/* Back navigation */}
         <button 
           onClick={() => router.back()}
           className="mt-8 mx-auto flex items-center gap-2 text-[#a1a1aa] hover:text-white transition-colors text-sm font-semibold uppercase tracking-widest"
