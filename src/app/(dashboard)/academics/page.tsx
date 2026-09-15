@@ -170,6 +170,8 @@ const DEPARTMENTS = [
   }
 ];
 
+const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString()).sort((a, b) => b.localeCompare(a));
+
 export default function AcademicsPage() {
   const db = useFirestore()
   const { toast } = useToast()
@@ -221,13 +223,6 @@ export default function AcademicsPage() {
   const { data: fetchedReactions } = useCollection(reactionsQuery)
 
   const userQid = student?.studentId || student?.enrollmentNo;
-
-  // Dynamic filter options for Year (keep dynamic based on existing data)
-  const dynamicYears = useMemo(() => {
-    if (!fetchedResources) return [];
-    const years = fetchedResources.map(f => f.year?.toString()).filter(Boolean);
-    return Array.from(new Set(years)).sort((a, b) => b.localeCompare(a));
-  }, [fetchedResources]);
 
   const filteredFiles = useMemo(() => {
     if (!fetchedResources) return [];
@@ -447,7 +442,7 @@ export default function AcademicsPage() {
               </SelectTrigger>
               <SelectContent className="bg-zinc-950 border-white/10 text-white">
                 <SelectItem value="ALL">Any Year</SelectItem>
-                {dynamicYears.map(year => (
+                {VALID_YEARS.map(year => (
                   <SelectItem key={year} value={year}>{year}</SelectItem>
                 ))}
               </SelectContent>
