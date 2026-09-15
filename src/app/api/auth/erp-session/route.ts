@@ -12,20 +12,13 @@ export async function GET(req: NextRequest) {
       sessionData = await store.getSession(appSessionId);
     }
 
-    // Step 6 Trace: Diagnostic for session API
-    if (sessionData && sessionData.student) {
-      console.log('[STEP-6-SESSION-API-RETRIEVAL]', {
-        hasPhotoUrl: !!sessionData.student.photoUrl,
-        photoUrlLength: sessionData.student.photoUrl?.length || 0,
-        photoUrlStartsWithData: sessionData.student.photoUrl?.startsWith('data:') || false
-      });
-    }
-
     if (!appSessionId || !sessionData) {
       return NextResponse.json({ authenticated: false, reason: 'no_session' }, { 
         status: 401,
         headers: { 
-          'Cache-Control': 'no-store, max-age=0' 
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
     }
@@ -37,7 +30,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ authenticated: false, reason: 'expired' }, { 
         status: 401,
         headers: { 
-          'Cache-Control': 'no-store, max-age=0' 
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
     }
@@ -47,7 +42,9 @@ export async function GET(req: NextRequest) {
       student
     }, {
       headers: { 
-        'Cache-Control': 'no-store, max-age=0' 
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
 
@@ -60,7 +57,7 @@ export async function GET(req: NextRequest) {
     }, { 
       status: 500,
       headers: { 
-        'Cache-Control': 'no-store, max-age=0' 
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' 
       }
     });
   }

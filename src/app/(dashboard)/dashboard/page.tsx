@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [mountTime] = useState(Date.now());
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -66,7 +67,7 @@ export default function Dashboard() {
             <div className="profile-inner">
               {!imageError ? (
                 <img 
-                  src="/api/student/photo" 
+                  src={`/api/student/photo?t=${mountTime}`} 
                   alt="Student" 
                   className="w-[85%] h-[85%] rounded-full object-cover border border-white/5 shadow-2xl" 
                   onError={() => {

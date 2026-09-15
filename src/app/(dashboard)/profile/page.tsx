@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
+  const [mountTime] = useState(Date.now());
 
   useEffect(() => {
     fetchProfile()
@@ -107,7 +108,7 @@ export default function ProfilePage() {
           <div className="w-32 h-32 rounded-full border-[6px] border-black overflow-hidden shadow-2xl bg-[#111] flex items-center justify-center">
             {!imageError ? (
               <img 
-                src="/api/student/photo" 
+                src={`/api/student/photo?t=${mountTime}`} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
                 onError={() => setImageError(true)}
