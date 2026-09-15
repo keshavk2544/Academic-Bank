@@ -131,9 +131,8 @@ export default function AcademicsPage() {
     setActivePickerId(null);
   };
 
-  const openPicker = (fileId: string, e: any) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
+  const openPicker = (fileId: string, target: HTMLElement) => {
+    const rect = target.getBoundingClientRect();
     setPickerPos({
       x: Math.min(window.innerWidth - 200, Math.max(20, rect.left + rect.width / 2 - 100)),
       y: rect.top - 60
@@ -143,8 +142,9 @@ export default function AcademicsPage() {
 
   // Interaction handlers
   const handleTouchStart = (fileId: string, e: any) => {
+    const target = e.currentTarget;
     longPressTimer.current = setTimeout(() => {
-      openPicker(fileId, e);
+      openPicker(fileId, target);
     }, 600);
   };
 
@@ -232,7 +232,7 @@ export default function AcademicsPage() {
                   return (
                     <div 
                       key={file.id} 
-                      onContextMenu={(e) => openPicker(file.id, e)}
+                      onContextMenu={(e) => { e.preventDefault(); openPicker(file.id, e.currentTarget); }}
                       onPointerDown={(e) => handleTouchStart(file.id, e)}
                       onPointerUp={handleTouchEnd}
                       onPointerLeave={handleTouchEnd}
@@ -304,7 +304,7 @@ export default function AcademicsPage() {
                           <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); openPicker(file.id, e); }}
+                          onClick={(e) => { e.stopPropagation(); openPicker(file.id, e.currentTarget); }}
                           className="w-9 h-9 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex"
                         >
                           <MoreVertical className="w-[16px] h-[16px]" strokeWidth={2.5} />
