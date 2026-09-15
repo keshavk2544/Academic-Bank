@@ -32,7 +32,6 @@ export default function LoginPage() {
     setCaptchaData(null)
     
     try {
-      // Direct call to our proxy API
       const res = await fetch('/api/auth/erp-captcha', { cache: 'no-store' });
       const data = await res.json();
       
@@ -52,7 +51,6 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    // Check if already authenticated to skip login
     const checkSession = async () => {
       try {
         const res = await fetch('/api/auth/erp-session');
@@ -183,7 +181,7 @@ export default function LoginPage() {
           )} />
           <div className={cn(
             "absolute bottom-[-40px] right-[15px] w-[45px] h-[100px] bg-white rounded-[25px] shadow-[0_5px_10px_rgba(0,0,0,0.3)] z-30 origin-bottom transition-all duration-500",
-            isCoveringEyes ? "translate-y-[-95px] rotate-[35deg]" : "rotate-[15deg]"
+            isCoveringEyes ? "translate-y-[-95px] rotate-[-35deg]" : "rotate-[15deg]"
           )} />
         </div>
 
