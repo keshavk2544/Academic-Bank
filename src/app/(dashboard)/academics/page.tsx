@@ -137,7 +137,7 @@ export default function AcademicsPage() {
                         </h3>
                         <div className="flex flex-col gap-0.5">
                           <p className="text-[0.75rem] font-medium text-zinc-400 line-clamp-1">
-                            {file.course} <span className="mx-1.5 text-zinc-600">•</span> {file.year}
+                            {file.course}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-[0.65rem] font-black text-black bg-[#fbbf24] px-1.5 py-0.5 rounded uppercase tracking-tighter">
@@ -149,6 +149,8 @@ export default function AcademicsPage() {
                                 return type;
                               })()}
                             </span>
+                            <span className="text-[0.7rem] font-bold text-[#52525b] uppercase tracking-widest">{file.year}</span>
+                            <div className="w-1 h-1 rounded-full bg-[#3f3f46]" />
                             <span className="text-[0.7rem] font-bold text-[#52525b] uppercase tracking-widest">{file.size || '0.0 MB'}</span>
                             <div className="w-1 h-1 rounded-full bg-[#3f3f46] hidden sm:block" />
                             <span className="text-[0.7rem] font-bold text-[#52525b] hidden sm:block uppercase tracking-widest">{formatDate(file.createdAt)}</span>
