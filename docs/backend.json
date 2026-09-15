@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "LoginTransaction": {
@@ -79,7 +78,7 @@
       "properties": {
         "documentId": { "type": "string" },
         "userId": { "type": "string" },
-        "reactionType": { "type": "string", "enum": ["like", "dislike", "heart", "angry"] },
+        "reactionType": { "type": "string", "enum": ["like", "dislike"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },

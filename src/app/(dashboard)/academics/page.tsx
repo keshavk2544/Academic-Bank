@@ -33,8 +33,6 @@ const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 const REACTION_TYPES = [
   { id: 'like', emoji: '👍', label: 'Like' },
   { id: 'dislike', emoji: '👎', label: 'Dislike' },
-  { id: 'heart', emoji: '❤️', label: 'Heart' },
-  { id: 'angry', emoji: '😡', label: 'Angry' },
 ];
 
 export default function AcademicsPage() {
