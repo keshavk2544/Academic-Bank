@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -14,7 +15,9 @@ import {
   Database,
   FileCheck,
   File,
-  ChevronLeft
+  Search,
+  X,
+  ChevronDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
@@ -25,10 +28,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 
-const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
+const TYPE_LABELS: Record<string, string> = {
+  "ALL": "Any Type",
+  "PYQ (Mid)": "PYQ (Mid)",
+  "PYQ (End)": "PYQ (End)",
+  "MFT": "MFT",
+  "Important Topics": "Important Topics",
+  "Notes": "Notes"
+};
 
 const REACTION_TYPES = [
   { id: 'like', emoji: '👍', label: 'Like' },
@@ -38,7 +56,12 @@ const REACTION_TYPES = [
 export default function AcademicsPage() {
   const db = useFirestore()
   const { toast } = useToast()
+  
+  // State
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("ALL");
+  const [selectedCourse, setSelectedCourse] = useState("ALL");
+  const [selectedYear, setSelectedYear] = useState("ALL");
   const [viewResource, setViewResource] = useState<any>(null);
   const [student, setStudent] = useState<any>(null);
   
@@ -63,14 +86,59 @@ export default function AcademicsPage() {
 
   const userQid = student?.studentId || student?.enrollmentNo;
 
+  // Dynamic filter options derived from data
+  const dynamicCourses = useMemo(() => {
+    if (!fetchedResources) return [];
+    const courses = fetchedResources.map(f => f.course).filter(Boolean);
+    return Array.from(new Set(courses)).sort();
+  }, [fetchedResources]);
+
+  const dynamicYears = useMemo(() => {
+    if (!fetchedResources) return [];
+    const years = fetchedResources.map(f => f.year?.toString()).filter(Boolean);
+    return Array.from(new Set(years)).sort((a, b) => b.localeCompare(a));
+  }, [fetchedResources]);
+
   const filteredFiles = useMemo(() => {
     if (!fetchedResources) return [];
     return fetchedResources.filter(file => {
-      const typeKey = (file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase();
-      const matchesType = selectedType === "ALL" || typeKey === selectedType;
-      return matchesType;
+      // Search logic
+      const matchesSearch = !searchQuery || [
+        file.subject,
+        file.course,
+        file.resourceType,
+        file.fileName,
+        file.faculty
+      ].some(field => field?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Type logic
+      let matchesType = true;
+      if (selectedType !== "ALL") {
+        if (selectedType === "PYQ (Mid)") matchesType = file.resourceType === 'pyq' && file.examType === 'MID SEM';
+        else if (selectedType === "PYQ (End)") matchesType = file.resourceType === 'pyq' && file.examType === 'END SEM';
+        else if (selectedType === "MFT") matchesType = file.resourceType === 'mft';
+        else if (selectedType === "Important Topics") matchesType = file.resourceType === 'imp';
+        else if (selectedType === "Notes") matchesType = file.resourceType === 'notes';
+      }
+
+      // Course logic
+      const matchesCourse = selectedCourse === "ALL" || file.course === selectedCourse;
+
+      // Year logic
+      const matchesYear = selectedYear === "ALL" || file.year?.toString() === selectedYear;
+
+      return matchesSearch && matchesType && matchesCourse && matchesYear;
     });
-  }, [fetchedResources, selectedType]);
+  }, [fetchedResources, searchQuery, selectedType, selectedCourse, selectedYear]);
+
+  const isFilterActive = searchQuery || selectedType !== "ALL" || selectedCourse !== "ALL" || selectedYear !== "ALL";
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedType("ALL");
+    setSelectedCourse("ALL");
+    setSelectedYear("ALL");
+  };
 
   const getIcon = (docType: string) => {
     switch (docType.toUpperCase()) {
@@ -92,7 +160,6 @@ export default function AcademicsPage() {
     }
   };
 
-  // Reaction logic
   const handleReaction = (documentId: string, reactionType: string) => {
     if (!userQid) {
       toast({ variant: "destructive", title: "Identity Required", description: "Please log in to react to vault resources." });
@@ -101,15 +168,11 @@ export default function AcademicsPage() {
 
     const reactionId = `${documentId}_${userQid}`;
     const reactionRef = doc(db, 'reactions', reactionId);
-    
-    // Find if user already has this specific reaction
     const currentReaction = fetchedReactions?.find(r => r.id === reactionId);
 
     if (currentReaction?.reactionType === reactionType) {
-      // Toggle off if same reaction
       deleteDoc(reactionRef);
     } else {
-      // Set or update reaction
       setDoc(reactionRef, {
         documentId,
         userId: userQid,
@@ -132,48 +195,108 @@ export default function AcademicsPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-x-hidden selection:bg-amber-500 selection:text-black font-sans antialiased">
-      {/* Premium Top Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_50%_0%,#1a1a24_0%,transparent_60%)] pointer-events-none -z-10" />
 
-      <div className="max-w-[720px] mx-auto px-6 pt-4 flex flex-col gap-10 relative z-10">
+      <div className="max-w-[720px] mx-auto px-6 pt-4 flex flex-col gap-6 relative z-10">
         
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-[2.25rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight">
+            <h1 className="text-[2rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight font-headline">
               Academic Vault
             </h1>
-            <p className="text-[0.95rem] font-medium text-[#a1a1aa]">Quantum University Resource Archive</p>
+            <p className="text-[0.85rem] font-medium text-[#a1a1aa]">Quantum University Resource Archive</p>
           </div>
         </header>
 
-        {/* Filters */}
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-          <button 
-            onClick={(e) => { e.stopPropagation(); setSelectedType("ALL"); }}
-            className={cn(
-              "px-6 py-2.5 rounded-2xl text-[0.8rem] font-semibold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
-              selectedType === "ALL" 
-                ? "bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] border-transparent text-black shadow-lg shadow-amber-500/30 -translate-y-0.5" 
-                : "bg-white/[0.03] border-white/[0.08] text-[#a1a1aa] hover:bg-white/[0.06] hover:text-white"
+        {/* Search & Filters */}
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-amber-500 transition-colors" />
+            <Input 
+              placeholder="Search resources, subjects, topics..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white/[0.03] border-white/[0.08] rounded-2xl h-12 pl-11 pr-4 text-sm focus:ring-1 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all backdrop-blur-xl"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 text-zinc-500"
+              >
+                <X className="w-3 h-3" />
+              </button>
             )}
-          >
-            All
-          </button>
-          {DOC_TYPE_OPTIONS.map(type => (
-            <button 
-              key={type}
-              onClick={(e) => { e.stopPropagation(); setSelectedType(type); }}
-              className={cn(
-                "px-6 py-2.5 rounded-2xl text-[0.8rem] font-semibold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
-                selectedType === type 
-                  ? "bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] border-transparent text-black shadow-lg shadow-amber-500/30 -translate-y-0.5" 
-                  : "bg-white/[0.03] border-white/[0.08] text-[#a1a1aa] hover:bg-white/[0.06] hover:text-white"
+          </div>
+
+          {/* Dropdown Row */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {/* Type Filter */}
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className={cn(
+                "h-9 min-w-[120px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
+                selectedType !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+              )}>
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-950 border-white/10 text-white">
+                <SelectItem value="ALL">Any Type</SelectItem>
+                <SelectItem value="PYQ (Mid)">PYQ (Mid)</SelectItem>
+                <SelectItem value="PYQ (End)">PYQ (End)</SelectItem>
+                <SelectItem value="MFT">MFT</SelectItem>
+                <SelectItem value="Important Topics">Important Topics</SelectItem>
+                <SelectItem value="Notes">Notes</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Course Filter */}
+            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+              <SelectTrigger className={cn(
+                "h-9 min-w-[120px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
+                selectedCourse !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+              )}>
+                <SelectValue placeholder="Course" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-950 border-white/10 text-white max-w-[280px]">
+                <SelectItem value="ALL">Any Course</SelectItem>
+                {dynamicCourses.map(course => (
+                  <SelectItem key={course} value={course}>{course}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Year Filter */}
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className={cn(
+                "h-9 min-w-[100px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
+                selectedYear !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+              )}>
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-950 border-white/10 text-white">
+                <SelectItem value="ALL">Any Year</SelectItem>
+                {dynamicYears.map(year => (
+                  <SelectItem key={year} value={year}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Results Summary */}
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+              {filteredFiles.length} {filteredFiles.length === 1 ? 'File' : 'Files'} Found
+            </span>
+            {isFilterActive && (
+              <button 
+                onClick={clearFilters}
+                className="text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-400 transition-colors"
+              >
+                Clear Filters
+              </button>
             )}
-            >
-              {type}
-            </button>
-          ))}
+          </div>
         </div>
 
         {/* File Section */}
@@ -181,14 +304,20 @@ export default function AcademicsPage() {
           {loading ? (
             <div className="flex flex-col gap-4 animate-pulse">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-20 bg-white/5 rounded-[1.25rem] border border-white/5" />
+                <div key={i} className="h-24 bg-white/5 rounded-[1.25rem] border border-white/5" />
               ))}
             </div>
           ) : (
             <div className="flex flex-col gap-3.5">
               {filteredFiles.length === 0 ? (
-                <div className="text-center py-20 bg-white/[0.02] rounded-[2rem] border border-dashed border-white/10">
-                  <p className="text-[#a1a1aa] font-medium">No resources found in this vault sector.</p>
+                <div className="text-center py-20 bg-white/[0.01] rounded-[2.5rem] border border-dashed border-white/10 animate-in fade-in duration-700">
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-6 h-6 text-zinc-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-200 mb-1">No resources found</h3>
+                  <p className="text-xs font-medium text-[#a1a1aa] max-w-[240px] mx-auto leading-relaxed">
+                    Try adjusting your search query or filters to scan other vault sectors.
+                  </p>
                 </div>
               ) : (
                 filteredFiles.map((file: any) => {
@@ -220,7 +349,7 @@ export default function AcademicsPage() {
                           </div>
                         </div>
 
-                        {/* Permanently Visible Reaction Bar */}
+                        {/* Reaction Bar */}
                         <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-full p-1 shrink-0">
                           {REACTION_TYPES.map(r => {
                             const count = summary[r.id] || 0;
