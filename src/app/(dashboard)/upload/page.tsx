@@ -152,7 +152,15 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
-// 750KB safe limit for Base64 strings in Firestore prototype documents (Firestore doc limit is 1MB)
+
+/**
+ * TECHNICAL LIMITATION:
+ * We are using Firestore documents to store file data as Base64 strings.
+ * Firestore has a hard limit of 1MB per document.
+ * Base64 encoding increases file size by ~33%. 
+ * Therefore, a 750KB file becomes ~1MB, reaching the database limit.
+ * To support 20MB, Firebase Storage would be required.
+ */
 const MAX_FILE_SIZE_BYTES = 750 * 1024; 
 
 export default function UploadPage() {
@@ -252,8 +260,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "Vault Limit Exceeded",
-          description: "Prototypes are limited to 750KB to ensure shared access and database stability."
+          title: "Database Size Limit",
+          description: "Documents are stored in the database which is limited to 1MB total. Please use a file smaller than 750KB."
         });
         return;
       }
@@ -282,8 +290,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "Vault Limit Exceeded",
-          description: "Prototypes are limited to 750KB to ensure shared access and database stability."
+          title: "Database Size Limit",
+          description: "Documents are stored in the database which is limited to 1MB total. Please use a file smaller than 750KB."
         });
         return;
       }
@@ -393,7 +401,7 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> Max 750KB
+                  <AlertTriangle className="w-2 h-2" /> Safe Limit: 750KB
                 </div>
               </div>
               <div 
