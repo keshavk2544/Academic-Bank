@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -197,7 +196,7 @@ export default function AcademicsPage() {
         <Dialog open={!!viewResource} onOpenChange={(open) => !open && setViewResource(null)}>
           <DialogContent className="bg-[#0b0b0b] border border-white/10 text-white max-w-[440px] rounded-[2rem] overflow-hidden p-0 shadow-2xl">
             <DialogHeader className="p-6 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black">
-              <DialogTitle className="text-xl font-black uppercase tracking-tighter">Pulse Information</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tighter">Docs</DialogTitle>
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Academic Vault Record</p>
             </DialogHeader>
 
