@@ -61,6 +61,7 @@
         "qid": { "type": "string" },
         "fileName": { "type": "string" },
         "resourceType": { "type": "string", "enum": ["pyq", "notes", "imp", "mft"] },
+        "examType": { "type": "string", "enum": ["MID SEM", "END SEM"], "description": "Specific for PYQ types" },
         "course": { "type": "string" },
         "subject": { "type": "string" },
         "year": { "type": "number" },

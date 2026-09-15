@@ -137,7 +137,13 @@ export default function AcademicsPage() {
                         </h3>
                         <div className="flex items-center gap-2.5">
                           <span className="text-[0.75rem] font-bold text-[#a1a1aa] tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-md">
-                            {(file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase()}
+                            {(() => {
+                              let type = (file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase();
+                              if (file.resourceType === 'pyq' && file.examType) {
+                                type = `${type} (${file.examType})`;
+                              }
+                              return type;
+                            })()}
                           </span>
                           <div className="w-1 h-1 rounded-full bg-[#52525b]" />
                           <span className="text-[0.75rem] font-semibold text-[#52525b] uppercase tracking-tighter">{file.size || '0.0 MB'}</span>

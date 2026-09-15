@@ -7,12 +7,9 @@ import {
   Upload, 
   ChevronLeft, 
   ChevronRight,
-  BookOpen,
-  GraduationCap,
   FileUp,
   X,
-  FileText,
-  Check
+  FileText
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -164,6 +161,7 @@ export default function UploadPage() {
     qid: "",
     fileName: "",
     resourceType: "",
+    examType: "",
     course: "",
     subject: "",
     year: "",
@@ -226,7 +224,7 @@ export default function UploadPage() {
   }
 
   const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, resourceType: value }))
+    setFormData(prev => ({ ...prev, resourceType: value, examType: "" }))
   }
 
   const handleSelectDept = (dept: string) => {
@@ -453,6 +451,21 @@ export default function UploadPage() {
 
             {isTypeSelected && (
               <div className="pt-3 mt-3 border-t border-dashed border-white/[0.08] space-y-3 animate-in fade-in duration-300">
+                {isPYQ && (
+                  <div className="space-y-1">
+                    <Label htmlFor="examType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Exam Type</Label>
+                    <Select onValueChange={(val) => setFormData(prev => ({...prev, examType: val}))} value={formData.examType}>
+                      <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
+                        <SelectValue placeholder="Select exam..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
+                        <SelectItem value="MID SEM">Mid Sem</SelectItem>
+                        <SelectItem value="END SEM">End Sem</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-1">
                   <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course</Label>
                   <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
@@ -529,7 +542,7 @@ export default function UploadPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.course || !selectedFile}
+              disabled={isSubmitting || !formData.course || !selectedFile || (isPYQ && !formData.examType)}
               className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
             >
               <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
