@@ -1,18 +1,12 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { 
   Upload, 
   ChevronLeft, 
-  FileText, 
-  BookOpen, 
-  Calendar, 
-  User,
-  GraduationCap
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,13 +18,14 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { LoadingOverlay } from "@/components/loading-overlay"
 
 export default function UploadPage() {
   const router = useRouter()
   const { toast } = useToast()
   
   const [formData, setFormData] = useState({
-    uploaderName: "Keshav Krishan",
+    uploaderName: "",
     qid: "",
     fileName: "",
     resourceType: "",
@@ -40,7 +35,50 @@ export default function UploadPage() {
     faculty: ""
   })
 
+  const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch('/api/auth/erp-session', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        
+        if (res.status === 401) {
+          router.replace("/");
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.authenticated && data.student) {
+          setFormData(prev => ({
+            ...prev,
+            uploaderName: data.student.name || "",
+            // Use studentId or enrollmentNo as the QID fallback
+            qid: data.student.studentId || data.student.enrollmentNo || ""
+          }));
+        } else {
+          router.replace("/");
+        }
+      } catch (e) {
+        console.error('[UPLOAD-SESSION-FETCH-ERROR]', e);
+        toast({ 
+          variant: "destructive", 
+          title: "Session Error", 
+          description: "Failed to verify identity for upload." 
+        });
+        router.replace("/");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSession();
+  }, [router, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
@@ -69,6 +107,8 @@ export default function UploadPage() {
   const isPYQ = formData.resourceType === "pyq"
   const isNotesOrIMP = formData.resourceType === "notes" || formData.resourceType === "imp"
 
+  if (isLoading) return <LoadingOverlay status="Verifying Identity" />;
+
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500 selection:text-black">
       {/* Premium Background Glow */}
@@ -94,8 +134,9 @@ export default function UploadPage() {
                   id="uploaderName" 
                   value={formData.uploaderName} 
                   onChange={handleInputChange}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
+                  readOnly
                 />
               </div>
               
@@ -106,8 +147,9 @@ export default function UploadPage() {
                   placeholder="e.g. QID12345" 
                   value={formData.qid}
                   onChange={handleInputChange}
-                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50" 
+                  className="bg-black/40 border-white/[0.08] rounded-xl h-12 focus:ring-1 focus:ring-amber-500/50 cursor-not-allowed opacity-80" 
                   required 
+                  readOnly
                 />
               </div>
 
