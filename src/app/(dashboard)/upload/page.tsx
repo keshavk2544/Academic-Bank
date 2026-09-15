@@ -152,8 +152,8 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
-// 500KB safe limit for Base64 strings in Firestore prototype documents
-const MAX_FILE_SIZE_BYTES = 500 * 1024; 
+// 750KB safe limit for Base64 strings in Firestore prototype documents (Firestore doc limit is 1MB)
+const MAX_FILE_SIZE_BYTES = 750 * 1024; 
 
 export default function UploadPage() {
   const router = useRouter()
@@ -253,7 +253,7 @@ export default function UploadPage() {
         toast({
           variant: "destructive",
           title: "Vault Limit Exceeded",
-          description: "Prototypes are limited to 500KB to ensure shared access."
+          description: "Prototypes are limited to 750KB to ensure shared access and database stability."
         });
         return;
       }
@@ -283,7 +283,7 @@ export default function UploadPage() {
         toast({
           variant: "destructive",
           title: "Vault Limit Exceeded",
-          description: "Prototypes are limited to 500KB to ensure shared access."
+          description: "Prototypes are limited to 750KB to ensure shared access and database stability."
         });
         return;
       }
@@ -393,7 +393,7 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> Max 500KB
+                  <AlertTriangle className="w-2 h-2" /> Max 750KB
                 </div>
               </div>
               <div 
