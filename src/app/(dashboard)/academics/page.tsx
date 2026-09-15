@@ -579,7 +579,7 @@ export default function AcademicsPage() {
                         </div>
 
                         {/* Reaction Bar */}
-                        <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-full p-1 shrink-0">
+                        <div className="flex items-center gap-1 bg-amber-500/[0.02] border border-amber-500/30 rounded-full p-1 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.05)]">
                           {REACTION_TYPES.map(r => {
                             const count = summary[r.id] || 0;
                             const isActive = userReaction === r.id;
