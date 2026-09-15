@@ -4,14 +4,12 @@ import { useState, useMemo } from "react"
 import { 
   FileText, 
   Download, 
-  Search,
   ChevronLeft,
   Calendar,
   Code,
   MoreVertical,
   File
 } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
@@ -26,17 +24,14 @@ export default function AcademicsPage() {
     { title: "Operating Systems Mid-Term", size: "1.5 MB", date: "Oct 12, 2024", type: "Operating Systems", docType: "NOTES", contributor: "Michael Chen" },
   ]);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("ALL");
 
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
-      const matchesSearch = file.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            file.contributor.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = selectedType === "ALL" || file.docType === selectedType;
-      return matchesSearch && matchesType;
+      return matchesType;
     });
-  }, [files, searchTerm, selectedType]);
+  }, [files, selectedType]);
 
   const getIcon = (docType: string) => {
     switch (docType) {
@@ -70,17 +65,6 @@ export default function AcademicsPage() {
             I_NAV
           </div>
         </header>
-
-        {/* Search */}
-        <div className="relative group animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 fill-mode-forwards opacity-0">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5 transition-colors group-focus-within:text-amber-400" />
-          <Input 
-            placeholder="Search resources, topics, or subjects..." 
-            className="h-14 bg-white/[0.03] border-white/[0.08] backdrop-blur-xl pl-14 rounded-2xl placeholder:text-zinc-600 text-base focus:ring-1 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all shadow-xl text-white font-medium outline-none"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
 
         {/* Filters */}
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-forwards opacity-0">
