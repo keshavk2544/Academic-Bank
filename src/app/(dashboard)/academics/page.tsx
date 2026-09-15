@@ -132,26 +132,27 @@ export default function AcademicsPage() {
                       </div>
                       
                       <div className="min-w-0">
-                        <h3 className="text-base font-semibold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
-                          {file.fileName || file.title}
+                        <h3 className="text-[1.05rem] font-bold text-zinc-100 mb-0.5 group-hover:text-[#fbbf24] transition-colors truncate">
+                          {file.subject}
                         </h3>
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-[0.75rem] font-bold text-[#a1a1aa] tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-md">
-                            {(() => {
-                              let type = (file.resourceType === 'imp' ? 'IMP TOPIC' : file.resourceType).toUpperCase();
-                              if (file.resourceType === 'pyq' && file.examType) {
-                                type = `${type} (${file.examType})`;
-                              }
-                              if (file.year) {
-                                type = `${type} | ${file.year}`;
-                              }
-                              return type;
-                            })()}
-                          </span>
-                          <div className="w-1 h-1 rounded-full bg-[#52525b]" />
-                          <span className="text-[0.75rem] font-semibold text-[#52525b] uppercase tracking-tighter">{file.size || '0.0 MB'}</span>
-                          <div className="w-1 h-1 rounded-full bg-[#52525b] hidden sm:block" />
-                          <span className="text-[0.75rem] font-semibold text-[#52525b] hidden sm:block uppercase tracking-tighter">{formatDate(file.createdAt)}</span>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-[0.75rem] font-medium text-zinc-400 line-clamp-1">
+                            {file.course} <span className="mx-1.5 text-zinc-600">•</span> {file.year}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[0.65rem] font-black text-black bg-[#fbbf24] px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                              {(() => {
+                                let type = (file.resourceType === 'imp' ? 'IMP' : file.resourceType).toUpperCase();
+                                if (file.resourceType === 'pyq' && file.examType) {
+                                  type = `${type} ${file.examType === 'MID SEM' ? 'MID' : 'END'}`;
+                                }
+                                return type;
+                              })()}
+                            </span>
+                            <span className="text-[0.7rem] font-bold text-[#52525b] uppercase tracking-widest">{file.size || '0.0 MB'}</span>
+                            <div className="w-1 h-1 rounded-full bg-[#3f3f46] hidden sm:block" />
+                            <span className="text-[0.7rem] font-bold text-[#52525b] hidden sm:block uppercase tracking-widest">{formatDate(file.createdAt)}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
