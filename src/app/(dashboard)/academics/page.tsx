@@ -356,12 +356,12 @@ export default function AcademicsPage() {
           </div>
 
           {/* Dropdown Row */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex gap-3 overflow-x-auto p-1 -m-1 scrollbar-none">
             {/* Type Filter */}
             <Select value={selectedType} onValueChange={setSelectedType}>
               <SelectTrigger className={cn(
-                "h-9 min-w-[120px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
-                selectedType !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+                "h-10 min-w-[130px] rounded-xl bg-white/[0.03] border border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
+                selectedType !== "ALL" && "border-amber-500 ring-1 ring-amber-500/40 bg-amber-500/5 text-amber-500"
               )}>
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -379,10 +379,10 @@ export default function AcademicsPage() {
             <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
               <DialogTrigger asChild>
                 <button className={cn(
-                  "h-9 min-w-[120px] px-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-between gap-2",
-                  selectedCourse !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+                  "h-10 min-w-[130px] px-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-between gap-2",
+                  selectedCourse !== "ALL" && "border-amber-500 ring-1 ring-amber-500/40 bg-amber-500/5 text-amber-500"
                 )}>
-                  <span className="truncate max-w-[80px]">
+                  <span className="truncate max-w-[90px]">
                     {selectedCourse === "ALL" ? "Course" : selectedCourse}
                   </span>
                   <ChevronDown className="w-3 h-3 opacity-50 shrink-0" />
@@ -435,8 +435,8 @@ export default function AcademicsPage() {
             {/* Year Filter */}
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className={cn(
-                "h-9 min-w-[100px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
-                selectedYear !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+                "h-10 min-w-[110px] rounded-xl bg-white/[0.03] border border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
+                selectedYear !== "ALL" && "border-amber-500 ring-1 ring-amber-500/40 bg-amber-500/5 text-amber-500"
               )}>
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
@@ -450,7 +450,7 @@ export default function AcademicsPage() {
           </div>
 
           {/* Results Summary */}
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between px-1 pt-1">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
               {filteredFiles.length} {filteredFiles.length === 1 ? 'File' : 'Files'} Found
             </span>
