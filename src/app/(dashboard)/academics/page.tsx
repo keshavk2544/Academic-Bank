@@ -24,8 +24,9 @@ import {
   ThumbsDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useFirestore, useCollection } from "@/firebase"
+import { useFirestore, useCollection, useStorage } from "@/firebase"
 import { collection, query, orderBy, setDoc, deleteDoc, doc } from "firebase/firestore"
+import { ref, getDownloadURL } from "firebase/storage"
 import {
   Dialog,
   DialogContent,
@@ -167,6 +168,7 @@ const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString()).
 
 export default function AcademicsPage() {
   const db = useFirestore()
+  const storage = useStorage()
   const { toast } = useToast()
   
   // State
@@ -302,7 +304,7 @@ export default function AcademicsPage() {
     }
   };
 
-  const handleDownload = (file: any, e?: React.MouseEvent) => {
+  const handleDownload = async (file: any, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
@@ -313,7 +315,32 @@ export default function AcademicsPage() {
       description: `Accessing ${file.fileName} from Secure Vault...`
     });
 
-    // If actual file data exists, download it using Blob for maximum device compatibility
+    // 1. Storage retrieval (Modern architecture)
+    if (file.storagePath) {
+      try {
+        const storageRef = ref(storage, file.storagePath);
+        const url = await getDownloadURL(storageRef);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.fileName;
+        a.target = "_blank"; // Force external tab for mobile stability
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      } catch (error) {
+        console.error('[STORAGE-DOWNLOAD-ERROR]', error);
+        toast({
+          variant: "destructive",
+          title: "Retrieval Failed",
+          description: "Could not access document in Firebase Storage."
+        });
+        return;
+      }
+    }
+
+    // 2. Legacy Base64 retrieval
     if (file.fileDataURI) {
       try {
         const parts = file.fileDataURI.split(';base64,');
@@ -337,16 +364,11 @@ export default function AcademicsPage() {
         URL.revokeObjectURL(url);
         return;
       } catch (error) {
-        console.error('[DOWNLOAD-ERROR]', error);
-        toast({
-          variant: "destructive",
-          title: "Download Interrupted",
-          description: "Could not process the secure file stream."
-        });
+        console.error('[LEGACY-DOWNLOAD-ERROR]', error);
       }
     }
 
-    // Fallback for metadata-only resources (legacy or oversized)
+    // 3. Fallback for metadata-only resources
     const content = `Quantum University Academic Vault Resource\n\n` +
       `------------------------------------------\n` +
       `File: ${file.fileName}\n` +
@@ -357,7 +379,7 @@ export default function AcademicsPage() {
       `Uploader: ${file.uploaderName}\n` +
       `Retrieved At: ${new Date().toLocaleString()}\n` +
       `------------------------------------------\n\n` +
-      `Note: This is a vault metadata record. The original binary content was either too large for prototype storage or uploaded as a legacy entry.`;
+      `Note: This document was uploaded as a legacy entry and lacks binary storage.`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);

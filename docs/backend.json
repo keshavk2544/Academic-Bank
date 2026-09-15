@@ -54,7 +54,7 @@
     },
     "Resource": {
       "title": "Academic Resource",
-      "description": "An academic material uploaded by a student.",
+      "description": "An academic material stored in Firebase Storage with metadata in Firestore.",
       "type": "object",
       "properties": {
         "uploaderName": { "type": "string" },
@@ -68,10 +68,12 @@
         "faculty": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["approved", "pending", "rejected"] },
-        "size": { "type": "string" },
-        "fileDataURI": { "type": "string", "description": "Base64 encoded file data for prototype retrieval." }
+        "size": { "type": "string", "description": "Formatted size string for UI" },
+        "fileSize": { "type": "number", "description": "Raw file size in bytes" },
+        "contentType": { "type": "string" },
+        "storagePath": { "type": "string", "description": "Path to the file in Firebase Storage" }
       },
-      "required": ["uploaderName", "qid", "fileName", "resourceType", "course", "subject", "createdAt", "status"]
+      "required": ["uploaderName", "qid", "fileName", "resourceType", "course", "subject", "createdAt", "status", "storagePath"]
     },
     "Reaction": {
       "title": "Document Reaction",

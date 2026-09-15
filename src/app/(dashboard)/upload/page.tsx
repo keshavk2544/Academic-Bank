@@ -31,8 +31,9 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
-import { useFirestore } from "@/firebase"
+import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
@@ -152,21 +153,13 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
-
-/**
- * TECHNICAL LIMITATION:
- * We are using Firestore documents to store file data as Base64 strings.
- * Firestore has a hard limit of 1MB per document.
- * Base64 encoding increases file size by ~33%. 
- * Therefore, a 750KB file becomes ~1MB, reaching the database limit.
- * To support 20MB, Firebase Storage would be required.
- */
-const MAX_FILE_SIZE_BYTES = 750 * 1024; 
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 export default function UploadPage() {
   const router = useRouter()
   const { toast } = useToast()
   const db = useFirestore()
+  const storage = useStorage()
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [formData, setFormData] = useState({
@@ -185,6 +178,7 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState<'dept' | 'course'>('dept')
@@ -260,8 +254,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "Database Size Limit",
-          description: "Documents are stored in the database which is limited to 1MB total. Please use a file smaller than 750KB."
+          title: "File too large",
+          description: "File size must be 20 MB or less."
         });
         return;
       }
@@ -290,8 +284,8 @@ export default function UploadPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         toast({
           variant: "destructive",
-          title: "Database Size Limit",
-          description: "Documents are stored in the database which is limited to 1MB total. Please use a file smaller than 750KB."
+          title: "File too large",
+          description: "File size must be 20 MB or less."
         });
         return;
       }
@@ -304,19 +298,11 @@ export default function UploadPage() {
 
   const removeFile = () => {
     setSelectedFile(null)
+    setUploadProgress(0)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -332,44 +318,74 @@ export default function UploadPage() {
     setIsSubmitting(true)
     
     try {
-      const fileDataURI = await fileToBase64(selectedFile);
-      
-      const resourcePayload = {
-        ...formData,
-        year: formData.year ? parseInt(formData.year) : null,
-        createdAt: new Date().toISOString(),
-        status: "approved",
-        size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
-        fileDataURI: fileDataURI
-      }
+      // 1. Generate unique path
+      const docId = Math.random().toString(36).substring(2, 15);
+      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
+      const storagePath = `resources/${docId}/${safeName}`;
+      const storageRef = ref(storage, storagePath);
 
-      const resourcesRef = collection(db, 'resources')
-      
-      addDoc(resourcesRef, resourcePayload)
-        .then(() => {
+      // 2. Start Storage Upload
+      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(Math.round(progress));
+        }, 
+        (error) => {
+          console.error('[STORAGE-UPLOAD-ERROR]', error);
+          setIsSubmitting(false);
           toast({
-            title: "Vault Synchronized",
-            description: "Your academic contribution is now available to all students.",
-          })
-          router.push("/academics")
-        })
-        .catch(async (error) => {
-          setIsSubmitting(false)
-          const permissionError = new FirestorePermissionError({
-            path: 'resources',
-            operation: 'create',
-            requestResourceData: resourcePayload
-          })
-          errorEmitter.emit('permission-error', permissionError)
-        })
+            variant: "destructive",
+            title: "Upload failed",
+            description: "Upload failed. Please try again."
+          });
+        }, 
+        async () => {
+          // 3. Obtain Metadata once upload completes
+          try {
+            const resourcePayload = {
+              ...formData,
+              year: formData.year ? parseInt(formData.year) : null,
+              createdAt: new Date().toISOString(),
+              status: "approved",
+              size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
+              fileSize: selectedFile.size,
+              contentType: selectedFile.type,
+              storagePath: storagePath
+            }
+
+            const resourcesRef = collection(db, 'resources')
+            
+            await addDoc(resourcesRef, resourcePayload);
+            
+            toast({
+              title: "Vault Synchronized",
+              description: "Your academic contribution is now available to all students.",
+            })
+            router.push("/academics")
+          } catch (error) {
+            console.error('[FIRESTORE-METADATA-ERROR]', error);
+            // Cleanup orphan file
+            await deleteObject(storageRef).catch(() => {});
+            
+            setIsSubmitting(false);
+            const permissionError = new FirestorePermissionError({
+              path: 'resources',
+              operation: 'create'
+            });
+            errorEmitter.emit('permission-error', permissionError);
+          }
+        }
+      );
 
     } catch (error) {
-      console.error('[UPLOAD-ERROR]', error);
+      console.error('[UPLOAD-PROCESS-ERROR]', error);
       setIsSubmitting(false);
       toast({
         variant: "destructive",
         title: "Process Failed",
-        description: "Could not read or store the document content."
+        description: "Upload failed. Please try again."
       });
     }
   }
@@ -401,21 +417,22 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> Safe Limit: 750KB
+                  <AlertTriangle className="w-2 h-2" /> Limit: 20MB
                 </div>
               </div>
               <div 
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
-                onClick={() => !selectedFile && fileInputRef.current?.click()}
+                onClick={() => !selectedFile && !isSubmitting && fileInputRef.current?.click()}
                 className={cn(
                   "relative group cursor-pointer h-20 rounded-xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-1.5 overflow-hidden",
                   selectedFile 
                     ? "border-amber-500/50 bg-amber-500/5" 
                     : isDragging 
                       ? "border-amber-500 bg-amber-500/10 scale-[1.01]" 
-                      : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-white/[0.02]"
+                      : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-white/[0.02]",
+                  isSubmitting && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <input 
@@ -423,7 +440,8 @@ export default function UploadPage() {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.ppt,.pptx"
+                  disabled={isSubmitting}
                 />
                 
                 {selectedFile ? (
@@ -434,16 +452,18 @@ export default function UploadPage() {
                     <div className="text-center px-4">
                       <p className="text-[10px] font-bold text-white truncate max-w-[150px]">{selectedFile.name}</p>
                       <p className="text-[8px] font-bold text-amber-500/70 uppercase tracking-widest">
-                        {(selectedFile.size / 1024).toFixed(0)} KB
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
-                    <button 
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); removeFile(); }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
-                    >
-                      <X className="w-2.5 h-2.5" />
-                    </button>
+                    {!isSubmitting && (
+                      <button 
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeFile(); }}
+                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/5 text-white hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -451,7 +471,16 @@ export default function UploadPage() {
                     <p className="text-[9px] font-bold text-zinc-400">Drag or Click to Upload</p>
                   </>
                 )}
+
+                {isSubmitting && (
+                  <div className="absolute bottom-0 left-0 h-1 bg-amber-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                )}
               </div>
+              {isSubmitting && (
+                <p className="text-[9px] font-black text-center text-amber-500 uppercase tracking-widest mt-1">
+                  Uploading... {uploadProgress}%
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -486,12 +515,13 @@ export default function UploadPage() {
                   onChange={handleInputChange}
                   className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
                   required 
+                  disabled={isSubmitting}
                 />
               </div>
 
               <div className="space-y-1 col-span-2">
                 <Label htmlFor="resourceType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Type</Label>
-                <Select onValueChange={handleSelectChange} value={formData.resourceType}>
+                <Select onValueChange={handleSelectChange} value={formData.resourceType} disabled={isSubmitting}>
                   <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
@@ -510,7 +540,7 @@ export default function UploadPage() {
                 {isPYQ && (
                   <div className="space-y-1">
                     <Label htmlFor="examType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Exam Type</Label>
-                    <Select onValueChange={(val) => setFormData(prev => ({...prev, examType: val}))} value={formData.examType}>
+                    <Select onValueChange={(val) => setFormData(prev => ({...prev, examType: val}))} value={formData.examType} disabled={isSubmitting}>
                       <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
                         <SelectValue placeholder="Select exam..." />
                       </SelectTrigger>
@@ -529,6 +559,7 @@ export default function UploadPage() {
                       <button 
                         type="button"
                         className="w-full bg-black/40 border border-white/[0.08] rounded-lg h-9 px-3 flex items-center justify-between text-[11px] hover:bg-white/[0.05]"
+                        disabled={isSubmitting}
                       >
                         <span className={formData.course ? "text-white truncate" : "text-zinc-500"}>
                           {formData.course || "Select course..."}
@@ -577,12 +608,12 @@ export default function UploadPage() {
 
                 <div className="space-y-1">
                   <Label htmlFor="subject" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Subject</Label>
-                  <Input id="subject" value={formData.subject} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
+                  <Input id="subject" value={formData.subject} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required disabled={isSubmitting} />
                 </div>
 
                 <div className="space-y-1">
                   <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Year</Label>
-                  <Select onValueChange={(val) => setFormData(prev => ({...prev, year: val}))} value={formData.year}>
+                  <Select onValueChange={(val) => setFormData(prev => ({...prev, year: val}))} value={formData.year} disabled={isSubmitting}>
                     <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
                       <SelectValue placeholder="Select year..." />
                     </SelectTrigger>
@@ -597,7 +628,7 @@ export default function UploadPage() {
                 {isNotesOrIMP && (
                   <div className="space-y-1">
                     <Label htmlFor="faculty" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty</Label>
-                    <Input id="faculty" value={formData.faculty} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
+                    <Input id="faculty" value={formData.faculty} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required disabled={isSubmitting} />
                   </div>
                 )}
               </div>
@@ -609,14 +640,15 @@ export default function UploadPage() {
               className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
             >
               <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
-              {isSubmitting ? "Uploading..." : "Upload to Vault"}
+              {isSubmitting ? `Synchronizing... ${uploadProgress}%` : "Upload to Vault"}
             </Button>
           </form>
         </div>
 
         <button 
           onClick={() => router.back()}
-          className="mt-5 mx-auto flex items-center gap-1.5 text-[#a1a1aa] hover:text-white transition-colors text-[9px] font-semibold uppercase tracking-widest"
+          disabled={isSubmitting}
+          className="mt-5 mx-auto flex items-center gap-1.5 text-[#a1a1aa] hover:text-white transition-colors text-[9px] font-semibold uppercase tracking-widest disabled:opacity-50"
         >
           <ChevronLeft className="w-3 h-3" />
           Back to Vault

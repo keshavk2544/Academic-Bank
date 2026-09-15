@@ -1,14 +1,17 @@
+
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
+import { FirebaseStorage } from 'firebase/storage';
 
 interface FirebaseContextProps {
   app: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
+  storage: FirebaseStorage;
 }
 
 const FirebaseContext = createContext<FirebaseContextProps | undefined>(undefined);
@@ -18,14 +21,16 @@ export function FirebaseProvider({
   app,
   firestore,
   auth,
+  storage,
 }: {
   children: ReactNode;
   app: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
+  storage: FirebaseStorage;
 }) {
   return (
-    <FirebaseContext.Provider value={{ app, firestore, auth }}>
+    <FirebaseContext.Provider value={{ app, firestore, auth, storage }}>
       {children}
     </FirebaseContext.Provider>
   );
@@ -49,4 +54,8 @@ export function useFirestore() {
 
 export function useAuth() {
   return useFirebase().auth;
+}
+
+export function useStorage() {
+  return useFirebase().storage;
 }

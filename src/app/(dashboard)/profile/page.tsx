@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -18,8 +19,9 @@ import {
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
 import { StudentProfile } from "@/types/student"
-import { useFirestore, useCollection } from "@/firebase"
+import { useFirestore, useCollection, useStorage } from "@/firebase"
 import { collection, query, where, deleteDoc, doc } from "firebase/firestore"
+import { ref, deleteObject } from "firebase/storage"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import {
@@ -37,13 +39,14 @@ export default function ProfilePage() {
   const router = useRouter()
   const { toast } = useToast()
   const db = useFirestore()
+  const storage = useStorage()
   const [student, setStudent] = useState<StudentProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
   const [mountTime] = useState(Date.now());
-  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null);
+  const [resourceToDelete, setResourceToDelete] = useState<any>(null);
 
   useEffect(() => {
     fetchProfile()
@@ -127,15 +130,22 @@ export default function ProfilePage() {
     }
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!resourceToDelete || !db) return;
     
-    const resourceRef = doc(db, 'resources', resourceToDelete);
+    const resourceRef = doc(db, 'resources', resourceToDelete.id);
     
+    // 1. Storage cleanup if exists
+    if (resourceToDelete.storagePath) {
+      const storageRef = ref(storage, resourceToDelete.storagePath);
+      await deleteObject(storageRef).catch(err => console.warn('Storage cleanup failed or file missing', err));
+    }
+
+    // 2. Firestore metadata removal
     deleteDoc(resourceRef)
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
-          path: `resources/${resourceToDelete}`,
+          path: `resources/${resourceToDelete.id}`,
           operation: 'delete',
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
@@ -143,7 +153,7 @@ export default function ProfilePage() {
         toast({
           variant: "destructive",
           title: "Purge Failed",
-          description: "Could not remove the document from the vault."
+          description: "Could not remove the document metadata."
         });
       });
     
@@ -235,7 +245,7 @@ export default function ProfilePage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setResourceToDelete(res.id);
+                          setResourceToDelete(res);
                         }}
                         className="w-9 h-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
                       >
@@ -327,7 +337,7 @@ export default function ProfilePage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-headline font-bold">Purge Resource?</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              This will permanently remove the document from the Academic Vault. This action cannot be undone once synchronized.
+              This will permanently remove the document from the Academic Vault and Firebase Storage. This action cannot be undone once synchronized.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
