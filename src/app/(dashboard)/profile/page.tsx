@@ -21,7 +21,7 @@ import { StudentProfile } from "@/types/student"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, query, where, deleteDoc, doc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -33,24 +33,6 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
   const [mountTime] = useState(Date.now());
-
-  const userResourcesQuery = useMemo(() => {
-    const qid = student?.studentId || student?.enrollmentNo;
-    if (!qid) return null;
-    return query(
-      collection(db, 'resources'),
-      where('qid', '==', qid)
-    );
-  }, [db, student]);
-
-  const { data: rawMyResources, loading: loadingResources } = useCollection(userResourcesQuery);
-  
-  const myResources = useMemo(() => {
-    if (!rawMyResources) return [];
-    return [...rawMyResources].sort((a: any, b: any) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }, [rawMyResources]);
 
   useEffect(() => {
     fetchProfile()
@@ -76,12 +58,31 @@ export default function ProfilePage() {
         setError(data.message || "Failed to load profile identity.")
       }
     } catch (e) {
-      console.error('[PROFILE-FETCH-ERROR]', e)
       setError("Network interruption during identity pulse.")
     } finally {
       setIsLoading(false)
     }
   }
+
+  const userResourcesQuery = useMemo(() => {
+    const qid = student?.studentId || student?.enrollmentNo;
+    if (!db || !qid) return null;
+    return query(
+      collection(db, 'resources'),
+      where('qid', '==', qid)
+    );
+  }, [db, student]);
+
+  const { data: rawMyResources, loading: loadingResources } = useCollection(userResourcesQuery);
+  
+  const myResources = useMemo(() => {
+    if (!rawMyResources) return [];
+    return [...rawMyResources].sort((a: any, b: any) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [rawMyResources]);
 
   const handleSyncERP = async () => {
     setIsSyncing(true)
@@ -116,16 +117,16 @@ export default function ProfilePage() {
   }
 
   const handleDeleteResource = (resourceId: string) => {
-    if (!resourceId) return;
-    if (!confirm("Are you sure you want to remove this document from the vault?")) return;
+    if (!resourceId || !db) return;
     
     const resourceRef = doc(db, 'resources', resourceId);
     
-    deleteDoc(resourceRef).catch(async (error) => {
+    deleteDoc(resourceRef)
+      .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: `resources/${resourceId}`,
           operation: 'delete',
-        });
+        } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
         
         toast({
@@ -133,7 +134,7 @@ export default function ProfilePage() {
           title: "Purge Failed",
           description: "Could not remove the document from the vault."
         });
-    });
+      });
     
     toast({
       title: "Document Removed",
@@ -183,7 +184,6 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* My Contributions Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-xl font-bold font-headline tracking-tight">My Contributions</h2>
@@ -197,7 +197,7 @@ export default function ProfilePage() {
               <div className="h-16 bg-white/5 rounded-[2rem] animate-pulse border border-white/5" />
             ) : myResources && myResources.length > 0 ? (
               myResources.map((res: any) => {
-                const uploadTime = new Date(res.createdAt).getTime();
+                const uploadTime = res.createdAt ? new Date(res.createdAt).getTime() : 0;
                 const now = new Date().getTime();
                 const hoursPassed = (now - uploadTime) / (1000 * 60 * 60);
                 const canDelete = hoursPassed < 24;
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                       <div className="min-w-0 pr-2">
                         <h4 className="text-[0.9rem] font-bold text-zinc-100 truncate">{res.subject}</h4>
                         <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
-                          {res.resourceType.toUpperCase()} • {res.year}
+                          {res.resourceType?.toUpperCase() || 'DOC'} • {res.year || 'N/A'}
                         </p>
                       </div>
                     </div>
@@ -221,6 +221,7 @@ export default function ProfilePage() {
                         variant="ghost" 
                         size="icon" 
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleDeleteResource(res.id);
                         }}
