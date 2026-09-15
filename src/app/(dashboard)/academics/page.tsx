@@ -8,17 +8,31 @@ import {
   Calendar,
   Code,
   MoreVertical,
-  History
+  History,
+  User,
+  Hash,
+  GraduationCap,
+  CalendarDays,
+  Database,
+  FileCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const DOC_TYPE_OPTIONS = ["PYQ", "NOTES", "IMP TOPIC", "MFT"];
 
 export default function AcademicsPage() {
   const db = useFirestore()
   const [selectedType, setSelectedType] = useState("ALL");
+  const [viewResource, setViewResource] = useState<any>(null);
 
   const resourcesQuery = useMemo(() => query(
     collection(db, 'resources'),
@@ -120,7 +134,8 @@ export default function AcademicsPage() {
                 filteredFiles.map((file: any) => (
                   <div 
                     key={file.id} 
-                    className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)]"
+                    onClick={() => setViewResource(file)}
+                    className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer"
                   >
                     <div className="flex items-center gap-5 min-w-0">
                       {/* 3D Icon Box */}
@@ -160,7 +175,10 @@ export default function AcademicsPage() {
                     </div>
 
                     <div className="flex items-center gap-3 pl-4">
-                      <button className="w-11 h-11 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); /* Logic for actual download */ }}
+                        className="w-11 h-11 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95"
+                      >
                         <Download className="w-[18px] h-[18px]" strokeWidth={2.5} />
                       </button>
                       <button className="w-11 h-11 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110 hidden sm:flex">
@@ -173,6 +191,104 @@ export default function AcademicsPage() {
             </div>
           )}
         </section>
+
+        {/* Resource Details Dialog */}
+        <Dialog open={!!viewResource} onOpenChange={(open) => !open && setViewResource(null)}>
+          <DialogContent className="bg-[#0b0b0b] border border-white/10 text-white max-w-[440px] rounded-[2rem] overflow-hidden p-0 shadow-2xl">
+            <DialogHeader className="p-6 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black">
+              <DialogTitle className="text-xl font-black uppercase tracking-tighter">Pulse Information</DialogTitle>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Academic Vault Record</p>
+            </DialogHeader>
+
+            <ScrollArea className="max-h-[500px]">
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                      <FileCheck className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Subject</h4>
+                      <p className="text-sm font-bold text-zinc-100">{viewResource?.subject}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Course</h4>
+                      <p className="text-sm font-bold text-zinc-100 leading-tight">{viewResource?.course}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="flex items-center gap-4 group">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                        <CalendarDays className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Year</h4>
+                        <p className="text-sm font-bold text-zinc-100">{viewResource?.year}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 group">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                        <Database className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">File Size</h4>
+                        <p className="text-sm font-bold text-zinc-100">{viewResource?.size || '0.0 MB'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5 space-y-4">
+                    <div className="flex items-center gap-4 group">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:scale-110 transition-transform">
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Uploader</h4>
+                        <p className="text-sm font-bold text-zinc-100">{viewResource?.uploaderName}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 group">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:scale-110 transition-transform">
+                        <Hash className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Enrollment / QID</h4>
+                        <p className="text-sm font-mono font-bold text-zinc-100">{viewResource?.qid}</p>
+                      </div>
+                    </div>
+
+                    {viewResource?.faculty && (
+                      <div className="flex items-center gap-4 group">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:scale-110 transition-transform">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Faculty</h4>
+                          <p className="text-sm font-bold text-zinc-100">{viewResource?.faculty}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => {/* Logic for actual download */}}
+                  className="w-full py-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-transform active:scale-95"
+                >
+                  Retrieve Document
+                </button>
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
