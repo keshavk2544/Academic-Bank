@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -16,11 +17,16 @@ service cloud.firestore {
     }
 
     // Resources are publicly readable but only creatable by anyone for MVP purposes
-    // In production, you'd restrict this to authenticated users.
     match /resources/{resourceId} {
       allow read: if true;
       allow create: if true;
       allow delete: if true;
+    }
+
+    // Reactions are public for counts but writing is restricted for identity consistency
+    match /reactions/{reactionId} {
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

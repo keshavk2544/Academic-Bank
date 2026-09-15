@@ -71,6 +71,19 @@
         "size": { "type": "string" }
       },
       "required": ["uploaderName", "qid", "fileName", "resourceType", "course", "subject", "createdAt", "status"]
+    },
+    "Reaction": {
+      "title": "Document Reaction",
+      "description": "A user reaction to an academic resource.",
+      "type": "object",
+      "properties": {
+        "documentId": { "type": "string" },
+        "userId": { "type": "string" },
+        "reactionType": { "type": "string", "enum": ["like", "dislike", "heart", "angry"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["documentId", "userId", "reactionType", "createdAt", "updatedAt"]
     }
   },
   "auth": {
@@ -88,6 +101,10 @@
     "/resources/{resourceId}": {
       "schema": { "$ref": "#/backend/entities/Resource" },
       "description": "Collection of academic materials contributed by students."
+    },
+    "/reactions/{reactionId}": {
+      "schema": { "$ref": "#/backend/entities/Reaction" },
+      "description": "Collection of student reactions to academic resources."
     }
   }
 }
