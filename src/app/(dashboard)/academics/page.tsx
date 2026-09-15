@@ -61,9 +61,6 @@ export default function AcademicsPage() {
             </h1>
             <p className="text-[0.95rem] font-medium text-zinc-400">Quantum University Resource Archive</p>
           </div>
-          <div className="w-20 h-12 rounded-2xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-xl flex items-center justify-center text-xs font-black tracking-tighter shadow-2xl hover:border-amber-500/40 transition-all hover:scale-105 hover:rotate-3 cursor-default">
-            I_NAV
-          </div>
         </header>
 
         {/* Filters */}
