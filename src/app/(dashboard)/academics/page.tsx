@@ -14,7 +14,8 @@ import {
   GraduationCap,
   CalendarDays,
   Database,
-  FileCheck
+  FileCheck,
+  File
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
@@ -210,6 +211,16 @@ export default function AcademicsPage() {
                     <div className="flex-1">
                       <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Subject</h4>
                       <p className="text-sm font-bold text-zinc-100">{viewResource?.subject}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                      <File className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">File Name</h4>
+                      <p className="text-sm font-bold text-zinc-100 truncate max-w-[280px]">{viewResource?.fileName}</p>
                     </div>
                   </div>
 
