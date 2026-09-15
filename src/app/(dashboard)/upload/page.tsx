@@ -150,6 +150,8 @@ const DEPARTMENTS = [
   }
 ];
 
+const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
+
 export default function UploadPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -526,15 +528,16 @@ export default function UploadPage() {
 
                 <div className="space-y-1">
                   <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Year</Label>
-                  <Input 
-                    id="year" 
-                    type="number" 
-                    placeholder="e.g. 2025"
-                    value={formData.year} 
-                    onChange={handleInputChange} 
-                    className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
-                    required 
-                  />
+                  <Select onValueChange={(val) => setFormData(prev => ({...prev, year: val}))} value={formData.year}>
+                    <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
+                      <SelectValue placeholder="Select year..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
+                      {VALID_YEARS.map(yr => (
+                        <SelectItem key={yr} value={yr}>{yr}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {isNotesOrIMP && (
@@ -548,7 +551,7 @@ export default function UploadPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.course || !selectedFile || (isPYQ && !formData.examType)}
+              disabled={isSubmitting || !formData.course || !formData.year || !selectedFile || (isPYQ && !formData.examType)}
               className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
             >
               <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
