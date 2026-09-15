@@ -529,7 +529,7 @@ export default function UploadPage() {
                   <Input 
                     id="year" 
                     type="number" 
-                    placeholder="e.g. 2024"
+                    placeholder="e.g. 2025"
                     value={formData.year} 
                     onChange={handleInputChange} 
                     className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
