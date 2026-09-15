@@ -19,7 +19,9 @@ import {
   X,
   ChevronDown,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
@@ -42,18 +44,9 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 
-const TYPE_LABELS: Record<string, string> = {
-  "ALL": "Any Type",
-  "PYQ (Mid)": "PYQ (Mid)",
-  "PYQ (End)": "PYQ (End)",
-  "MFT": "MFT",
-  "Important Topics": "Important Topics",
-  "Notes": "Notes"
-};
-
 const REACTION_TYPES = [
-  { id: 'like', emoji: '👍', label: 'Like' },
-  { id: 'dislike', emoji: '👎', label: 'Dislike' },
+  { id: 'like', emoji: <ThumbsUp className="w-3.5 h-3.5" />, label: 'Like' },
+  { id: 'dislike', emoji: <ThumbsDown className="w-3.5 h-3.5" />, label: 'Dislike' },
 ];
 
 const DEPARTMENTS = [
@@ -266,7 +259,7 @@ export default function AcademicsPage() {
   };
 
   const getIcon = (docType: string) => {
-    switch (docType.toUpperCase()) {
+    switch (docType?.toUpperCase()) {
       case 'NOTES': return <FileText className="w-[18px] h-[18px] text-[#fbbf24]" strokeWidth={2.5} />;
       case 'MFT': return <Calendar className="w-[18px] h-[18px] text-[#34d399]" strokeWidth={2.5} />;
       case 'IMP': 
@@ -285,7 +278,8 @@ export default function AcademicsPage() {
     }
   };
 
-  const handleReaction = (documentId: string, reactionType: string) => {
+  const handleReaction = (documentId: string, reactionType: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!userQid) {
       toast({ variant: "destructive", title: "Identity Required", description: "Please log in to react to vault resources." });
       return;
@@ -308,6 +302,44 @@ export default function AcademicsPage() {
     }
   };
 
+  const handleDownload = (file: any, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    toast({
+      title: "Initiating Retrieval",
+      description: `Accessing ${file.fileName} from Secure Vault...`
+    });
+
+    // In a real implementation with Storage, we would use getDownloadURL()
+    // For this prototype, we simulate the retrieval by creating a blob from the available metadata
+    const content = `Quantum University Academic Vault Resource\n\n` +
+      `------------------------------------------\n` +
+      `File: ${file.fileName}\n` +
+      `Subject: ${file.subject}\n` +
+      `Course: ${file.course}\n` +
+      `Type: ${file.resourceType?.toUpperCase()}\n` +
+      `Year: ${file.year}\n` +
+      `Uploader: ${file.uploaderName}\n` +
+      `Retrieved At: ${new Date().toLocaleString()}\n` +
+      `------------------------------------------\n\n` +
+      `This document was retrieved from the PreRP Academic Vault system.`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Append .txt if not already present to ensure it opens correctly on mobile
+    const downloadName = file.fileName.includes('.') ? file.fileName : `${file.fileName}.txt`;
+    a.download = downloadName;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
   const getDocReactions = (fileId: string) => {
     const fileReactions = fetchedReactions?.filter(r => r.documentId === fileId) || [];
     const summary: Record<string, number> = {};
@@ -322,7 +354,7 @@ export default function AcademicsPage() {
     <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-x-hidden selection:bg-amber-500 selection:text-black font-sans antialiased">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_50%_0%,#1a1a24_0%,transparent_60%)] pointer-events-none -z-10" />
 
-      <div className="max-w-[720px] mx-auto px-6 pt-4 flex flex-col gap-6 relative z-10">
+      <div className="max-w-[720px] mx-auto px-6 pt-2 flex flex-col gap-6 relative z-10">
         
         {/* Header */}
         <header className="flex items-center justify-between">
@@ -493,7 +525,7 @@ export default function AcademicsPage() {
                     <div 
                       key={file.id} 
                       onClick={() => setViewResource(file)}
-                      className="group flex flex-col gap-3 p-3.5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer relative"
+                      className="group flex flex-col gap-4 p-3.5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] cursor-pointer relative"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4 min-w-0">
@@ -523,17 +555,17 @@ export default function AcademicsPage() {
                             return (
                               <button
                                 key={r.id}
-                                onClick={(e) => { e.stopPropagation(); handleReaction(file.id, r.id); }}
+                                onClick={(e) => handleReaction(file.id, r.id, e)}
                                 aria-label={r.label}
                                 title={r.label}
                                 className={cn(
-                                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
+                                  "flex items-center gap-1 px-2.5 py-1 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
                                   isActive 
                                     ? "bg-amber-500/15 border border-amber-500/30 opacity-100 blur-0 shadow-[0_0_8px_rgba(245,158,11,0.2)]" 
                                     : "opacity-35 blur-[0.5px] hover:opacity-100 hover:blur-0"
                                 )}
                               >
-                                <span className="text-base">{r.emoji}</span>
+                                <span className={cn("text-zinc-500", isActive && "text-amber-500")}>{r.emoji}</span>
                                 {count > 0 && <span className={cn("text-[9px] font-black", isActive ? "text-amber-500" : "text-zinc-500")}>{count}</span>}
                               </button>
                             );
@@ -561,7 +593,7 @@ export default function AcademicsPage() {
 
                         <div className="flex items-center gap-2">
                           <button 
-                            onClick={(e) => { e.stopPropagation(); /* Logic for actual download */ }}
+                            onClick={(e) => handleDownload(file, e)}
                             className="w-9 h-9 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 active:scale-95"
                           >
                             <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
@@ -674,7 +706,7 @@ export default function AcademicsPage() {
                 </div>
 
                 <button 
-                  onClick={() => {/* Logic for actual download */}}
+                  onClick={() => handleDownload(viewResource)}
                   className="w-full py-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-transform active:scale-95"
                 >
                   Retrieve Document
