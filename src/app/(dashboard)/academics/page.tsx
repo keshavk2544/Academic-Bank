@@ -135,7 +135,7 @@ export default function AcademicsPage() {
       {/* Premium Top Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_50%_0%,#1a1a24_0%,transparent_60%)] pointer-events-none -z-10" />
 
-      <div className="max-w-[720px] mx-auto px-6 pt-12 flex flex-col gap-10 relative z-10">
+      <div className="max-w-[720px] mx-auto px-6 pt-4 flex flex-col gap-10 relative z-10">
         
         {/* Header */}
         <header className="flex items-center justify-between">
