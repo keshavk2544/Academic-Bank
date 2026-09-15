@@ -116,15 +116,23 @@ export default function ProfilePage() {
   }
 
   const handleDeleteResource = (resourceId: string) => {
+    if (!resourceId) return;
     if (!confirm("Are you sure you want to remove this document from the vault?")) return;
     
     const resourceRef = doc(db, 'resources', resourceId);
+    
     deleteDoc(resourceRef).catch(async (error) => {
         const permissionError = new FirestorePermissionError({
           path: `resources/${resourceId}`,
           operation: 'delete',
         });
         errorEmitter.emit('permission-error', permissionError);
+        
+        toast({
+          variant: "destructive",
+          title: "Purge Failed",
+          description: "Could not remove the document from the vault."
+        });
     });
     
     toast({
@@ -212,7 +220,10 @@ export default function ProfilePage() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        onClick={() => handleDeleteResource(res.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteResource(res.id);
+                        }}
                         className="w-9 h-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 border border-red-500/20"
                       >
                         <Trash2 className="w-4 h-4" />
