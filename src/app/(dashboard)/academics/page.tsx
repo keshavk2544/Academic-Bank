@@ -57,6 +57,15 @@ export default function AcademicsPage({
     }
   };
 
+  const getIconClass = (docType: string) => {
+    switch (docType) {
+      case 'NOTES': return "text-amber-400";
+      case 'MFT': return "text-emerald-400";
+      case 'IMP TOPIC': return "text-blue-400";
+      default: return "text-amber-400";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-white pb-32 relative overflow-hidden">
       {/* Premium Top Glow */}
