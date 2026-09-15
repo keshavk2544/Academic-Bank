@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -139,18 +138,6 @@ export default function ProfilePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
-              <div className="pl-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Fingerprint className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Registration ID</h3>
-                  <p className="text-sm font-bold font-headline">{student?.registrationId || 'Not available'}</p>
-                </div>
-              </div>
-            </div>
-
             <div className="bg-card p-4 rounded-[2.5rem] flex items-center justify-between border border-white/5">
               <div className="pl-4 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
