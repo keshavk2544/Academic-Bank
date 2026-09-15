@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -7,7 +6,6 @@ import {
   Download, 
   Calendar,
   Code,
-  MoreVertical,
   History,
   User,
   Hash,
@@ -274,12 +272,6 @@ export default function AcademicsPage() {
                             className="w-9 h-9 rounded-full bg-[#fbbf24]/5 text-[#fbbf24] border border-[#fbbf24]/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-[#fbbf24] hover:to-[#f59e0b] hover:text-black hover:scale-110 active:scale-95"
                           >
                             <Download className="w-[16px] h-[16px]" strokeWidth={2.5} />
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); setViewResource(file); }}
-                            className="w-9 h-9 rounded-full bg-white/[0.03] text-[#a1a1aa] flex items-center justify-center transition-all hover:bg-white/10 hover:text-white hover:scale-110"
-                          >
-                            <MoreVertical className="w-[16px] h-[16px]" strokeWidth={2.5} />
                           </button>
                         </div>
                       </div>
