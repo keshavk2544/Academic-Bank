@@ -374,8 +374,8 @@ export default function UploadPage() {
                 
                 {selectedFile ? (
                   <div className="flex flex-col items-center gap-1 animate-in fade-in zoom-in-95 duration-300">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
-                      <FileText className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500">
+                      <FileText className="w-3.5 h-3.5" />
                     </div>
                     <div className="text-center px-4">
                       <p className="text-[10px] font-bold text-white truncate max-w-[150px]">{selectedFile.name}</p>
@@ -393,7 +393,7 @@ export default function UploadPage() {
                   </div>
                 ) : (
                   <>
-                    <FileUp className="w-4 h-4 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                    <FileUp className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-500 transition-colors" />
                     <p className="text-[9px] font-bold text-zinc-400">Drag or Click to Upload</p>
                   </>
                 )}
@@ -532,7 +532,7 @@ export default function UploadPage() {
               disabled={isSubmitting || !formData.course || !selectedFile}
               className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
             >
-              <Upload className="w-3.5 h-3.5 mr-2" strokeWidth={2.5} />
+              <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
               {isSubmitting ? "Uploading..." : "Upload to Vault"}
             </Button>
           </form>

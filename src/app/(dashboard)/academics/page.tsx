@@ -38,12 +38,12 @@ export default function AcademicsPage() {
 
   const getIcon = (docType: string) => {
     switch (docType.toUpperCase()) {
-      case 'NOTES': return <FileText className="w-[22px] h-[22px] text-[#fbbf24]" strokeWidth={2.5} />;
-      case 'MFT': return <Calendar className="w-[22px] h-[22px] text-[#34d399]" strokeWidth={2.5} />;
+      case 'NOTES': return <FileText className="w-[18px] h-[18px] text-[#fbbf24]" strokeWidth={2.5} />;
+      case 'MFT': return <Calendar className="w-[18px] h-[18px] text-[#34d399]" strokeWidth={2.5} />;
       case 'IMP': 
-      case 'IMP TOPIC': return <Code className="w-[22px] h-[22px] text-[#60a5fa]" strokeWidth={2.5} />;
-      case 'PYQ': return <History className="w-[22px] h-[22px] text-[#f87171]" strokeWidth={2.5} />;
-      default: return <FileText className="w-[22px] h-[22px] text-[#fbbf24]" strokeWidth={2.5} />;
+      case 'IMP TOPIC': return <Code className="w-[18px] h-[18px] text-[#60a5fa]" strokeWidth={2.5} />;
+      case 'PYQ': return <History className="w-[18px] h-[18px] text-[#f87171]" strokeWidth={2.5} />;
+      default: return <FileText className="w-[18px] h-[18px] text-[#fbbf24]" strokeWidth={2.5} />;
     }
   };
 
@@ -124,7 +124,7 @@ export default function AcademicsPage() {
                   >
                     <div className="flex items-center gap-5 min-w-0">
                       {/* 3D Icon Box */}
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
                         <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
                         <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                           {getIcon(file.resourceType)}
