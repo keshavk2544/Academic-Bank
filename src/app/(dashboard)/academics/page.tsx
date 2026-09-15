@@ -17,7 +17,9 @@ import {
   File,
   Search,
   X,
-  ChevronDown
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useFirestore, useCollection } from "@/firebase"
@@ -27,6 +29,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Select,
@@ -53,6 +56,120 @@ const REACTION_TYPES = [
   { id: 'dislike', emoji: '👎', label: 'Dislike' },
 ];
 
+const DEPARTMENTS = [
+  {
+    name: "Engineering & Technology",
+    courses: [
+      "B.Tech Computer Science & Engineering (Core)",
+      "B.Tech CSE (AI & Machine Learning)",
+      "B.Tech CSE (Cyber Security)",
+      "B.Tech CSE (Cloud Computing & DevOps)",
+      "B.Tech CSE (Full Stack Web Development)",
+      "B.Tech CSE (Data Science)",
+      "B.Tech Mechanical Engineering",
+      "B.Tech Civil Engineering",
+      "B.Tech Mechatronics Engineering",
+      "BCA (General)",
+      "BCA (Cyber Security)",
+      "BCA (Data Science)",
+      "BCA (Artificial Intelligence & Machine Learning)",
+      "MCA (Master of Computer Applications)",
+      "M.Tech Computer Science & Engineering",
+      "M.Tech Thermal Engineering",
+      "M.Tech Structural Engineering",
+      "Diploma in Computer Science & Engineering",
+      "Diploma in Mechanical Engineering",
+      "Diploma in Civil Engineering",
+      "Diploma in Electrical Engineering"
+    ]
+  },
+  {
+    name: "Business & Management",
+    courses: [
+      "BBA (General Management)",
+      "BBA (Digital Marketing)",
+      "BBA (Banking & Insurance)",
+      "BBA (Business Analytics)",
+      "BBA (Family Business & Entrepreneurship)",
+      "B.Com (Hons)",
+      "B.Com (Banking & Insurance)",
+      "B.Com (International Finance & Accounting)",
+      "MBA (Dual Specialization: Marketing & HR)",
+      "MBA (Dual Specialization: Marketing & Finance)",
+      "MBA (Dual Specialization: Finance & HR)",
+      "MBA (Dual Specialization: Operations & Supply Chain)",
+      "MBA (Dual Specialization: International Business)",
+      "MBA (Business Analytics)",
+      "MBA (Logistics & Supply Chain Management)",
+      "M.Com"
+    ]
+  },
+  {
+    name: "Health Sciences & Pharmacy",
+    courses: [
+      "B.Pharm (Bachelor of Pharmacy)",
+      "D.Pharm (Diploma in Pharmacy)",
+      "B.Sc. Medical Laboratory Technology (BMLT)",
+      "B.Sc. Medical Radiology & Imaging Technology (BMRIT)",
+      "B.Sc. Nutrition & Dietetics",
+      "M.Sc. Nutrition & Dietetics"
+    ]
+  },
+  {
+    name: "Agricultural Studies",
+    courses: [
+      "B.Sc. (Hons) Agriculture",
+      "M.Sc. Agriculture (Agronomy)",
+      "M.Sc. Agriculture (Horticulture)",
+      "M.Sc. Agriculture (Genetics & Plant Breeding)"
+    ]
+  },
+  {
+    name: "Media, Design & Animation",
+    courses: [
+      "BA (Hons) Journalism & Mass Communication (BJMC)",
+      "MA Journalism & Mass Communication",
+      "B.Des Graphic Design",
+      "B.Des UI/UX Design",
+      "B.Des Interior Design",
+      "B.Sc. Animation & VFX",
+      "Diploma in Animation & Graphic Design"
+    ]
+  },
+  {
+    name: "Law",
+    courses: [
+      "BA LLB (Hons) - 5-Year Integrated",
+      "BBA LLB (Hons) - 5-Year Integrated",
+      "LLM (Corporate Law)",
+      "LLM (Criminal Law)"
+    ]
+  },
+  {
+    name: "Hospitality & Tourism",
+    courses: [
+      "BHM (Bachelor of Hotel Management)",
+      "Diploma in Hotel Management (DHM)"
+    ]
+  },
+  {
+    name: "Sciences & Humanities",
+    courses: [
+      "B.Sc. (Hons) Physics",
+      "B.Sc. (Hons) Chemistry",
+      "B.Sc. (Hons) Mathematics",
+      "M.Sc. Physics",
+      "M.Sc. Chemistry",
+      "M.Sc. Mathematics",
+      "BA (Hons) English",
+      "BA (Hons) Psychology",
+      "BA (Hons) Economics",
+      "MA English",
+      "MA Economics"
+    ]
+  }
+];
+
 export default function AcademicsPage() {
   const db = useFirestore()
   const { toast } = useToast()
@@ -65,6 +182,25 @@ export default function AcademicsPage() {
   const [viewResource, setViewResource] = useState<any>(null);
   const [student, setStudent] = useState<any>(null);
   
+  // Selector state for Course filter
+  const [selectorOpen, setSelectorOpen] = useState(false)
+  const [currentStep, setCurrentStep] = useState<'dept' | 'course'>('dept')
+  const [tempDept, setTempDept] = useState<string | null>(null)
+
+  const handleSelectDept = (dept: string) => {
+    setTempDept(dept)
+    setCurrentStep('course')
+  }
+
+  const handleSelectCourse = (course: string) => {
+    setSelectedCourse(course)
+    setSelectorOpen(false)
+    setTimeout(() => {
+      setCurrentStep('dept')
+      setTempDept(null)
+    }, 300)
+  }
+
   // Fetch session to get user identity
   useEffect(() => {
     fetch('/api/auth/erp-session', { credentials: 'include' })
@@ -86,13 +222,7 @@ export default function AcademicsPage() {
 
   const userQid = student?.studentId || student?.enrollmentNo;
 
-  // Dynamic filter options derived from data
-  const dynamicCourses = useMemo(() => {
-    if (!fetchedResources) return [];
-    const courses = fetchedResources.map(f => f.course).filter(Boolean);
-    return Array.from(new Set(courses)).sort();
-  }, [fetchedResources]);
-
+  // Dynamic filter options for Year (keep dynamic based on existing data)
   const dynamicYears = useMemo(() => {
     if (!fetchedResources) return [];
     const years = fetchedResources.map(f => f.year?.toString()).filter(Boolean);
@@ -250,21 +380,62 @@ export default function AcademicsPage() {
               </SelectContent>
             </Select>
 
-            {/* Course Filter */}
-            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-              <SelectTrigger className={cn(
-                "h-9 min-w-[120px] rounded-xl bg-white/[0.03] border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all",
-                selectedCourse !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
-              )}>
-                <SelectValue placeholder="Course" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-950 border-white/10 text-white max-w-[280px]">
-                <SelectItem value="ALL">Any Course</SelectItem>
-                {dynamicCourses.map(course => (
-                  <SelectItem key={course} value={course}>{course}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Course Filter (Dialog-based selector) */}
+            <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
+              <DialogTrigger asChild>
+                <button className={cn(
+                  "h-9 min-w-[120px] px-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-between gap-2",
+                  selectedCourse !== "ALL" && "border-amber-500/50 bg-amber-500/5 text-amber-500"
+                )}>
+                  <span className="truncate max-w-[80px]">
+                    {selectedCourse === "ALL" ? "Course" : selectedCourse}
+                  </span>
+                  <ChevronDown className="w-3 h-3 opacity-50 shrink-0" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[400px] p-0 shadow-2xl rounded-[2rem] overflow-hidden">
+                <DialogHeader className="p-4 border-b border-white/[0.05]">
+                  <DialogTitle className="text-base font-bold flex items-center gap-2">
+                    {currentStep === 'course' && (
+                      <ChevronLeft className="w-4 h-4 text-amber-500 cursor-pointer" onClick={() => setCurrentStep('dept')} />
+                    )}
+                    <span>{currentStep === 'dept' ? "Filter by Department" : tempDept}</span>
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="p-1 max-h-[350px] overflow-y-auto scrollbar-none">
+                  {currentStep === 'dept' ? (
+                    <>
+                      <button
+                        onClick={() => { setSelectedCourse("ALL"); setSelectorOpen(false); }}
+                        className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] transition-all flex items-center justify-between text-[12px] text-amber-500 font-bold"
+                      >
+                        <span>Any Course</span>
+                      </button>
+                      {DEPARTMENTS.map(dept => (
+                        <button
+                          key={dept.name}
+                          onClick={() => handleSelectDept(dept.name)}
+                          className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] transition-all flex items-center justify-between text-[12px]"
+                        >
+                          <span className="font-semibold text-zinc-300">{dept.name}</span>
+                          <ChevronRight className="w-3 h-3 text-zinc-600" />
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    DEPARTMENTS.find(d => d.name === tempDept)?.courses.map(course => (
+                      <button
+                        key={course}
+                        onClick={() => handleSelectCourse(course)}
+                        className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] text-[11px] text-zinc-400 hover:text-white"
+                      >
+                        {course}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Year Filter */}
             <Select value={selectedYear} onValueChange={setSelectedYear}>
