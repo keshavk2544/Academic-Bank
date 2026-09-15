@@ -313,8 +313,18 @@ export default function AcademicsPage() {
       description: `Accessing ${file.fileName} from Secure Vault...`
     });
 
-    // In a real implementation with Storage, we would use getDownloadURL()
-    // For this prototype, we simulate the retrieval by creating a blob from the available metadata
+    // If actual file data exists, download it
+    if (file.fileDataURI) {
+      const a = document.createElement('a');
+      a.href = file.fileDataURI;
+      a.download = file.fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
+    // Fallback for metadata-only resources (legacy or oversized)
     const content = `Quantum University Academic Vault Resource\n\n` +
       `------------------------------------------\n` +
       `File: ${file.fileName}\n` +
@@ -325,13 +335,12 @@ export default function AcademicsPage() {
       `Uploader: ${file.uploaderName}\n` +
       `Retrieved At: ${new Date().toLocaleString()}\n` +
       `------------------------------------------\n\n` +
-      `This document was retrieved from the PreRP Academic Vault system.`;
+      `Note: Actual document content was not stored for this record (likely legacy or exceeded size limit).`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    // Append .txt if not already present to ensure it opens correctly on mobile
     const downloadName = file.fileName.includes('.') ? file.fileName : `${file.fileName}.txt`;
     a.download = downloadName;
     document.body.appendChild(a);

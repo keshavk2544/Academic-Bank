@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "LoginTransaction": {
@@ -67,13 +68,14 @@
         "faculty": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["approved", "pending", "rejected"] },
-        "size": { "type": "string" }
+        "size": { "type": "string" },
+        "fileDataURI": { "type": "string", "description": "Base64 encoded file data for prototype retrieval." }
       },
       "required": ["uploaderName", "qid", "fileName", "resourceType", "course", "subject", "createdAt", "status"]
     },
     "Reaction": {
       "title": "Document Reaction",
-      "description": "A user reaction to an academic resource.",
+      "description": "A student reaction (Like/Dislike) to an academic resource.",
       "type": "object",
       "properties": {
         "documentId": { "type": "string" },

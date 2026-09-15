@@ -9,7 +9,8 @@ import {
   ChevronRight,
   FileUp,
   X,
-  FileText
+  FileText,
+  AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -151,6 +152,7 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
+const MAX_FILE_SIZE_BYTES = 750 * 1024; // 750KB limit for Base64 storage in Firestore prototype
 
 export default function UploadPage() {
   const router = useRouter()
@@ -246,6 +248,14 @@ export default function UploadPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Documents must be under 750KB for prototype storage."
+        });
+        return;
+      }
       setSelectedFile(file)
       if (!formData.fileName) {
         setFormData(prev => ({ ...prev, fileName: file.name }))
@@ -268,6 +278,14 @@ export default function UploadPage() {
     setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
     if (file) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Documents must be under 750KB for prototype storage."
+        });
+        return;
+      }
       setSelectedFile(file)
       if (!formData.fileName) {
         setFormData(prev => ({ ...prev, fileName: file.name }))
@@ -282,6 +300,15 @@ export default function UploadPage() {
     }
   }
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFile) {
@@ -295,35 +322,48 @@ export default function UploadPage() {
 
     setIsSubmitting(true)
     
-    const resourcePayload = {
-      ...formData,
-      year: formData.year ? parseInt(formData.year) : null,
-      createdAt: new Date().toISOString(),
-      status: "approved",
-      size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB"
-    }
+    try {
+      const fileDataURI = await fileToBase64(selectedFile);
+      
+      const resourcePayload = {
+        ...formData,
+        year: formData.year ? parseInt(formData.year) : null,
+        createdAt: new Date().toISOString(),
+        status: "approved",
+        size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
+        fileDataURI: fileDataURI
+      }
 
-    const resourcesRef = collection(db, 'resources')
-    
-    addDoc(resourcesRef, resourcePayload)
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'resources',
-          operation: 'create',
-          requestResourceData: resourcePayload
+      const resourcesRef = collection(db, 'resources')
+      
+      addDoc(resourcesRef, resourcePayload)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'resources',
+            operation: 'create',
+            requestResourceData: resourcePayload
+          })
+          errorEmitter.emit('permission-error', permissionError)
         })
-        errorEmitter.emit('permission-error', permissionError)
-      })
 
-    toast({
-      title: "Vault Synchronized",
-      description: "Your academic contribution is now available in the REPO.",
-    })
-    
-    setTimeout(() => {
-      setIsSubmitting(false)
-      router.push("/academics")
-    }, 800)
+      toast({
+        title: "Vault Synchronized",
+        description: "Your academic contribution is now available in the REPO.",
+      })
+      
+      setTimeout(() => {
+        setIsSubmitting(false)
+        router.push("/academics")
+      }, 800)
+    } catch (error) {
+      console.error('[UPLOAD-ERROR]', error);
+      setIsSubmitting(false);
+      toast({
+        variant: "destructive",
+        title: "Process Failed",
+        description: "Could not read the document content."
+      });
+    }
   }
 
   const isTypeSelected = formData.resourceType !== ""
@@ -350,7 +390,12 @@ export default function UploadPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             
             <div className="space-y-1.5">
-              <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
+                <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
+                  <AlertTriangle className="w-2 h-2" /> Max 750KB
+                </div>
+              </div>
               <div 
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
@@ -370,6 +415,7 @@ export default function UploadPage() {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
                 />
                 
                 {selectedFile ? (
