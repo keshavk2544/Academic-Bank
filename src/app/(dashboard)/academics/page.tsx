@@ -37,13 +37,13 @@ export default function AcademicsPage({
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedType, setSelectedType] = useState("ALL");
 
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
       const matchesSearch = file.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                             file.contributor.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = selectedType === "all" || file.docType === selectedType;
+      const matchesType = selectedType === "ALL" || file.docType === selectedType;
       return matchesSearch && matchesType;
     });
   }, [files, searchTerm, selectedType]);
@@ -74,13 +74,13 @@ export default function AcademicsPage({
       <div className="max-w-[720px] mx-auto px-6 pt-12 space-y-10 relative z-10">
         
         {/* Header */}
-        <header className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards">
+        <header className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-forwards">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2 group cursor-pointer" onClick={() => router.back()}>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Back</span>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tighter bg-gradient-to-br from-amber-400 to-amber-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-br from-amber-400 to-amber-600 bg-clip-text text-transparent">
               Academic Vault
             </h1>
             <p className="text-sm font-medium text-muted-foreground">Quantum University Resource Archive</p>
@@ -91,24 +91,24 @@ export default function AcademicsPage({
         </header>
 
         {/* Search */}
-        <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 fill-mode-forwards opacity-0">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 transition-colors group-focus-within:text-primary" />
+        <div className="relative group animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 fill-mode-forwards opacity-0">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 transition-colors group-focus-within:text-amber-400" />
           <Input 
             placeholder="Search resources, topics, or subjects..." 
-            className="h-14 bg-white/[0.03] border-white/[0.08] backdrop-blur-xl pl-14 rounded-2xl placeholder:text-muted-foreground/40 text-base focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-xl"
+            className="h-14 bg-white/[0.08] border-white/[0.15] backdrop-blur-xl pl-14 rounded-2xl placeholder:text-muted-foreground/60 text-base focus:ring-1 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all shadow-2xl text-white font-medium"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-forwards opacity-0">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200 fill-mode-forwards opacity-0">
           <button 
-            onClick={() => setSelectedType("all")}
+            onClick={() => setSelectedType("ALL")}
             className={cn(
               "px-6 py-2.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
-              selectedType === "all" 
-                ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/20 translate-y-[-2px]" 
+              selectedType === "ALL" 
+                ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/30 translate-y-[-2px]" 
                 : "bg-white/[0.03] border-white/[0.08] text-muted-foreground hover:bg-white/[0.06] hover:text-white"
             )}
           >
@@ -121,7 +121,7 @@ export default function AcademicsPage({
               className={cn(
                 "px-6 py-2.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider border shrink-0 transition-all backdrop-blur-md", 
                 selectedType === type 
-                  ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/20 translate-y-[-2px]" 
+                  ? "bg-gradient-to-br from-amber-400 to-amber-600 border-transparent text-black shadow-lg shadow-amber-500/30 translate-y-[-2px]" 
                   : "bg-white/[0.03] border-white/[0.08] text-muted-foreground hover:bg-white/[0.06] hover:text-white"
               )}
             >
@@ -132,9 +132,9 @@ export default function AcademicsPage({
 
         {/* File Section */}
         <section className="space-y-6">
-          <div className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards opacity-0">
+          <div className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300 fill-mode-forwards opacity-0">
             <h2 className="text-xl font-bold tracking-tight">Recent Uploads</h2>
-            <span className="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 rounded-full uppercase">
+            <span className="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
               {filteredFiles.length} Files
             </span>
           </div>
@@ -143,18 +143,18 @@ export default function AcademicsPage({
             {filteredFiles.map((file, idx) => (
               <div 
                 key={idx} 
-                className="group flex items-center justify-between p-4 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-2xl transition-all duration-500 hover:translate-y-[-5px] hover:scale-[1.01] hover:border-white/20 hover:shadow-2xl animate-in fade-in slide-in-from-bottom-4 fill-mode-forwards opacity-0"
+                className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:translate-y-[-5px] hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] animate-in fade-in slide-in-from-bottom-6 fill-mode-forwards opacity-0"
                 style={{ animationDelay: `${400 + idx * 100}ms` }}
               >
                 <div className="flex items-center gap-5 min-w-0">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-108 group-hover:-rotate-2 transition-all duration-500">
                     <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
-                    <div className="relative z-10">
+                    <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                       {getIcon(file.docType)}
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-[15px] font-bold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
+                    <h3 className="text-base font-semibold text-zinc-100 mb-1 group-hover:text-white transition-colors truncate">
                       {file.title}
                     </h3>
                     <div className="flex items-center gap-2">
@@ -163,14 +163,14 @@ export default function AcademicsPage({
                       </span>
                       <div className="w-1 h-1 rounded-full bg-zinc-700" />
                       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">{file.size}</span>
-                      <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                      <div className="w-1 h-1 rounded-full bg-zinc-700 hidden sm:block" />
                       <span className="text-[10px] font-bold text-zinc-500 hidden sm:block uppercase tracking-tighter">{file.date}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 pl-4">
-                  <button className="w-11 h-11 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-amber-400 hover:to-amber-600 hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/30 active:scale-95 group/btn">
+                  <button className="w-11 h-11 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/10 flex items-center justify-center transition-all duration-300 hover:bg-gradient-to-br hover:from-amber-400 hover:to-amber-600 hover:text-black hover:scale-110 hover:shadow-lg hover:shadow-amber-500/40 active:scale-95 group/btn animate-pulseGlow">
                     <Download className="w-5 h-5" />
                   </button>
                   <button className="w-11 h-11 rounded-full bg-white/[0.03] text-muted-foreground border border-transparent flex items-center justify-center transition-all hover:bg-white/[0.1] hover:text-white hover:scale-110 hidden sm:flex">
@@ -182,6 +182,14 @@ export default function AcademicsPage({
           </div>
         </section>
       </div>
+      
+      <style jsx global>{`
+        @keyframes pulseGlow {
+          0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+          70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+      `}</style>
     </div>
   )
 }
