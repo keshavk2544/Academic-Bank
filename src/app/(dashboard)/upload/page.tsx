@@ -524,12 +524,18 @@ export default function UploadPage() {
                   <Input id="subject" value={formData.subject} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
                 </div>
 
-                {isPYQ && (
-                  <div className="space-y-1">
-                    <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Exam Year</Label>
-                    <Input id="year" type="number" value={formData.year} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required />
-                  </div>
-                )}
+                <div className="space-y-1">
+                  <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Year</Label>
+                  <Input 
+                    id="year" 
+                    type="number" 
+                    placeholder="e.g. 2024"
+                    value={formData.year} 
+                    onChange={handleInputChange} 
+                    className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
+                    required 
+                  />
+                </div>
 
                 {isNotesOrIMP && (
                   <div className="space-y-1">

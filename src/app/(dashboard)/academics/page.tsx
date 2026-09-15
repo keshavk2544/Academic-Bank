@@ -142,6 +142,9 @@ export default function AcademicsPage() {
                               if (file.resourceType === 'pyq' && file.examType) {
                                 type = `${type} (${file.examType})`;
                               }
+                              if (file.year) {
+                                type = `${type} | ${file.year}`;
+                              }
                               return type;
                             })()}
                           </span>
