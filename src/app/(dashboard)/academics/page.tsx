@@ -50,7 +50,7 @@ export default function AcademicsPage() {
       <div className="max-w-[720px] mx-auto px-6 pt-12 flex flex-col gap-10 relative z-10">
         
         {/* Header */}
-        <header className="flex items-center justify-between animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-forwards">
+        <header className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-[2.25rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight">
               Academic Vault
@@ -63,7 +63,7 @@ export default function AcademicsPage() {
         </header>
 
         {/* Filters */}
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-forwards opacity-0">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
           <button 
             onClick={() => setSelectedType("ALL")}
             className={cn(
@@ -93,7 +93,7 @@ export default function AcademicsPage() {
 
         {/* File Section */}
         <section>
-          <div className="flex items-center justify-between mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-forwards opacity-0">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-[1.25rem] font-bold tracking-tight">Recent Uploads</h2>
             <span className="text-[0.75rem] font-bold text-[#fbbf24] bg-[#fbbf24]/10 border border-[#fbbf24]/20 px-3 py-1 rounded-full">
               {filteredFiles.length} Files
@@ -104,12 +104,11 @@ export default function AcademicsPage() {
             {filteredFiles.map((file, idx) => (
               <div 
                 key={idx} 
-                className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)] animate-in fade-in slide-in-from-bottom-8 fill-mode-forwards opacity-0"
-                style={{ animationDelay: `${400 + idx * 100}ms` }}
+                className="group flex items-center justify-between p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-[1.25rem] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center gap-5 min-w-0">
                   {/* 3D Icon Box */}
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-108 group-hover:-rotate-2 transition-all duration-500">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden group-hover:scale-110 group-hover:-rotate-2 transition-all duration-500">
                     <div className="absolute inset-0 bg-white/5 opacity-40 blur-xl z-0" />
                     <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                       {getIcon(file.docType)}
