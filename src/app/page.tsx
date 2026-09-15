@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LoadingOverlay } from "@/components/loading-overlay"
-import { Shield, RotateCw, AlertCircle } from "lucide-react"
+import { Shield, RotateCw, AlertCircle, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
@@ -14,6 +14,7 @@ export default function LoginPage() {
   
   const [qid, setQid] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [captchaInput, setCaptchaInput] = useState("")
   const [captchaData, setCaptchaData] = useState<{ image: string } | null>(null)
   const [transactionId, setTransactionId] = useState("")
@@ -198,16 +199,25 @@ export default function LoginPage() {
               required
             />
             
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none text-white"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => { setIsSad(false); setIsCoveringEyes(true); }}
-              onBlur={() => setIsCoveringEyes(false)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="w-full h-14 bg-[#2a2a2a] border-2 border-transparent rounded-xl px-5 pr-12 text-sm transition-all focus:border-primary focus:bg-[#222222] outline-none text-white"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => { setIsSad(false); setIsCoveringEyes(true); }}
+                onBlur={() => setIsCoveringEyes(false)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
 
             <div className="space-y-3">
               <div className="flex gap-3 h-14">
