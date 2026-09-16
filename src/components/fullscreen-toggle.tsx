@@ -1,126 +1,71 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
-import { Maximize2, Minimize2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useRef } from "react"
 
 /**
- * A subtle UI control that toggles native browser fullscreen mode.
- * Synchronizes with the actual browser state using event listeners.
+ * An invisible component that listens for the first user interaction 
+ * (click/tap) and requests native browser fullscreen for the entire app.
+ * This ensures the app enters fullscreen mode via a valid user gesture 
+ * without requiring a visible button.
  */
 export function FullscreenToggle() {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isSupported, setIsSupported] = useState(true)
-  const { toast } = useToast()
+  const hasAttempted = useRef(false)
 
   useEffect(() => {
-    // Check if fullscreen is supported in this browser
-    const checkSupport = () => {
-      const doc = document as any
-      return !!(
-        doc.fullscreenEnabled ||
-        doc.webkitFullscreenEnabled ||
-        doc.mozFullScreenEnabled ||
-        doc.msFullscreenEnabled
-      )
-    }
+    // We use 'pointerdown' as it's the most inclusive interaction event 
+    // for both desktop (mouse) and mobile (touch).
+    const handleFirstInteraction = async () => {
+      if (hasAttempted.current) return
+      
+      // Immediately mark as attempted to ensure this only happens once per page load.
+      hasAttempted.current = true
+      
+      // Remove the listener immediately so it doesn't fire on any future clicks.
+      window.removeEventListener('pointerdown', handleFirstInteraction)
 
-    if (!checkSupport()) {
-      setIsSupported(false)
-      return
-    }
-
-    // Function to synchronize local state with actual browser fullscreen state
-    const handleFullscreenChange = () => {
       const doc = document as any
-      setIsFullscreen(!!(
+      // Check if we are already in fullscreen or if it's explicitly disabled.
+      const isFullscreen = !!(
         doc.fullscreenElement ||
         doc.webkitFullscreenElement ||
         doc.mozFullScreenElement ||
         doc.msFullscreenElement
-      ))
+      )
+
+      if (!isFullscreen && doc.fullscreenEnabled !== false) {
+        try {
+          const docEl = document.documentElement as any
+          // Vendor-agnostic request logic.
+          const requestFullscreen = 
+            docEl.requestFullscreen || 
+            docEl.webkitRequestFullscreen || 
+            docEl.mozRequestFullScreen || 
+            docEl.msRequestFullscreen
+          
+          if (requestFullscreen) {
+            // Call it! This returns a promise. We don't need to await it
+            // because we want the original event to continue propagating.
+            requestFullscreen.call(docEl).catch((err: any) => {
+              // Silently catch failures (e.g. user denied or browser policy).
+              console.warn("[FULLSCREEN-AUTO] Request denied or failed", err)
+            })
+          }
+        } catch (error) {
+          // Silent fallback.
+        }
+      }
     }
 
-    // Register listeners for all major browser engines
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange)
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange)
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange)
-
-    // Initial sync
-    handleFullscreenChange()
+    // Add the listener. It won't trigger until the user actually interacts.
+    window.addEventListener('pointerdown', handleFirstInteraction)
 
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange)
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange)
-      document.removeEventListener("mozfullscreenchange", handleFullscreenChange)
-      document.removeEventListener("MSFullscreenChange", handleFullscreenChange)
+      // Clean up on component unmount (though this is a global layout component).
+      window.removeEventListener('pointerdown', handleFirstInteraction)
     }
   }, [])
 
-  const toggleFullscreen = async () => {
-    try {
-      const docEl = document.documentElement as any
-      const doc = document as any
-
-      if (!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement)) {
-        // Enter Fullscreen
-        const requestFullscreen = 
-          docEl.requestFullscreen || 
-          docEl.webkitRequestFullscreen || 
-          docEl.mozRequestFullScreen || 
-          docEl.msRequestFullscreen
-        
-        if (requestFullscreen) {
-          await requestFullscreen.call(docEl)
-        }
-      } else {
-        // Exit Fullscreen
-        const exitFullscreen = 
-          doc.exitFullscreen || 
-          doc.webkitExitFullscreen || 
-          doc.mozCancelFullScreen || 
-          doc.msExitFullscreen
-        
-        if (exitFullscreen) {
-          await exitFullscreen.call(doc)
-        }
-      }
-    } catch (error) {
-      console.error("[FULLSCREEN-ERROR]", error)
-      toast({
-        variant: "destructive",
-        title: "System Error",
-        description: "Fullscreen mode isn't available in this browser pulse.",
-      })
-    }
-  }
-
-  if (!isSupported) return null
-
-  return (
-    <button
-      onClick={toggleFullscreen}
-      className={cn(
-        "fixed top-6 left-6 z-[999] w-10 h-10 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl flex items-center justify-center text-zinc-500 transition-all duration-500 hover:border-primary hover:text-primary hover:scale-110 active:scale-95 group shadow-2xl overflow-hidden",
-        isFullscreen && "border-primary/50 text-primary bg-primary/10 shadow-[0_0_20px_rgba(250,204,21,0.2)]"
-      )}
-      aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-      title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      {isFullscreen ? (
-        <Minimize2 className="w-4 h-4 relative z-10" />
-      ) : (
-        <Maximize2 className="w-4 h-4 relative z-10" />
-      )}
-      
-      {/* Tooltip hint */}
-      <span className="absolute left-12 px-2 py-1 rounded-lg bg-zinc-900 border border-white/10 text-[9px] font-black text-white uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl">
-        {isFullscreen ? "Collapse View" : "Expand Interface"}
-      </span>
-    </button>
-  )
+  // This component renders nothing as the user wants an invisible experience.
+  return null
 }

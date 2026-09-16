@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -28,6 +29,7 @@ export default function RootLayout({
         <div className="fixed top-[40%] right-[10%] w-[20%] h-[20%] bg-purple-500/10 rounded-full blur-[80px] -z-10" />
         
         <FirebaseClientProvider>
+          {/* The FullscreenToggle is now a hidden listener for the first interaction */}
           <FullscreenToggle />
           {children}
         </FirebaseClientProvider>
