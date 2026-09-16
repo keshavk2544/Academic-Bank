@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
-import { ref, uploadBytes, deleteObject } from "firebase/storage"
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
@@ -316,80 +316,77 @@ export default function UploadPage() {
     }
 
     setIsSubmitting(true)
-    setUploadProgress(5) // Start indicator
+    setUploadProgress(0)
     
-    let storageRef: any = null;
+    // 1. Generate unique path
+    const docId = Math.random().toString(36).substring(2, 15);
+    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const storagePath = `resources/${docId}/${safeName}`;
+    const storageRef = ref(storage, storagePath);
 
-    try {
-      // 1. Generate unique path
-      const docId = Math.random().toString(36).substring(2, 15);
-      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
-      const storagePath = `resources/${docId}/${safeName}`;
-      storageRef = ref(storage, storagePath);
+    // 2. Execute Streamed Upload
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
-      // 2. Start Optimized Upload
-      // Using optimistic simulation for better perceived performance while promise is pending
-      const progressTimer = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressTimer);
-            return 90;
-          }
-          return prev + Math.floor(Math.random() * 5) + 2;
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        // Track REAL progress
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(Math.round(progress));
+      }, 
+      (error) => {
+        console.error('[UPLOAD-TASK-ERROR]', error);
+        setIsSubmitting(false);
+        setUploadProgress(0);
+        toast({
+          variant: "destructive",
+          title: "Upload Interrupted",
+          description: "Network failure during document transfer."
         });
-      }, 200);
+      }, 
+      async () => {
+        // 3. Finalize with Metadata
+        try {
+          const resourcePayload = {
+            ...formData,
+            year: formData.year ? parseInt(formData.year) : null,
+            createdAt: new Date().toISOString(),
+            status: "approved",
+            size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
+            fileSize: selectedFile.size,
+            contentType: selectedFile.type,
+            storagePath: storagePath
+          };
 
-      await uploadBytes(storageRef, selectedFile);
-      clearInterval(progressTimer);
-      setUploadProgress(95);
-
-      // 3. Obtain Metadata once upload completes
-      const resourcePayload = {
-        ...formData,
-        year: formData.year ? parseInt(formData.year) : null,
-        createdAt: new Date().toISOString(),
-        status: "approved",
-        size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
-        fileSize: selectedFile.size,
-        contentType: selectedFile.type,
-        storagePath: storagePath
+          const resourcesRef = collection(db, 'resources');
+          await addDoc(resourcesRef, resourcePayload);
+          
+          toast({
+            title: "Vault Synchronized",
+            description: "Your academic contribution is now available.",
+          });
+          
+          router.push("/academics");
+        } catch (error) {
+          console.error('[METADATA-SYNC-ERROR]', error);
+          // Cleanup orphan file
+          await deleteObject(storageRef).catch(() => {});
+          
+          setIsSubmitting(false);
+          setUploadProgress(0);
+          
+          toast({
+            variant: "destructive",
+            title: "Sync Failed",
+            description: "Binary data uploaded but vault indexing failed."
+          });
+          
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: 'resources',
+            operation: 'create'
+          }));
+        }
       }
-
-      const resourcesRef = collection(db, 'resources')
-      await addDoc(resourcesRef, resourcePayload);
-      
-      setUploadProgress(100);
-      toast({
-        title: "Vault Synchronized",
-        description: "Your academic contribution is now available to all students.",
-      })
-      
-      // Delay slightly for visual feedback
-      setTimeout(() => router.push("/academics"), 500);
-
-    } catch (error) {
-      console.error('[UPLOAD-PROCESS-ERROR]', error);
-      
-      // Cleanup orphan file if storage upload worked but firestore failed
-      if (storageRef) {
-        await deleteObject(storageRef).catch(() => {});
-      }
-      
-      setIsSubmitting(false);
-      setUploadProgress(0);
-      
-      toast({
-        variant: "destructive",
-        title: "Process Failed",
-        description: "Upload failed. Please check your connection and try again."
-      });
-      
-      const permissionError = new FirestorePermissionError({
-        path: 'resources',
-        operation: 'create'
-      });
-      errorEmitter.emit('permission-error', permissionError);
-    }
+    );
   }
 
   const isTypeSelected = formData.resourceType !== ""
@@ -569,7 +566,7 @@ export default function UploadPage() {
                         <ChevronRight className="w-3 h-3 text-zinc-500" />
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[400px] p-0 shadow-2xl">
+                    <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[400px] p-0 shadow-2xl rounded-[2rem] overflow-hidden">
                       <DialogHeader className="p-4 border-b border-white/[0.05]">
                         <DialogTitle className="text-base font-bold flex items-center gap-2">
                           {currentStep === 'course' && (
@@ -578,7 +575,7 @@ export default function UploadPage() {
                           <span>{currentStep === 'dept' ? "Departments" : tempDept}</span>
                         </DialogTitle>
                       </DialogHeader>
-                      <div className="p-1 max-h-[350px] overflow-y-auto">
+                      <div className="p-1 max-h-[350px] overflow-y-auto scrollbar-none">
                         {currentStep === 'dept' ? (
                           DEPARTMENTS.map(dept => (
                             <button
