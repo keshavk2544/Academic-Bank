@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useToast } from "@/hooks/use-toast"
-import { ShieldCheck, User } from "lucide-react"
+import { ShieldCheck, User, BookOpen, Upload } from "lucide-react"
 
 export default function Dashboard() {
   const router = useRouter();
@@ -128,6 +129,38 @@ export default function Dashboard() {
               <span className="text-xs font-bold font-headline text-white group-hover:text-primary transition-colors truncate max-w-[140px]">{student.section || 'N/A'}</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="mt-8 space-y-4">
+        <h2 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] px-2">Vault Access</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/academics">
+            <div className="h-36 rounded-[2.5rem] bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] p-6 flex flex-col justify-between shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all active:scale-95 group relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors" />
+              <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-black" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-black/40">Archive</span>
+                <span className="text-2xl font-black font-headline text-black uppercase tracking-tighter leading-none">Repo</span>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/upload">
+            <div className="h-36 rounded-[2.5rem] bg-gradient-to-br from-[#10b981] to-[#059669] p-6 flex flex-col justify-between shadow-lg shadow-emerald-500/20 hover:scale-[1.02] transition-all active:scale-95 group relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors" />
+              <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center">
+                <Upload className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Contribute</span>
+                <span className="text-2xl font-black font-headline text-white uppercase tracking-tighter leading-none">Upload</span>
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 
