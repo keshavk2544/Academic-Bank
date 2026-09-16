@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage"
+import { ref, uploadBytes, deleteObject } from "firebase/storage"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
@@ -316,77 +316,79 @@ export default function UploadPage() {
     }
 
     setIsSubmitting(true)
+    setUploadProgress(5) // Start indicator
     
+    let storageRef: any = null;
+
     try {
       // 1. Generate unique path
       const docId = Math.random().toString(36).substring(2, 15);
       const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
       const storagePath = `resources/${docId}/${safeName}`;
-      const storageRef = ref(storage, storagePath);
+      storageRef = ref(storage, storagePath);
 
-      // 2. Start Storage Upload
-      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-
-      uploadTask.on('state_changed', 
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(Math.round(progress));
-        }, 
-        (error) => {
-          console.error('[STORAGE-UPLOAD-ERROR]', error);
-          setIsSubmitting(false);
-          toast({
-            variant: "destructive",
-            title: "Upload failed",
-            description: "Upload failed. Please try again."
-          });
-        }, 
-        async () => {
-          // 3. Obtain Metadata once upload completes
-          try {
-            const resourcePayload = {
-              ...formData,
-              year: formData.year ? parseInt(formData.year) : null,
-              createdAt: new Date().toISOString(),
-              status: "approved",
-              size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
-              fileSize: selectedFile.size,
-              contentType: selectedFile.type,
-              storagePath: storagePath
-            }
-
-            const resourcesRef = collection(db, 'resources')
-            
-            await addDoc(resourcesRef, resourcePayload);
-            
-            toast({
-              title: "Vault Synchronized",
-              description: "Your academic contribution is now available to all students.",
-            })
-            router.push("/academics")
-          } catch (error) {
-            console.error('[FIRESTORE-METADATA-ERROR]', error);
-            // Cleanup orphan file
-            await deleteObject(storageRef).catch(() => {});
-            
-            setIsSubmitting(false);
-            const permissionError = new FirestorePermissionError({
-              path: 'resources',
-              operation: 'create'
-            });
-            errorEmitter.emit('permission-error', permissionError);
+      // 2. Start Optimized Upload
+      // Using optimistic simulation for better perceived performance while promise is pending
+      const progressTimer = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressTimer);
+            return 90;
           }
-        }
-      );
+          return prev + Math.floor(Math.random() * 5) + 2;
+        });
+      }, 200);
+
+      await uploadBytes(storageRef, selectedFile);
+      clearInterval(progressTimer);
+      setUploadProgress(95);
+
+      // 3. Obtain Metadata once upload completes
+      const resourcePayload = {
+        ...formData,
+        year: formData.year ? parseInt(formData.year) : null,
+        createdAt: new Date().toISOString(),
+        status: "approved",
+        size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
+        fileSize: selectedFile.size,
+        contentType: selectedFile.type,
+        storagePath: storagePath
+      }
+
+      const resourcesRef = collection(db, 'resources')
+      await addDoc(resourcesRef, resourcePayload);
+      
+      setUploadProgress(100);
+      toast({
+        title: "Vault Synchronized",
+        description: "Your academic contribution is now available to all students.",
+      })
+      
+      // Delay slightly for visual feedback
+      setTimeout(() => router.push("/academics"), 500);
 
     } catch (error) {
       console.error('[UPLOAD-PROCESS-ERROR]', error);
+      
+      // Cleanup orphan file if storage upload worked but firestore failed
+      if (storageRef) {
+        await deleteObject(storageRef).catch(() => {});
+      }
+      
       setIsSubmitting(false);
+      setUploadProgress(0);
+      
       toast({
         variant: "destructive",
         title: "Process Failed",
-        description: "Upload failed. Please try again."
+        description: "Upload failed. Please check your connection and try again."
       });
+      
+      const permissionError = new FirestorePermissionError({
+        path: 'resources',
+        operation: 'create'
+      });
+      errorEmitter.emit('permission-error', permissionError);
     }
   }
 
@@ -478,7 +480,7 @@ export default function UploadPage() {
               </div>
               {isSubmitting && (
                 <p className="text-[9px] font-black text-center text-amber-500 uppercase tracking-widest mt-1">
-                  Uploading... {uploadProgress}%
+                  Synchronizing... {uploadProgress}%
                 </p>
               )}
             </div>
