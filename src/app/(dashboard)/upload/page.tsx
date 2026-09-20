@@ -87,6 +87,12 @@ const DEPARTMENTS = [
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
 
 export default function UploadPage() {
   const router = useRouter()
@@ -180,17 +186,31 @@ export default function UploadPage() {
     }, 300)
   }
 
+  const validateFile = (file: File): boolean => {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "File size must be 20 MB or less."
+      });
+      return false;
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast({
+        variant: "destructive",
+        title: "Unsupported type",
+        description: "Only PDF and DOC files are allowed."
+      });
+      return false;
+    }
+
+    return true;
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "File size must be 20 MB or less."
-        });
-        return;
-      }
+    if (file && validateFile(file)) {
       setSelectedFile(file)
       if (!formData.fileName) {
         setFormData(prev => ({ ...prev, fileName: file.name }))
@@ -212,15 +232,7 @@ export default function UploadPage() {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
-    if (file) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "File size must be 20 MB or less."
-        });
-        return;
-      }
+    if (file && validateFile(file)) {
       setSelectedFile(file)
       if (!formData.fileName) {
         setFormData(prev => ({ ...prev, fileName: file.name }))
@@ -249,8 +261,6 @@ export default function UploadPage() {
     const storagePath = `resources/${docId}/${safeName}`;
     const storageRef = ref(storage, storagePath);
 
-    console.log('[UPLOAD-INIT] Target Path:', storagePath);
-
     // 2. Execute Streamed Upload
     const uploadTask = uploadBytesResumable(storageRef, selectedFile, {
       contentType: selectedFile.type
@@ -259,34 +269,24 @@ export default function UploadPage() {
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        // Only update state if percentage changes to reduce re-renders
         setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
-        console.error('[UPLOAD-ERROR-DIAGNOSTIC]', error);
+        console.error('[UPLOAD-ERROR]', error);
         setIsSubmitting(false);
         setUploadProgress(0);
         
         let errorTitle = "Sync Interrupted";
         let errorMsg = "An unexpected error occurred during upload.";
 
-        // Handle specific Firebase Storage error codes
         switch (error.code) {
           case 'storage/unauthorized':
             errorTitle = "Access Denied";
-            errorMsg = "Check your Firebase Storage Security Rules. Ensure your bucket is initialized.";
+            errorMsg = "Check your Firebase Storage Security Rules.";
             break;
           case 'storage/quota-exceeded':
             errorTitle = "Storage Full";
-            errorMsg = "The project storage quota has been reached. Please contact support.";
-            break;
-          case 'storage/retry-limit-exceeded':
-            errorTitle = "Connection Timeout";
-            errorMsg = "Ensure Storage is enabled in the Firebase Console and check your CORS settings.";
-            break;
-          case 'storage/canceled':
-            errorTitle = "Upload Canceled";
-            errorMsg = "The file transfer was stopped.";
+            errorMsg = "The project storage quota has been reached.";
             break;
         }
 
@@ -317,7 +317,6 @@ export default function UploadPage() {
           router.push("/academics");
         } catch (error) {
           console.error('[FIRESTORE-SYNC-ERROR]', error);
-          // Cleanup storage orphan if Firestore indexing fails
           await deleteObject(storageRef).catch(() => {});
           setIsSubmitting(false);
           setUploadProgress(0);
@@ -343,7 +342,7 @@ export default function UploadPage() {
             <h1 className="text-[1.25rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-0.5 font-headline">
               Upload Resource
             </h1>
-            <p className="text-[0.7rem] font-medium text-[#a1a1aa]">Add materials to the Vault</p>
+            <p className="text-[0.7rem] font-medium text-[#a1a1aa]">Add PDF or DOC to the Vault</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -352,7 +351,7 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> Limit: 20MB
+                  <AlertTriangle className="w-2 h-2" /> PDF / DOC • Limit: 20MB
                 </div>
               </div>
               <div 
@@ -375,7 +374,7 @@ export default function UploadPage() {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.ppt,.pptx"
+                  accept=".pdf,.doc,.docx"
                   disabled={isSubmitting}
                 />
                 
