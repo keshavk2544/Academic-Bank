@@ -82,6 +82,70 @@ const DEPARTMENTS = [
       "MBA (Logistics & Supply Chain Management)",
       "M.Com"
     ]
+  },
+  {
+    name: "Health Sciences & Pharmacy",
+    courses: [
+      "B.Pharm (Bachelor of Pharmacy)",
+      "D.Pharm (Diploma in Pharmacy)",
+      "B.Sc. Medical Laboratory Technology (BMLT)",
+      "B.Sc. Medical Radiology & Imaging Technology (BMRIT)",
+      "B.Sc. Nutrition & Dietetics",
+      "M.Sc. Nutrition & Dietetics"
+    ]
+  },
+  {
+    name: "Agricultural Studies",
+    courses: [
+      "B.Sc. (Hons) Agriculture",
+      "M.Sc. Agriculture (Agronomy)",
+      "M.Sc. Agriculture (Horticulture)",
+      "M.Sc. Agriculture (Genetics & Plant Breeding)"
+    ]
+  },
+  {
+    name: "Media, Design & Animation",
+    courses: [
+      "BA (Hons) Journalism & Mass Communication (BJMC)",
+      "MA Journalism & Mass Communication",
+      "B.Des Graphic Design",
+      "B.Des UI/UX Design",
+      "B.Des Interior Design",
+      "B.Sc. Animation & VFX",
+      "Diploma in Animation & Graphic Design"
+    ]
+  },
+  {
+    name: "Law",
+    courses: [
+      "BA LLB (Hons) - 5-Year Integrated",
+      "BBA LLB (Hons) - 5-Year Integrated",
+      "LLM (Corporate Law)",
+      "LLM (Criminal Law)"
+    ]
+  },
+  {
+    name: "Hospitality & Tourism",
+    courses: [
+      "BHM (Bachelor of Hotel Management)",
+      "Diploma in Hotel Management (DHM)"
+    ]
+  },
+  {
+    name: "Sciences & Humanities",
+    courses: [
+      "B.Sc. (Hons) Physics",
+      "B.Sc. (Hons) Chemistry",
+      "B.Sc. (Hons) Mathematics",
+      "M.Sc. Physics",
+      "M.Sc. Chemistry",
+      "M.Sc. Mathematics",
+      "BA (Hons) English",
+      "BA (Hons) Psychology",
+      "BA (Hons) Economics",
+      "MA English",
+      "MA Economics"
+    ]
   }
 ];
 
