@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage"
+import { ref, uploadBytesResumable, deleteObject } from "firebase/storage"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
@@ -306,32 +306,25 @@ export default function UploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedFile) {
-      toast({
-        variant: "destructive",
-        title: "No file selected",
-        description: "Please choose a document to upload to the vault.",
-      })
-      return
-    }
+    if (isSubmitting || !selectedFile) return;
 
     setIsSubmitting(true)
     setUploadProgress(0)
     
-    // 1. Generate unique path
-    const docId = Math.random().toString(36).substring(2, 15);
+    // 1. Generate robust unique ID
+    const docId = crypto.randomUUID();
     const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const storagePath = `resources/${docId}/${safeName}`;
     const storageRef = ref(storage, storagePath);
 
-    // 2. Execute Streamed Upload
+    // 2. Execute Streamed Upload with optimized progress tracking
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
     uploadTask.on('state_changed', 
       (snapshot) => {
-        // Track REAL progress
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(Math.round(progress));
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        // Optimized: Only trigger state update if the rounded integer changed to minimize re-renders
+        setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
         console.error('[UPLOAD-TASK-ERROR]', error);
@@ -344,7 +337,7 @@ export default function UploadPage() {
         });
       }, 
       async () => {
-        // 3. Finalize with Metadata
+        // 3. Finalize with Metadata immediately after binary transfer
         try {
           const resourcePayload = {
             ...formData,
@@ -368,7 +361,7 @@ export default function UploadPage() {
           router.push("/academics");
         } catch (error) {
           console.error('[METADATA-SYNC-ERROR]', error);
-          // Cleanup orphan file
+          // Cleanup orphan file if indexing fails
           await deleteObject(storageRef).catch(() => {});
           
           setIsSubmitting(false);
