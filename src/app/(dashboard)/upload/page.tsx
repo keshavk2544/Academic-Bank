@@ -32,7 +32,7 @@ import { useToast } from "@/hooks/use-toast"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
-import { ref, uploadBytesResumable, deleteObject } from "firebase/storage"
+import { ref, uploadBytes, deleteObject } from "firebase/storage"
 import { cn } from "@/lib/utils"
 
 const DEPARTMENTS = [
@@ -151,7 +151,6 @@ const DEPARTMENTS = [
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
 const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB (Requested high efficiency limit)
-const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'application/msword',
@@ -255,7 +254,7 @@ export default function UploadPage() {
       toast({
         variant: "destructive",
         title: "File too large",
-        description: "File size must be 1 MB or less for optimal efficiency."
+        description: "File size must be 1 MB or less for maximum synchronization efficiency."
       });
       return false;
     }
@@ -264,7 +263,7 @@ export default function UploadPage() {
       toast({
         variant: "destructive",
         title: "Unsupported type",
-        description: "Only PDF and DOC files are allowed."
+        description: "Only PDF and DOC files are allowed in the Vault."
       });
       return false;
     }
@@ -317,78 +316,52 @@ export default function UploadPage() {
     if (isSubmitting || !selectedFile) return;
 
     setIsSubmitting(true)
-    setUploadProgress(0)
+    setUploadProgress(25) // Immediate status feedback
     
-    // 1. Generate unique ID
-    const docId = crypto.randomUUID();
-    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const storagePath = `resources/${docId}/${safeName}`;
-    const storageRef = ref(storage, storagePath);
+    try {
+      // 1. Generate unique identification
+      const docId = crypto.randomUUID();
+      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
+      const storagePath = `resources/${docId}/${safeName}`;
+      const storageRef = ref(storage, storagePath);
 
-    // 2. Execute Streamed Upload
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile, {
-      contentType: selectedFile.type
-    });
+      // 2. High-Efficiency Binary Transfer
+      // uploadBytes is faster than uploadBytesResumable for files under 5MB
+      await uploadBytes(storageRef, selectedFile, {
+        contentType: selectedFile.type
+      });
+      
+      setUploadProgress(75); // Synchronization stage
 
-    uploadTask.on('state_changed', 
-      (snapshot) => {
-        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        // Only trigger state update if percentage changed to reduce re-renders
-        setUploadProgress(prev => prev !== progress ? progress : prev);
-      }, 
-      (error) => {
-        console.error('[UPLOAD-ERROR]', error);
-        setIsSubmitting(false);
-        setUploadProgress(0);
-        
-        let errorTitle = "Sync Interrupted";
-        let errorMsg = "An unexpected error occurred during upload.";
+      // 3. Metadata Indexing
+      const resourcePayload = {
+        ...formData,
+        year: formData.year ? parseInt(formData.year) : null,
+        createdAt: new Date().toISOString(),
+        status: "approved",
+        size: (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB",
+        fileSize: selectedFile.size,
+        contentType: selectedFile.type,
+        storagePath: storagePath
+      };
 
-        switch (error.code) {
-          case 'storage/unauthorized':
-            errorTitle = "Access Denied";
-            errorMsg = "Check your Firebase Storage Security Rules.";
-            break;
-          case 'storage/quota-exceeded':
-            errorTitle = "Storage Full";
-            errorMsg = "The project storage quota has been reached.";
-            break;
-        }
-
-        toast({
-          variant: "destructive",
-          title: errorTitle,
-          description: errorMsg
-        });
-      }, 
-      async () => {
-        try {
-          // 3. Finalize Metadata in Firestore
-          const resourcePayload = {
-            ...formData,
-            year: formData.year ? parseInt(formData.year) : null,
-            createdAt: new Date().toISOString(),
-            status: "approved",
-            size: (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB",
-            fileSize: selectedFile.size,
-            contentType: selectedFile.type,
-            storagePath: storagePath
-          };
-
-          const resourcesRef = collection(db, 'resources');
-          await addDoc(resourcesRef, resourcePayload);
-          
-          toast({ title: "Vault Synchronized", description: "Document added successfully." });
-          router.push("/academics");
-        } catch (error) {
-          console.error('[FIRESTORE-SYNC-ERROR]', error);
-          await deleteObject(storageRef).catch(() => {});
-          setIsSubmitting(false);
-          setUploadProgress(0);
-          toast({ variant: "destructive", title: "Indexing Failed", description: "Document uploaded but index could not be created." });
-        }
-      }
-    );
+      const resourcesRef = collection(db, 'resources');
+      await addDoc(resourcesRef, resourcePayload);
+      
+      setUploadProgress(100);
+      toast({ title: "Vault Synchronized", description: "Document added successfully." });
+      router.push("/academics");
+    } catch (error: any) {
+      console.error('[UPLOAD-ERROR]', error);
+      setIsSubmitting(false);
+      setUploadProgress(0);
+      
+      toast({
+        variant: "destructive",
+        title: "Sync Interrupted",
+        description: error.message || "An unexpected error occurred during vault synchronization."
+      });
+    }
   }
 
   const isTypeSelected = formData.resourceType !== ""
@@ -407,7 +380,7 @@ export default function UploadPage() {
             <h1 className="text-[1.25rem] font-extrabold tracking-tight bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent leading-tight mb-0.5 font-headline">
               Upload Resource
             </h1>
-            <p className="text-[0.7rem] font-medium text-[#a1a1aa]">Add PDF or DOC to the Vault</p>
+            <p className="text-[0.7rem] font-medium text-[#a1a1aa]">Fast Sync Protocol Active (1MB Limit)</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -576,7 +549,7 @@ export default function UploadPage() {
               className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black font-bold text-[13px] rounded-lg shadow-lg active:scale-95"
             >
               <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
-              {isSubmitting ? `Synchronizing... ${uploadProgress}%` : "Upload to Vault"}
+              {isSubmitting ? `Synchronizing...` : "Upload to Vault"}
             </Button>
           </form>
         </div>
