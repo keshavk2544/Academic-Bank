@@ -2,8 +2,8 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     // Academic Vault Resources
-    // Note: Since ERP authentication is custom and not linked to Firebase Auth UID,
-    // we allow public access for the MVP to ensure the binary transfer succeeds.
+    // Since the app uses a custom ERP-based session, we allow public access
+    // to the resources directory for the MVP.
     match /resources/{allPaths=**} {
       allow read: if true;
       allow write: if request.resource.size < 20 * 1024 * 1024;

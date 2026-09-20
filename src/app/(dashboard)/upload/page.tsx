@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -85,70 +84,6 @@ const DEPARTMENTS = [
       "MBA (Logistics & Supply Chain Management)",
       "M.Com"
     ]
-  },
-  {
-    name: "Health Sciences & Pharmacy",
-    courses: [
-      "B.Pharm (Bachelor of Pharmacy)",
-      "D.Pharm (Diploma in Pharmacy)",
-      "B.Sc. Medical Laboratory Technology (BMLT)",
-      "B.Sc. Medical Radiology & Imaging Technology (BMRIT)",
-      "B.Sc. Nutrition & Dietetics",
-      "M.Sc. Nutrition & Dietetics"
-    ]
-  },
-  {
-    name: "Agricultural Studies",
-    courses: [
-      "B.Sc. (Hons) Agriculture",
-      "M.Sc. Agriculture (Agronomy)",
-      "M.Sc. Agriculture (Horticulture)",
-      "M.Sc. Agriculture (Genetics & Plant Breeding)"
-    ]
-  },
-  {
-    name: "Media, Design & Animation",
-    courses: [
-      "BA (Hons) Journalism & Mass Communication (BJMC)",
-      "MA Journalism & Mass Communication",
-      "B.Des Graphic Design",
-      "B.Des UI/UX Design",
-      "B.Des Interior Design",
-      "B.Sc. Animation & VFX",
-      "Diploma in Animation & Graphic Design"
-    ]
-  },
-  {
-    name: "Law",
-    courses: [
-      "BA LLB (Hons) - 5-Year Integrated",
-      "BBA LLB (Hons) - 5-Year Integrated",
-      "LLM (Corporate Law)",
-      "LLM (Criminal Law)"
-    ]
-  },
-  {
-    name: "Hospitality & Tourism",
-    courses: [
-      "BHM (Bachelor of Hotel Management)",
-      "Diploma in Hotel Management (DHM)"
-    ]
-  },
-  {
-    name: "Sciences & Humanities",
-    courses: [
-      "B.Sc. (Hons) Physics",
-      "B.Sc. (Hons) Chemistry",
-      "B.Sc. (Hons) Mathematics",
-      "M.Sc. Physics",
-      "M.Sc. Chemistry",
-      "M.Sc. Mathematics",
-      "BA (Hons) English",
-      "BA (Hons) Psychology",
-      "BA (Hons) Economics",
-      "MA English",
-      "MA Economics"
-    ]
   }
 ];
 
@@ -210,7 +145,6 @@ export default function UploadPage() {
           router.replace("/");
         }
       } catch (e) {
-        console.error('[UPLOAD-SESSION-FETCH-ERROR]', e);
         toast({ 
           variant: "destructive", 
           title: "Session Error", 
@@ -311,14 +245,15 @@ export default function UploadPage() {
     setIsSubmitting(true)
     setUploadProgress(0)
     
-    // 1. Generate robust unique ID
+    // 1. Generate unique ID
     const docId = crypto.randomUUID();
     const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const storagePath = `resources/${docId}/${safeName}`;
     const storageRef = ref(storage, storagePath);
 
-    // 2. Execute Streamed Upload with optimized progress tracking
-    // Pass metadata including contentType to help the backend process the stream correctly
+    console.log('[UPLOAD-INIT] Target Path:', storagePath);
+
+    // 2. Execute Streamed Upload
     const uploadTask = uploadBytesResumable(storageRef, selectedFile, {
       contentType: selectedFile.type
     });
@@ -326,31 +261,29 @@ export default function UploadPage() {
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        // Only trigger state update if the rounded integer changed to minimize re-renders
         setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
-        console.error('[UPLOAD-TASK-ERROR]', error);
+        console.error('[UPLOAD-ERROR-DIAGNOSTIC]', error);
         setIsSubmitting(false);
         setUploadProgress(0);
         
-        // Handle specific Firebase Storage errors
-        let errorMsg = "Network failure during document transfer.";
+        let errorMsg = "Upload failed. Ensure 'Storage' is enabled in your Firebase Console.";
         if (error.code === 'storage/retry-limit-exceeded') {
-          errorMsg = "Connection timed out. Please check your network and try again.";
+          errorMsg = "Connection timed out. Check your Internet or Firebase Storage settings.";
         } else if (error.code === 'storage/unauthorized') {
-          errorMsg = "Unauthorized upload. Permission denied by the vault.";
+          errorMsg = "Permission denied. Please verify your Storage Security Rules.";
         }
 
         toast({
           variant: "destructive",
-          title: "Upload Interrupted",
+          title: "Sync Interrupted",
           description: errorMsg
         });
       }, 
       async () => {
-        // 3. Finalize with Metadata immediately after binary transfer
         try {
+          // 3. Finalize Metadata in Firestore
           const resourcePayload = {
             ...formData,
             year: formData.year ? parseInt(formData.year) : null,
@@ -365,30 +298,14 @@ export default function UploadPage() {
           const resourcesRef = collection(db, 'resources');
           await addDoc(resourcesRef, resourcePayload);
           
-          toast({
-            title: "Vault Synchronized",
-            description: "Your academic contribution is now available.",
-          });
-          
+          toast({ title: "Vault Synchronized", description: "Document added successfully." });
           router.push("/academics");
         } catch (error) {
-          console.error('[METADATA-SYNC-ERROR]', error);
-          // Cleanup orphan file if indexing fails
-          await deleteObject(storageRef).catch(() => {});
-          
+          console.error('[FIRESTORE-SYNC-ERROR]', error);
+          await deleteObject(storageRef).catch(() => {}); // Cleanup orphan
           setIsSubmitting(false);
           setUploadProgress(0);
-          
-          toast({
-            variant: "destructive",
-            title: "Sync Failed",
-            description: "Binary data uploaded but vault indexing failed."
-          });
-          
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: 'resources',
-            operation: 'create'
-          }));
+          toast({ variant: "destructive", title: "Indexing Failed", description: "Metadata could not be saved." });
         }
       }
     );
@@ -490,43 +407,22 @@ export default function UploadPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="uploaderName" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Name</Label>
-                <Input 
-                  id="uploaderName" 
-                  value={formData.uploaderName} 
-                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" 
-                  required 
-                  readOnly
-                />
+                <Input id="uploaderName" value={formData.uploaderName} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" readOnly />
               </div>
-              
               <div className="space-y-1">
                 <Label htmlFor="qid" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">QID</Label>
-                <Input 
-                  id="qid" 
-                  value={formData.qid}
-                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" 
-                  required 
-                  readOnly
-                />
+                <Input id="qid" value={formData.qid} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] opacity-70" readOnly />
               </div>
 
               <div className="space-y-1 col-span-2">
                 <Label htmlFor="fileName" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">File Display Name</Label>
-                <Input 
-                  id="fileName" 
-                  placeholder="e.g. End_Term_Networking.pdf" 
-                  value={formData.fileName}
-                  onChange={handleInputChange}
-                  className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50" 
-                  required 
-                  disabled={isSubmitting}
-                />
+                <Input id="fileName" value={formData.fileName} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required disabled={isSubmitting} />
               </div>
 
               <div className="space-y-1 col-span-2">
                 <Label htmlFor="resourceType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Type</Label>
                 <Select onValueChange={handleSelectChange} value={formData.resourceType} disabled={isSubmitting}>
-                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
+                  <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]">
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
@@ -541,66 +437,33 @@ export default function UploadPage() {
 
             {isTypeSelected && (
               <div className="pt-3 mt-3 border-t border-dashed border-white/[0.08] space-y-3 animate-in fade-in duration-300">
-                {isPYQ && (
-                  <div className="space-y-1">
-                    <Label htmlFor="examType" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Exam Type</Label>
-                    <Select onValueChange={(val) => setFormData(prev => ({...prev, examType: val}))} value={formData.examType} disabled={isSubmitting}>
-                      <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
-                        <SelectValue placeholder="Select exam..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
-                        <SelectItem value="MID SEM">Mid Sem</SelectItem>
-                        <SelectItem value="END SEM">End Sem</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
                 <div className="space-y-1">
                   <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Course</Label>
                   <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
                     <DialogTrigger asChild>
-                      <button 
-                        type="button"
-                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg h-9 px-3 flex items-center justify-between text-[11px] hover:bg-white/[0.05]"
-                        disabled={isSubmitting}
-                      >
-                        <span className={formData.course ? "text-white truncate" : "text-zinc-500"}>
-                          {formData.course || "Select course..."}
-                        </span>
+                      <button type="button" className="w-full bg-black/40 border border-white/[0.08] rounded-lg h-9 px-3 flex items-center justify-between text-[11px] hover:bg-white/[0.05]" disabled={isSubmitting}>
+                        <span className={formData.course ? "text-white truncate" : "text-zinc-500"}>{formData.course || "Select course..."}</span>
                         <ChevronRight className="w-3 h-3 text-zinc-500" />
                       </button>
                     </DialogTrigger>
                     <DialogContent className="bg-[#0b0b0b] border-white/[0.08] text-white sm:max-w-[400px] p-0 shadow-2xl rounded-[2rem] overflow-hidden">
                       <DialogHeader className="p-4 border-b border-white/[0.05]">
                         <DialogTitle className="text-base font-bold flex items-center gap-2">
-                          {currentStep === 'course' && (
-                            <ChevronLeft className="w-4 h-4 text-amber-500 cursor-pointer" onClick={() => setCurrentStep('dept')} />
-                          )}
+                          {currentStep === 'course' && <ChevronLeft className="w-4 h-4 text-amber-500 cursor-pointer" onClick={() => setCurrentStep('dept')} />}
                           <span>{currentStep === 'dept' ? "Departments" : tempDept}</span>
                         </DialogTitle>
                       </DialogHeader>
                       <div className="p-1 max-h-[350px] overflow-y-auto scrollbar-none">
                         {currentStep === 'dept' ? (
                           DEPARTMENTS.map(dept => (
-                            <button
-                              key={dept.name}
-                              type="button"
-                              onClick={() => handleSelectDept(dept.name)}
-                              className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] transition-all flex items-center justify-between text-[12px]"
-                            >
+                            <button key={dept.name} type="button" onClick={() => handleSelectDept(dept.name)} className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] transition-all flex items-center justify-between text-[12px]">
                               <span className="font-semibold text-zinc-300">{dept.name}</span>
                               <ChevronRight className="w-3 h-3 text-zinc-600" />
                             </button>
                           ))
                         ) : (
                           DEPARTMENTS.find(d => d.name === tempDept)?.courses.map(course => (
-                            <button
-                              key={course}
-                              type="button"
-                              onClick={() => handleSelectCourse(course)}
-                              className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] text-[11px] text-zinc-400 hover:text-white"
-                            >
+                            <button key={course} type="button" onClick={() => handleSelectCourse(course)} className="w-full p-3 text-left rounded-lg hover:bg-white/[0.05] text-[11px] text-zinc-400 hover:text-white">
                               {course}
                             </button>
                           ))
@@ -618,30 +481,21 @@ export default function UploadPage() {
                 <div className="space-y-1">
                   <Label htmlFor="year" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document Year</Label>
                   <Select onValueChange={(val) => setFormData(prev => ({...prev, year: val}))} value={formData.year} disabled={isSubmitting}>
-                    <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px] focus:ring-1 focus:ring-amber-500/50">
+                    <SelectTrigger className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]">
                       <SelectValue placeholder="Select year..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#050505] border-white/[0.08] text-white">
-                      {VALID_YEARS.map(yr => (
-                        <SelectItem key={yr} value={yr}>{yr}</SelectItem>
-                      ))}
+                      {VALID_YEARS.map(yr => <SelectItem key={yr} value={yr}>{yr}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-
-                {isNotesOrIMP && (
-                  <div className="space-y-1">
-                    <Label htmlFor="faculty" className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Faculty</Label>
-                    <Input id="faculty" value={formData.faculty} onChange={handleInputChange} className="bg-black/40 border-white/[0.08] rounded-lg h-9 text-[11px]" required disabled={isSubmitting} />
-                  </div>
-                )}
               </div>
             )}
 
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.course || !formData.year || !selectedFile || (isPYQ && !formData.examType)}
-              className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:from-[#f59e0b] hover:to-[#fbbf24] text-black font-bold text-[13px] rounded-lg shadow-lg shadow-amber-500/20 active:scale-95"
+              disabled={isSubmitting || !formData.course || !formData.year || !selectedFile}
+              className="w-full h-10 mt-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-black font-bold text-[13px] rounded-lg shadow-lg active:scale-95"
             >
               <Upload className="w-3 h-3 mr-2" strokeWidth={2.5} />
               {isSubmitting ? `Synchronizing... ${uploadProgress}%` : "Upload to Vault"}
