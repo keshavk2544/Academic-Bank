@@ -2,10 +2,10 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     // Academic Vault Resources
-    // Strictly restrict to PDF and DOC/DOCX MIME types
+    // Strictly restrict to PDF and DOC/DOCX MIME types and efficient size (1MB)
     match /resources/{allPaths=**} {
       allow read: if true;
-      allow write: if request.resource.size < 20 * 1024 * 1024 
+      allow write: if request.resource.size < 1 * 1024 * 1024 
                    && request.resource.contentType.matches('application/pdf|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     }
   }

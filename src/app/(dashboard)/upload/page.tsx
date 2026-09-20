@@ -150,7 +150,7 @@ const DEPARTMENTS = [
 ];
 
 const VALID_YEARS = Array.from({ length: 13 }, (_, i) => (2018 + i).toString());
-const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB (Requested high efficiency limit)
 const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
@@ -255,7 +255,7 @@ export default function UploadPage() {
       toast({
         variant: "destructive",
         title: "File too large",
-        description: "File size must be 20 MB or less."
+        description: "File size must be 1 MB or less for optimal efficiency."
       });
       return false;
     }
@@ -333,6 +333,7 @@ export default function UploadPage() {
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        // Only trigger state update if percentage changed to reduce re-renders
         setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
@@ -368,7 +369,7 @@ export default function UploadPage() {
             year: formData.year ? parseInt(formData.year) : null,
             createdAt: new Date().toISOString(),
             status: "approved",
-            size: (selectedFile.size / (1024 * 1024)).toFixed(1) + " MB",
+            size: (selectedFile.size / (1024 * 1024)).toFixed(2) + " MB",
             fileSize: selectedFile.size,
             contentType: selectedFile.type,
             storagePath: storagePath
@@ -415,7 +416,7 @@ export default function UploadPage() {
               <div className="flex items-center justify-between">
                 <Label className="text-[0.6rem] font-bold uppercase tracking-widest text-[#a1a1aa]">Document</Label>
                 <div className="flex items-center gap-1 text-[8px] font-black text-amber-500/60 uppercase">
-                  <AlertTriangle className="w-2 h-2" /> PDF / DOC • Limit: 20MB
+                  <AlertTriangle className="w-2 h-2" /> PDF / DOC • Limit: 1MB
                 </div>
               </div>
               <div 
@@ -450,7 +451,7 @@ export default function UploadPage() {
                     <div className="text-center px-4">
                       <p className="text-[10px] font-bold text-white truncate max-w-[150px]">{selectedFile.name}</p>
                       <p className="text-[8px] font-bold text-amber-500/70 uppercase tracking-widest">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                        {(selectedFile.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
                     {!isSubmitting && (
