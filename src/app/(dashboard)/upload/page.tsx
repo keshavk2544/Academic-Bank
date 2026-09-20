@@ -318,22 +318,34 @@ export default function UploadPage() {
     const storageRef = ref(storage, storagePath);
 
     // 2. Execute Streamed Upload with optimized progress tracking
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+    // Pass metadata including contentType to help the backend process the stream correctly
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile, {
+      contentType: selectedFile.type
+    });
 
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        // Optimized: Only trigger state update if the rounded integer changed to minimize re-renders
+        // Only trigger state update if the rounded integer changed to minimize re-renders
         setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
         console.error('[UPLOAD-TASK-ERROR]', error);
         setIsSubmitting(false);
         setUploadProgress(0);
+        
+        // Handle specific Firebase Storage errors
+        let errorMsg = "Network failure during document transfer.";
+        if (error.code === 'storage/retry-limit-exceeded') {
+          errorMsg = "Connection timed out. Please check your network and try again.";
+        } else if (error.code === 'storage/unauthorized') {
+          errorMsg = "Unauthorized upload. Permission denied by the vault.";
+        }
+
         toast({
           variant: "destructive",
           title: "Upload Interrupted",
-          description: "Network failure during document transfer."
+          description: errorMsg
         });
       }, 
       async () => {
