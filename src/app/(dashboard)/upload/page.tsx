@@ -33,8 +33,6 @@ import { LoadingOverlay } from "@/components/loading-overlay"
 import { useFirestore, useStorage } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import { ref, uploadBytesResumable, deleteObject } from "firebase/storage"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 const DEPARTMENTS = [
@@ -261,6 +259,7 @@ export default function UploadPage() {
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        // Only update state if percentage changes to reduce re-renders
         setUploadProgress(prev => prev !== progress ? progress : prev);
       }, 
       (error) => {
@@ -268,16 +267,32 @@ export default function UploadPage() {
         setIsSubmitting(false);
         setUploadProgress(0);
         
-        let errorMsg = "Upload failed. Ensure 'Storage' is enabled in your Firebase Console.";
-        if (error.code === 'storage/retry-limit-exceeded') {
-          errorMsg = "Connection timed out. Check your Internet or Firebase Storage settings.";
-        } else if (error.code === 'storage/unauthorized') {
-          errorMsg = "Permission denied. Please verify your Storage Security Rules.";
+        let errorTitle = "Sync Interrupted";
+        let errorMsg = "An unexpected error occurred during upload.";
+
+        // Handle specific Firebase Storage error codes
+        switch (error.code) {
+          case 'storage/unauthorized':
+            errorTitle = "Access Denied";
+            errorMsg = "Check your Firebase Storage Security Rules. Ensure your bucket is initialized.";
+            break;
+          case 'storage/quota-exceeded':
+            errorTitle = "Storage Full";
+            errorMsg = "The project storage quota has been reached. Please contact support.";
+            break;
+          case 'storage/retry-limit-exceeded':
+            errorTitle = "Connection Timeout";
+            errorMsg = "Ensure Storage is enabled in the Firebase Console and check your CORS settings.";
+            break;
+          case 'storage/canceled':
+            errorTitle = "Upload Canceled";
+            errorMsg = "The file transfer was stopped.";
+            break;
         }
 
         toast({
           variant: "destructive",
-          title: "Sync Interrupted",
+          title: errorTitle,
           description: errorMsg
         });
       }, 
@@ -302,18 +317,17 @@ export default function UploadPage() {
           router.push("/academics");
         } catch (error) {
           console.error('[FIRESTORE-SYNC-ERROR]', error);
-          await deleteObject(storageRef).catch(() => {}); // Cleanup orphan
+          // Cleanup storage orphan if Firestore indexing fails
+          await deleteObject(storageRef).catch(() => {});
           setIsSubmitting(false);
           setUploadProgress(0);
-          toast({ variant: "destructive", title: "Indexing Failed", description: "Metadata could not be saved." });
+          toast({ variant: "destructive", title: "Indexing Failed", description: "Document uploaded but index could not be created." });
         }
       }
     );
   }
 
   const isTypeSelected = formData.resourceType !== ""
-  const isPYQ = formData.resourceType === "pyq"
-  const isNotesOrIMP = formData.resourceType === "notes" || formData.resourceType === "imp"
 
   if (isLoading) return <LoadingOverlay status="Verifying Identity" />;
 
